@@ -53,11 +53,49 @@ header {
   font-weight: 600;
   text-decoration: none;
   border-radius: 6px;
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.06s ease;
 }
+
+/* Hover and focus states */
 .linkHome:hover,
 .linkVF:hover,
-.linkTools:hover {
-  background: #f5f5f5;
+.linkTools:hover,
+.linkHome:focus,
+.linkVF:focus,
+.linkTools:focus {
+  background: linear-gradient(
+    90deg,
+    rgba(227, 27, 35, 0.08),
+    rgba(255, 59, 77, 0.04)
+  );
+  color: var(--equinor-red);
+  transform: translateY(-1px);
+}
+
+/* Active/selected state */
+.linkHome.active,
+.linkVF.active,
+.linkTools.active {
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(227, 27, 35, 0.12);
+}
+
+/* Allow active links to show hover color when hovered or focused */
+.linkHome.active:hover,
+.linkVF.active:hover,
+.linkTools.active:hover,
+.linkHome.active:focus,
+.linkVF.active:focus,
+.linkTools.active:focus {
+  background: linear-gradient(
+    90deg,
+    rgba(227, 27, 35, 0.08),
+    rgba(255, 59, 77, 0.04)
+  );
+  color: var(--equinor-red);
+  transform: translateY(-1px);
 }
 
 /* simple toggle switch */
