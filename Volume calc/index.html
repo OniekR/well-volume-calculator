@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oil Well Volume Calculator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="headerWrapper">
+        <div>
+          <a href="../FV.github.io/"
+            ><img
+              class="firmalogo"
+              src="../FV.github.io/KR_fav.jpg"
+              alt="Keino logo"
+            />
+          </a>
+        </div>
+        <nav>
+          <div class="linker">
+            <a class="linkHome" href="../FV.github.io/">Home</a>
+            <a class="linkVF" href="https://oniekr.github.io/">FV</a>
+            <a class="linkTools" href="#">Tools</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="left-panel">
+        <h1>Well Volume Calculator</h1>
+
+        <div class="input-row">
+          <div class="input-inline">
+            <label>Well type:</label>
+            <div class="toggle-inline">
+              <label class="switch">
+                <input type="checkbox" id="riser_subsea" checked />
+                <span class="slider round"></span>
+              </label>
+              <span id="riser_position_label" class="small-note-inline"
+                >Subsea -</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="input-inline input-inline--narrow"
+            id="wellhead-depth-container"
+            style="display: none"
+          >
+            <label>Wellhead Depth (m):</label>
+            <input type="number" id="wellhead_depth" step="1.0" value="0" />
+          </div>
+        </div>
+
+        <div class="casing-input">
+          <div class="casing-header">
+            <input
+              type="checkbox"
+              class="use-checkbox"
+              id="use_riser"
+              checked
+            />
+            <h3>Riser</h3>
+          </div>
+          <div class="casing-body">
+            <div class="input-row">
+              <div class="input-inline">
+                <label>Riser type:</label>
+                <select id="riser_type">
+                  <option value="17.5">Drilling riser</option>
+                  <option value="8.5">Production riser</option>
+                  <option value="20">Marine riser</option>
+                  <option value="none">No riser</option>
+                </select>
+              </div>
+              <div
+                class="input-inline input-inline--narrow"
+                id="depth_riser_container"
+              >
+                <label>Depth (m):</label>
+                <input type="number" id="depth_riser" step="1.0" value="0" />
+                <div style="margin-top: 8px">
+                  <button
+                    type="button"
+                    class="wellhead-btn"
+                    data-target="depth_riser"
+                  >
+                    Wellhead
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="casing-input">
+          <div class="casing-header">
+            <input type="checkbox" class="use-checkbox" id="use_18" checked />
+            <h3>Conductor</h3>
+          </div>
+          <div class="casing-body">
+            <div class="input-row three-cols">
+              <div class="input-inline">
+                <label>Size:</label>
+                <select id="conductor_size">
+                  <option value="28">30"</option>
+                </select>
+                <div
+                  class="small-note"
+                  id="conductor_connect_note"
+                  style="display: none"
+                ></div>
+              </div>
+              <div class="input-inline">
+                <label>Top (m):</label>
+                <input
+                  type="number"
+                  id="depth_18_top"
+                  step="1.0"
+                  placeholder="Optional"
+                  title="Double-click to copy Wellhead depth"
+                />
+                <div style="margin-top: 8px; display: flex; gap: 8px">
+                  <button
+                    type="button"
+                    class="wellhead-btn"
+                    data-target="depth_18_top"
+                  >
+                    Wellhead
+                  </button>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label>Bottom (m):</label>
+                <input
+                  type="number"
+                  id="depth_18_bottom"
+                  step="1.0"
+                  value="0"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="casing-input">
+          <div class="casing-header">
+            <input type="checkbox" class="use-checkbox" id="use_13" checked />
+            <h3>Surface Casing</h3>
+          </div>
+          <div class="casing-body">
+            <div class="input-row three-cols">
+              <div class="input-inline">
+                <label>Size:</label>
+                <select id="surface_size">
+                  <option value="17.755" selected>18 5/8"</option>
+                  <option value="18.5">20"</option>
+                </select>
+                <div
+                  class="small-note"
+                  id="surface_connect_note"
+                  style="display: none"
+                ></div>
+              </div>
+              <div class="input-inline">
+                <label>Top (m):</label>
+                <input
+                  type="number"
+                  id="depth_13_top"
+                  step="1.0"
+                  placeholder="Optional"
+                  title="Double-click to copy Wellhead depth"
+                />
+                <div style="margin-top: 8px; display: flex; gap: 8px">
+                  <button
+                    type="button"
+                    class="wellhead-btn"
+                    data-target="depth_13_top"
+                  >
+                    Wellhead
+                  </button>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label>Bottom (m):</label>
+                <input type="number" id="depth_13" step="1.0" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="casing-input">
+          <div class="casing-header">
+            <input type="checkbox" class="use-checkbox" id="use_9" checked />
+            <h3>Intermediate Casing</h3>
+          </div>
+          <div class="casing-body">
+            <div class="input-row three-cols">
+              <div class="input-inline">
+                <label>Size:</label>
+                <select id="intermediate_size">
+                  <option value="12.715">13 3/8"</option>
+                  <option value="12.875">13 5/8"</option>
+                </select>
+                <div
+                  class="small-note"
+                  id="intermediate_connect_note"
+                  style="display: none"
+                ></div>
+              </div>
+              <div class="input-inline">
+                <label>Top (m):</label>
+                <input
+                  type="number"
+                  id="depth_9_top"
+                  step="1.0"
+                  placeholder="Optional"
+                  title="Double-click to copy Wellhead depth"
+                />
+                <div style="margin-top: 8px; display: flex; gap: 8px">
+                  <button
+                    type="button"
+                    class="wellhead-btn"
+                    data-target="depth_9_top"
+                  >
+                    Wellhead
+                  </button>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label>Bottom (m):</label>
+                <input type="number" id="depth_9" step="1.0" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="casing-input">
+          <div class="casing-header">
+            <input type="checkbox" class="use-checkbox" id="use_7" checked />
+            <h3>Production Casing/liner</h3>
+            <label
+              class="header-inline inline-checkbox"
+              style="margin-left: auto"
+            >
+              <input type="checkbox" id="production_is_liner" />
+              Tie-back?
+            </label>
+          </div>
+          <div class="casing-body">
+            <div class="input-row three-cols">
+              <div class="input-inline">
+                <label>Size:</label>
+                <div class="size-with-ctrl">
+                  <select id="production_size">
+                    <option value="8.921">9 5/8"</option>
+                  </select>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label id="production_top_label">Top (m):</label>
+                <input
+                  type="number"
+                  id="depth_7_top"
+                  step="0.1"
+                  placeholder="Optional"
+                />
+                <div
+                  style="
+                    margin-top: 8px;
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                    position: relative;
+                  "
+                >
+                  <!-- Main action button: shows 'Default' when Tie-back? checked, 'Wellhead' when unchecked -->
+                  <button
+                    type="button"
+                    class="default-top-btn"
+                    data-target="depth_7_top"
+                  >
+                    Default
+                  </button>
+
+                  <!-- Extra button shown when Tie-back? is UNchecked (renamed to 'Liner') -->
+                  <button
+                    type="button"
+                    class="default-top-btn production-extra-default"
+                    style="display: none"
+                    aria-label="Default for Liner (uses Intermediate bottom minus 50 m)"
+                    title="Default for Liner: uses Intermediate casing bottom minus 50 m"
+                  >
+                    Liner
+                  </button>
+                  <!-- Small info button shown when the extra button is visible -->
+                  <button
+                    type="button"
+                    id="production_extra_info_btn"
+                    class="info-btn"
+                    style="display: none; margin-left: 6px"
+                    aria-label="More info: Default for Liner, uses Intermediate casing bottom minus 50 m"
+                  >
+                    i
+                  </button>
+                  <div
+                    id="production_extra_info_tooltip"
+                    class="info-tooltip"
+                    role="tooltip"
+                    aria-hidden="true"
+                    style="display: none"
+                  >
+                    Default for Liner: uses Intermediate casing bottom minus 50
+                    m
+                  </div>
+
+                  <!-- Info button shown when Liner is checked -->
+                  <button
+                    type="button"
+                    id="production_liner_info_btn"
+                    class="info-btn"
+                    title="Default for Tie-back: uses Intermediate casing bottom minus 50 m"
+                    aria-label="More info: Default for Tie-back, uses Intermediate casing bottom minus 50 m"
+                    style="display: none"
+                  >
+                    i
+                  </button>
+                  <!-- Custom tooltip (shows immediately on hover/focus/click) -->
+                  <div
+                    id="production_liner_info_tooltip"
+                    class="info-tooltip"
+                    role="tooltip"
+                    aria-hidden="true"
+                    style="display: none"
+                  >
+                    Default: uses Intermediate casing bottom minus 50 m
+                  </div>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label>Bottom (m):</label>
+                <input type="number" id="depth_7" step="1.0" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tie-back Casing: shown when Production 'Liner?' is checked -->
+        <div class="casing-input" id="tieback_casing" style="display: none">
+          <div class="casing-header">
+            <input
+              type="checkbox"
+              class="use-checkbox"
+              id="use_tieback"
+              checked
+            />
+            <h3>Tie-back Casing</h3>
+          </div>
+          <div class="casing-body">
+            <div class="input-row three-cols">
+              <div class="input-inline">
+                <label>Size:</label>
+                <select id="tieback_size">
+                  <option value="8.921" selected>9 5/8"</option>
+                  <option value="10.75">10 3/4"</option>
+                </select>
+              </div>
+              <div class="input-inline">
+                <label>Top (m):</label>
+                <input
+                  type="number"
+                  id="depth_tb_top"
+                  step="0.1"
+                  placeholder="Optional"
+                />
+                <div style="margin-top: 8px; display: flex; gap: 8px">
+                  <button
+                    type="button"
+                    class="wellhead-btn"
+                    data-target="depth_tb_top"
+                  >
+                    Wellhead
+                  </button>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label>Bottom (m):</label>
+                <input
+                  class="readonly-input"
+                  type="number"
+                  id="depth_tb"
+                  step="1.0"
+                  value="0"
+                  readonly
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="casing-input">
+          <div class="casing-header">
+            <input type="checkbox" class="use-checkbox" id="use_5" checked />
+            <h3>Reservoir Liner</h3>
+          </div>
+          <div class="casing-body">
+            <div class="input-row three-cols">
+              <div class="input-inline">
+                <label>Size:</label>
+                <select id="reservoir_size">
+                  <option value="6.276">7"</option>
+                  <option value="4.892">5 1/2"</option>
+                </select>
+              </div>
+              <div class="input-inline">
+                <label>Top (m):</label>
+                <input
+                  type="number"
+                  id="depth_5_top"
+                  step="0.1"
+                  placeholder="Optional"
+                />
+                <div
+                  style="
+                    margin-top: 8px;
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                    position: relative;
+                  "
+                >
+                  <button
+                    type="button"
+                    class="default-top-btn reservoir-default-btn"
+                    aria-label="Default: set Reservoir Top to Production bottom"
+                  >
+                    Default
+                  </button>
+                  <button
+                    type="button"
+                    id="reservoir_default_info_btn"
+                    class="info-btn"
+                    style="margin-left: 6px"
+                    aria-label="More info: uses production casing bottom minus 50 m"
+                  >
+                    i
+                  </button>
+                  <div
+                    id="reservoir_default_info_tooltip"
+                    class="info-tooltip"
+                    role="tooltip"
+                    aria-hidden="true"
+                    style="display: none"
+                  >
+                    uses production casing bottom minus 50 m
+                  </div>
+                </div>
+              </div>
+              <div class="input-inline">
+                <label>Bottom (m):</label>
+                <input type="number" id="depth_5" step="1.0" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result">
+          <h2>Total Volume</h2>
+          <p id="totalVolume">0.00 m³</p>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <h1>Well Schematic</h1>
+        <canvas id="wellSchematic"></canvas>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
