@@ -67,24 +67,15 @@ header {
   transform: translateY(-1px);
 }
 
-/* Active/selected state */
+/* Active/selected state - neutral (no special visual treatment) */
 .nav-link.active {
-  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(227, 27, 35, 0.12);
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  transform: none;
 }
 
-/* Allow active links to show hover color when hovered or focused */
-.nav-link.active:hover,
-.nav-link.active:focus {
-  background: linear-gradient(
-    90deg,
-    rgba(227, 27, 35, 0.08),
-    rgba(255, 59, 77, 0.04)
-  );
-  color: var(--equinor-red);
-  transform: translateY(-1px);
-}
+/* Remove special hover/focus for active links so they use the regular .nav-link:hover rules */
 
 /* simple toggle switch */
 .switch {
