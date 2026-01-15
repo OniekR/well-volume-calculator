@@ -12,13 +12,13 @@ const VolumeCalc = (() => {
   const STORAGE_KEY = 'keino_volume_state_v2';
 
   const OD = {
-    conductor: { '17.755': 18.625, '28': 30 },
+    conductor: { '17.8': 18.625, '28': 30, '27': 30 },
     riser: { '17.5': 20, '8.5': 9.5 },
-    surface: { '18.5': 20, '17.755': 18.625 },
-    intermediate: { '12.715': 13.375, '12.875': 13.625 },
+    surface: { '18.73': 20, '17.8': 18.625 },
+    intermediate: { '12.347': 13.375, '12.375': 13.625 },
     production: { '6.276': 7, '8.921': 9.625 },
     tieback: { '8.921': 9.625, '10.75': 11.5 },
-    reservoir: { '6.276': 7, '4.892': 5.5 },
+    reservoir: { '6.276': 7, '4.778': 5.5 },
   };
 
   const el = id => document.getElementById(id);
