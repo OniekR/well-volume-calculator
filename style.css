@@ -260,7 +260,7 @@ select:focus {
   cursor: pointer;
   color: var(--text-color);
 }
-.default-top-btn:hover {
+.default-top-btn:not(.active):hover {
   background: #fff;
 }
 .default-top-btn:active {
@@ -284,7 +284,7 @@ select:focus {
   cursor: pointer;
   color: var(--text-color);
 }
-.liner-default-btn:hover {
+.liner-default-btn:not(.active):hover {
   background: #fff;
 }
 .liner-default-btn:active {
@@ -367,7 +367,7 @@ select:focus {
   cursor: pointer;
   color: var(--text-color);
 }
-.wellhead-btn:hover {
+.wellhead-btn:not(.active):hover {
   background: #fff;
 }
 .wellhead-btn:active {

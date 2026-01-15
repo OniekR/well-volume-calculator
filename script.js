@@ -485,6 +485,12 @@ const VolumeCalc = (() => {
 
     if (prodLinerChk) prodLinerChk.addEventListener('change', updateTieback);
     updateTieback();
+
+    // Default: if no button is active and tie-back is not forcing Liner, make Liner active
+    const anyActive = (casingBtn && casingBtn.classList.contains('active')) || (linerBtn && linerBtn.classList.contains('active'));
+    if (!anyActive) {
+      if (!(prodLinerChk && prodLinerChk.checked) && linerBtn) setActive(linerBtn);
+    }
   }
 
   function setupRiserPositionToggle() {
