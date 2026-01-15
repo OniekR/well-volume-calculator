@@ -267,6 +267,7 @@ const VolumeCalc = (() => {
     let totalVolume = 0;
     let lastIncludedDepth = 0;
     const casingsToDraw = [];
+    const perCasingVolumes = []; // collect per-casing volume info
 
     casingsInput.forEach((casing, index) => {
       const prevDepth = lastIncludedDepth;
@@ -276,13 +277,25 @@ const VolumeCalc = (() => {
       const shouldDraw = casing.use && casing.depth > drawStart;
       const shouldCountVolume = casing.use && casing.depth > startForCalc && !(casing.role === 'conductor' && surfaceInUse) && !(casing.role === 'surface' && intermediateInUse);
 
-      if (shouldCountVolume) {
+      // compute per-casing metrics
+      let includedLength = 0;
+      let volume = 0;
+      let perMeter_m3 = 0;
+      if (casing.id && shouldCountVolume) {
         const radiusMeters = (casing.id / 2) * 0.0254;
-        const length = casing.depth - startForCalc;
-        const volume = Math.PI * radiusMeters * radiusMeters * length;
+        perMeter_m3 = Math.PI * radiusMeters * radiusMeters; // m^3 per meter
+        includedLength = Math.max(0, casing.depth - startForCalc);
+        volume = perMeter_m3 * includedLength;
         totalVolume += volume;
         lastIncludedDepth = casing.depth;
       }
+
+      perCasingVolumes.push({
+        role: casing.role,
+        includedLength,
+        volume,
+        perMeter_m3
+      });
 
       if (shouldDraw) {
         casingsToDraw.push({ id: casing.id, od: casing.od, depth: casing.depth, prevDepth: drawStart, index, z: casing.role === 'conductor' ? -1 : casing.role === 'reservoir' ? 4 : casing.role === 'production' || casing.role === 'tieback' ? 3 : casing.role === 'intermediate' ? 2 : casing.role === 'surface' ? 1 : 0 });
@@ -290,6 +303,33 @@ const VolumeCalc = (() => {
     });
 
     if (totalVolumeEl) totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + ' m³';
+
+    // Render per-casing volume table
+    const casingVolumesTable = el('casingVolumes');
+    if (casingVolumesTable) {
+      const tbody = casingVolumesTable.querySelector('tbody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        // friendly labels
+        const roleLabel = {
+          riser: 'Riser',
+          conductor: 'Conductor',
+          surface: 'Surface',
+          intermediate: 'Intermediate',
+          production: 'Production',
+          tieback: 'Tie-back',
+          reservoir: 'Reservoir'
+        };
+        perCasingVolumes.forEach((c) => {
+          const tr = document.createElement('tr');
+          const nameTd = document.createElement('td'); nameTd.textContent = roleLabel[c.role] || c.role; tr.appendChild(nameTd);
+          const lenTd = document.createElement('td'); lenTd.textContent = (c.includedLength || 0).toFixed(1); tr.appendChild(lenTd);
+          const volTd = document.createElement('td'); volTd.textContent = (c.volume || 0).toFixed(3); tr.appendChild(volTd);
+          const perMtd = document.createElement('td'); perMtd.textContent = ((c.perMeter_m3 || 0) * 1000).toFixed(2); tr.appendChild(perMtd);
+          tbody.appendChild(tr);
+        });
+      }
+    }
 
     // Show subsea water column when appropriate
     let showWater = false; let waterDepth;

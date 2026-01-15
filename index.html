@@ -446,6 +446,27 @@
       <div class="right-panel">
         <h1>Well Schematic</h1>
         <canvas id="wellSchematic" role="img" aria-label="Well schematic showing casings and water column"></canvas>
+
+        <!-- Volume breakdown table -->
+        <section id="volume-breakdown" class="volume-breakdown" aria-labelledby="volume-breakdown-title">
+          <h2 id="volume-breakdown-title">Volume breakdown</h2>
+          <div class="table-wrap">
+            <table id="casingVolumes" class="volume-table" aria-live="polite" aria-describedby="volume-breakdown-note">
+              <thead>
+                <tr>
+                  <th scope="col">Casing</th>
+                  <th scope="col">Included length (m)</th>
+                  <th scope="col">Volume (m³)</th>
+                  <th scope="col">Volume per m (L/m)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rows populated by script -->
+              </tbody>
+            </table>
+            <div id="volume-breakdown-note" class="small-note">Values update automatically when inputs change.</div>
+          </div>
+        </section>
       </div>
     </div>
 

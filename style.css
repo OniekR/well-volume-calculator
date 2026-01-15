@@ -387,6 +387,37 @@ select:focus {
   height: 16px;
 }
 
+/* Volume breakdown table */
+.volume-breakdown {
+  margin-top: 18px;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+.volume-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid rgba(20,34,42,0.06);
+}
+.volume-table th,
+.volume-table td {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(20,34,42,0.04);
+}
+.volume-table thead th {
+  background: linear-gradient(90deg, rgba(227,27,35,0.04), rgba(255,59,77,0.02));
+  font-weight: 700;
+}
+.volume-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.small-note { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+
+
 /* Horizontal container for Size select + inline controls */
 .size-with-ctrl {
   display: inline-flex;
