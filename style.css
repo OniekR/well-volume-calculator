@@ -291,6 +291,19 @@ select:focus {
   transform: translateY(1px);
 }
 
+/* Filled active state for Production buttons */
+.casing-btn.active,
+.liner-default-btn.active {
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(227,27,35,0.12);
+}
+.casing-btn.active:hover,
+.liner-default-btn.active:hover {
+  filter: brightness(0.98);
+} 
+
 /* Small info button shown next to Default when Liner is active */
 .info-btn {
   display: inline-flex;

@@ -292,10 +292,10 @@
                 />
                 <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center; position: relative;">
                   <!-- Casing: copy wellhead depth to Production Top -->
-                  <button id="production_casing_btn" type="button" class="wellhead-btn casing-btn" data-target="depth_7_top" aria-label="Copy Wellhead depth to Production top">Casing</button>
+                  <button id="production_casing_btn" type="button" class="wellhead-btn casing-btn" data-target="depth_7_top" aria-label="Copy Wellhead depth to Production top" aria-pressed="false">Casing</button>
 
                   <!-- Liner: use Intermediate Bottom - 50m (falls back to wellhead if missing) -->
-                  <button type="button" class="liner-default-btn" aria-label="Default for Liner (uses Intermediate bottom minus 50 m)" title="Default for Liner: uses Intermediate casing bottom minus 50 m">Liner</button>
+                  <button type="button" id="production_liner_btn" class="liner-default-btn" aria-label="Default for Liner (uses Intermediate bottom minus 50 m)" title="Default for Liner: uses Intermediate casing bottom minus 50 m" aria-pressed="false">Liner</button>
 
                   <!-- Small info button for Liner default -->
                   <button type="button" id="production_liner_info_btn" class="info-btn" style="margin-left: 6px" aria-label="Liner: PBR depth is intermediate casing shoe - 50" title="Liner: PBR depth is intermediate casing shoe - 50">i</button>

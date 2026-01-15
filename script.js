@@ -441,6 +441,52 @@ const VolumeCalc = (() => {
     }
   }
 
+  function setupProductionToggleButtons() {
+    const casingBtn = el('production_casing_btn');
+    const linerBtn = qs('.liner-default-btn')[0];
+    const useTie = el('use_tieback');
+    const prodLinerChk = el('production_is_liner');
+    if (!casingBtn && !linerBtn) return;
+
+    const setActive = (btn) => {
+      [casingBtn, linerBtn].forEach((b) => {
+        if (!b) return;
+        const isActive = b === btn;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    };
+
+    // initialise aria-pressed state
+    [casingBtn, linerBtn].forEach((b) => { if (b) b.setAttribute('aria-pressed', b.classList.contains('active') ? 'true' : 'false'); });
+
+    if (casingBtn) {
+      casingBtn.addEventListener('click', () => {
+        if (useTie && useTie.checked) return;
+        setActive(casingBtn);
+      });
+      casingBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); casingBtn.click(); } });
+    }
+
+    if (linerBtn) {
+      linerBtn.addEventListener('click', () => {
+        if (useTie && useTie.checked) return;
+        setActive(linerBtn);
+      });
+      linerBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); linerBtn.click(); } });
+    }
+
+    const updateTieback = () => {
+      if (prodLinerChk && prodLinerChk.checked) {
+        if (linerBtn) setActive(linerBtn);
+        if (casingBtn) { casingBtn.classList.remove('active'); casingBtn.setAttribute('aria-pressed','false'); }
+      }
+    };
+
+    if (prodLinerChk) prodLinerChk.addEventListener('change', updateTieback);
+    updateTieback();
+  }
+
   function setupRiserPositionToggle() {
     const toggle = el('riser_subsea');
     const label = el('riser_position_label');
@@ -465,7 +511,7 @@ const VolumeCalc = (() => {
     // initial canvas sizing
     resizeCanvasForDPR(); window.addEventListener('resize', debouncedResize);
     // setup
-    setupEventDelegation(); setupCasingToggles(); setupButtons(); setupTooltips(); setupWellheadSync(); setupTiebackBehavior(); setupRiserTypeHandler(); setupRiserPositionToggle(); setupNavActive();
+    setupEventDelegation(); setupCasingToggles(); setupButtons(); setupTooltips(); setupWellheadSync(); setupTiebackBehavior(); setupProductionToggleButtons(); setupRiserTypeHandler(); setupRiserPositionToggle(); setupNavActive();
     // compute initial
     calculateVolume();
   }
