@@ -74,6 +74,25 @@ const path = require('path');
     await new Promise(r => setTimeout(r, 25));
     if (surfaceId.value === surfaceSel.value) pass('surface id input follows select when not user-edited'); else fail('surface id input follows select', `expected ${surfaceSel.value} got ${surfaceId.value}`);
 
+    // Overlap allocation: the casing with the smallest numeric ID should win overlapping segments
+    // Make Production and Reservoir fully overlap (0 - 500) and ensure the smaller ID (Reservoir) gets the volume
+    d.getElementById('depth_7_top').value = '0';
+    d.getElementById('depth_7').value = '500';
+    d.getElementById('depth_5_top').value = '0';
+    d.getElementById('depth_5').value = '500';
+    // ensure ID inputs are set explicitly (reservoir smaller than production)
+    d.getElementById('production_size_id').value = '8.535';
+    d.getElementById('reservoir_size_id').value = '6.184';
+    // ensure both are enabled
+    d.getElementById('use_7').checked = true; d.getElementById('use_5').checked = true;
+    ['depth_7_top','depth_7','depth_5_top','depth_5','production_size_id','reservoir_size_id','use_7','use_5'].forEach(id => { const el = d.getElementById(id); if (el) el.dispatchEvent(new window.Event('input', { bubbles: true })); });
+    await new Promise(r => setTimeout(r, 50));
+
+    const rowsAfter = Array.from(d.querySelectorAll('#casingVolumes tbody tr'));
+    const mapping = {};
+    rowsAfter.forEach((tr) => { const name = tr.children[0] && tr.children[0].textContent && tr.children[0].textContent.trim(); const vol = tr.children[1] && parseFloat(tr.children[1].textContent) || 0; if (name) mapping[name] = vol; });
+    if ((mapping['Reservoir'] || 0) > 0 && (mapping['Production'] || 0) === 0) pass('overlap: smaller ID wins entire overlapping span'); else fail('overlap: smaller ID wins', `reservoir=${mapping['Reservoir']}, production=${mapping['Production']}`);
+
   } catch (err) {
     fail('smoke tests', err);
   }

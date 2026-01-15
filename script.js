@@ -245,7 +245,7 @@ const VolumeCalc = (() => {
       { role: 'reservoir', id: reservoirID, top: !isNaN(clampNumber(Number(el('depth_5_top')?.value))) ? clampNumber(Number(el('depth_5_top')?.value)) : undefined, depth: clampNumber(Number(el('depth_5')?.value)), use: !!el('use_5')?.checked, od: reservoirOD }
     ];
 
-    // Recompute volumes using depth-segments so the *deepest* casing wins overlapping segments
+    // Recompute volumes using depth-segments so the *smallest ID* casing wins overlapping segments
     let totalVolume = 0;
     const casingsToDraw = [];
 
@@ -296,8 +296,12 @@ const VolumeCalc = (() => {
 
       if (covering.length === 0) continue;
 
-      // choose the deepest casing (largest bottom depth)
-      covering.sort((a, b) => b.depth - a.depth);
+      // choose the casing with the smallest ID (numeric) when overlapping — smallest ID wins
+      covering.sort((a, b) => {
+        const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+        const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+        return ai - bi;
+      });
       const winner = covering[0];
       const area = perCasingMap[winner.role].perMeter_m3; // m^3 per meter
       const segVol = area * segLength;
