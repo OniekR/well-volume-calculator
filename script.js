@@ -185,7 +185,7 @@ const VolumeCalc = (() => {
   function calculateVolume() {
     // Read common values
     const riserTypeVal = el('riser_type')?.value;
-    const riserID = clampNumber(Number(riserTypeVal));
+    const riserID = sizeIdValue('riser_type', clampNumber(Number(riserTypeVal)));
     const riserOD = riserTypeVal === 'none' ? 0 : (OD.riser[riserTypeVal] || 20);
 
     const riserDepthVal = clampNumber(Number(el('depth_riser')?.value));
@@ -198,23 +198,24 @@ const VolumeCalc = (() => {
     const intermediateInUse = el('use_9')?.checked;
 
     // per-casing
-    const conductorID = clampNumber(Number(el('conductor_size')?.value));
+    // prefer explicit ID input values if provided
+    const conductorID = sizeIdValue('conductor_size', clampNumber(Number(el('conductor_size')?.value)));
     const conductorOD = OD.conductor[conductorID] || 30;
     const conductorTopInputVal = clampNumber(Number(el('depth_18_top')?.value));
 
-    const surfaceID = clampNumber(Number(el('surface_size')?.value));
+    const surfaceID = sizeIdValue('surface_size', clampNumber(Number(el('surface_size')?.value)));
     const surfaceOD = OD.surface[surfaceID] || 20;
 
-    const intermediateID = clampNumber(Number(el('intermediate_size')?.value));
+    const intermediateID = sizeIdValue('intermediate_size', clampNumber(Number(el('intermediate_size')?.value)));
     const intermediateOD = OD.intermediate[intermediateID] || 13.375;
 
-    const productionID = clampNumber(Number(el('production_size')?.value));
+    const productionID = sizeIdValue('production_size', clampNumber(Number(el('production_size')?.value)));
     const productionOD = OD.production[productionID] || 9.625;
 
-    const reservoirID = clampNumber(Number(el('reservoir_size')?.value));
+    const reservoirID = sizeIdValue('reservoir_size', clampNumber(Number(el('reservoir_size')?.value)));
     const reservoirOD = OD.reservoir[reservoirID] || 5.5;
 
-    const tiebackID = clampNumber(Number(el('tieback_size')?.value));
+    const tiebackID = sizeIdValue('tieback_size', clampNumber(Number(el('tieback_size')?.value)));
     const tiebackOD = OD.tieback[tiebackID] || productionOD;
 
     // compute auto tops
@@ -232,27 +233,7 @@ const VolumeCalc = (() => {
       intermediateTopFinal = riserDepthVal; intermediateTopAuto = true;
     }
 
-    // update connect notes accessibility
-    const conductorNoteEl = el('conductor_connect_note');
-    if (conductorNoteEl) {
-      if (!isNaN(conductorTopInputVal)) { conductorNoteEl.textContent = `Top set to ${conductorTopInputVal} m`; conductorNoteEl.classList.remove('hidden'); conductorNoteEl.setAttribute('aria-hidden','false'); }
-      else { conductorNoteEl.classList.add('hidden'); conductorNoteEl.setAttribute('aria-hidden','true'); }
-    }
-
-    const surfaceNoteEl = el('surface_connect_note');
-    if (surfaceNoteEl) {
-      if (typeof surfaceTopFinal !== 'undefined' && surfaceTopAuto) { surfaceNoteEl.classList.remove('hidden'); surfaceNoteEl.setAttribute('aria-hidden','false'); }
-      else { surfaceNoteEl.classList.add('hidden'); surfaceNoteEl.setAttribute('aria-hidden','true'); }
-    }
-
-    const intermediateNoteEl = el('intermediate_connect_note');
-    if (intermediateNoteEl) {
-      if (typeof intermediateTopFinal !== 'undefined') {
-        intermediateNoteEl.textContent = intermediateTopAuto ? `Connected to riser at ${intermediateTopFinal} m` : `Top set to ${intermediateTopFinal} m`;
-        intermediateNoteEl.classList.remove('hidden'); intermediateNoteEl.setAttribute('aria-hidden','false');
-      } else { intermediateNoteEl.classList.add('hidden'); intermediateNoteEl.setAttribute('aria-hidden','true'); }
-    }
-
+    // connect notes removed (UI simplified)
     // gather casings
     const casingsInput = [
       { role: 'riser', id: riserID, depth: clampNumber(Number(el('depth_riser')?.value)), use: !!el('use_riser')?.checked, od: riserOD },
@@ -264,42 +245,72 @@ const VolumeCalc = (() => {
       { role: 'reservoir', id: reservoirID, top: !isNaN(clampNumber(Number(el('depth_5_top')?.value))) ? clampNumber(Number(el('depth_5_top')?.value)) : undefined, depth: clampNumber(Number(el('depth_5')?.value)), use: !!el('use_5')?.checked, od: reservoirOD }
     ];
 
+    // Recompute volumes using depth-segments so the *deepest* casing wins overlapping segments
     let totalVolume = 0;
-    let lastIncludedDepth = 0;
     const casingsToDraw = [];
-    const perCasingVolumes = []; // collect per-casing volume info
 
-    casingsInput.forEach((casing, index) => {
-      const prevDepth = lastIncludedDepth;
-      const startForCalc = typeof casing.top !== 'undefined' ? Math.max(prevDepth, casing.top) : prevDepth;
-      const drawStart = typeof casing.top !== 'undefined' ? casing.top : prevDepth;
-
-      const shouldDraw = casing.use && casing.depth > drawStart;
-      const shouldCountVolume = casing.use && casing.depth > startForCalc && !(casing.role === 'conductor' && surfaceInUse) && !(casing.role === 'surface' && intermediateInUse);
-
-      // compute per-casing metrics
-      let includedLength = 0;
-      let volume = 0;
-      let perMeter_m3 = 0;
-      if (casing.id && shouldCountVolume) {
-        const radiusMeters = (casing.id / 2) * 0.0254;
-        perMeter_m3 = Math.PI * radiusMeters * radiusMeters; // m^3 per meter
-        includedLength = Math.max(0, casing.depth - startForCalc);
-        volume = perMeter_m3 * includedLength;
-        totalVolume += volume;
-        lastIncludedDepth = casing.depth;
+    // Prepare per-role accumulators (use role as key: keeps order later)
+    const perCasingMap = {};
+    casingsInput.forEach((c) => {
+      perCasingMap[c.role] = {
+        role: c.role,
+        includedLength: 0,
+        volume: 0,
+        perMeter_m3: (c.id ? Math.PI * Math.pow((c.id / 2) * 0.0254, 2) : 0),
+        physicalLength: (typeof c.top !== 'undefined') ? Math.max(0, c.depth - c.top) : undefined,
+        use: !!c.use
+      };
+      // prepare draw entries as before
+      const drawStart = typeof c.top !== 'undefined' ? c.top : 0;
+      if (c.use && c.depth > drawStart) {
+        casingsToDraw.push({ id: c.id, od: c.od, depth: c.depth, prevDepth: drawStart, index: 0, z: c.role === 'conductor' ? -1 : c.role === 'reservoir' ? 4 : c.role === 'production' || c.role === 'tieback' ? 3 : c.role === 'intermediate' ? 2 : c.role === 'surface' ? 1 : 0 });
       }
+    });
 
-      perCasingVolumes.push({
-        role: casing.role,
-        includedLength,
-        volume,
-        perMeter_m3
+    // Build sorted unique depth points from all tops and bottoms
+    const pointsSet = new Set([0]);
+    casingsInput.forEach((c) => {
+      if (typeof c.top !== 'undefined' && !isNaN(c.top)) pointsSet.add(c.top);
+      if (!isNaN(c.depth)) pointsSet.add(c.depth);
+    });
+    const points = Array.from(pointsSet).sort((a, b) => a - b);
+
+    // For each segment between consecutive points, find covering casings and award the segment to the deepest eligible casing
+    for (let i = 0; i < points.length - 1; i++) {
+      const segStart = points[i];
+      const segEnd = points[i + 1];
+      const segLength = segEnd - segStart;
+      if (segLength <= 0) continue;
+
+      // find eligible casings covering this segment
+      const covering = casingsInput.filter((c) => {
+        if (!c.use) return false;
+        if (c.depth <= segStart) return false; // bottom at or above segment start -> does not cover
+        const topVal = (typeof c.top !== 'undefined') ? c.top : 0;
+        if (topVal >= segEnd) return false; // top at or below segment end -> does not cover
+        // preserve existing role exclusions
+        if (c.role === 'conductor' && surfaceInUse) return false;
+        if (c.role === 'surface' && intermediateInUse) return false;
+        return true;
       });
 
-      if (shouldDraw) {
-        casingsToDraw.push({ id: casing.id, od: casing.od, depth: casing.depth, prevDepth: drawStart, index, z: casing.role === 'conductor' ? -1 : casing.role === 'reservoir' ? 4 : casing.role === 'production' || casing.role === 'tieback' ? 3 : casing.role === 'intermediate' ? 2 : casing.role === 'surface' ? 1 : 0 });
-      }
+      if (covering.length === 0) continue;
+
+      // choose the deepest casing (largest bottom depth)
+      covering.sort((a, b) => b.depth - a.depth);
+      const winner = covering[0];
+      const area = perCasingMap[winner.role].perMeter_m3; // m^3 per meter
+      const segVol = area * segLength;
+      totalVolume += segVol;
+      perCasingMap[winner.role].volume += segVol;
+      perCasingMap[winner.role].includedLength += segLength;
+    }
+
+    // Convert perCasingMap to array in stable order and preserve use flag
+    const perCasingVolumes = casingsInput.map(c => {
+      const p = perCasingMap[c.role] || { role: c.role, includedLength: 0, volume: 0, perMeter_m3: 0, physicalLength: undefined };
+      p.use = !!c.use;
+      return p;
     });
 
     if (totalVolumeEl) totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + ' m³';
@@ -320,14 +331,57 @@ const VolumeCalc = (() => {
           tieback: 'Tie-back',
           reservoir: 'Reservoir'
         };
+        let totals = { volume: 0, includedLength: 0 };
+
+        // Render only casings that are in use
         perCasingVolumes.forEach((c) => {
+          if (!c.use) return;
+
           const tr = document.createElement('tr');
           const nameTd = document.createElement('td'); nameTd.textContent = roleLabel[c.role] || c.role; tr.appendChild(nameTd);
+          // New column order: Volume, Included length, Volume per m
+          const volTd = document.createElement('td'); volTd.textContent = (c.volume || 0).toFixed(1); tr.appendChild(volTd);
           const lenTd = document.createElement('td'); lenTd.textContent = (c.includedLength || 0).toFixed(1); tr.appendChild(lenTd);
-          const volTd = document.createElement('td'); volTd.textContent = (c.volume || 0).toFixed(3); tr.appendChild(volTd);
-          const perMtd = document.createElement('td'); perMtd.textContent = ((c.perMeter_m3 || 0) * 1000).toFixed(2); tr.appendChild(perMtd);
+          const perMtd = document.createElement('td'); perMtd.textContent = ((c.perMeter_m3 || 0) * 1000).toFixed(1); tr.appendChild(perMtd);
           tbody.appendChild(tr);
+
+          totals.volume += (c.volume || 0);
+          totals.includedLength += (c.includedLength || 0);
         });
+
+        // Update per-role physical length notes (under each Shoe input) for all casings
+        const noteIdMap = {
+          riser: 'riser_length_note',
+          conductor: 'conductor_length_note',
+          surface: 'surface_length_note',
+          intermediate: 'intermediate_length_note',
+          production: 'production_length_note',
+          tieback: 'tieback_length_note',
+          reservoir: 'reservoir_length_note'
+        };
+        perCasingVolumes.forEach((c) => {
+          const noteEl = el(noteIdMap[c.role]);
+          if (noteEl) {
+            if (typeof c.physicalLength !== 'undefined') {
+              noteEl.textContent = `Length: ${c.physicalLength.toFixed(1)} m`;
+              noteEl.classList.remove('hidden');
+            } else {
+              noteEl.textContent = '';
+            }
+          }
+        });
+
+        // Totals row
+        const totalsTr = document.createElement('tr'); totalsTr.classList.add('totals-row');
+        const totalsLabelTd = document.createElement('td'); totalsLabelTd.textContent = 'Totals'; totalsTr.appendChild(totalsLabelTd);
+        const totalsVolTd = document.createElement('td'); totalsVolTd.textContent = (totals.volume || 0).toFixed(1); totalsTr.appendChild(totalsVolTd);
+        const totalsLenTd = document.createElement('td'); totalsLenTd.textContent = (totals.includedLength || 0).toFixed(1); totalsTr.appendChild(totalsLenTd);
+        const totalsPerMTd = document.createElement('td');
+        if (totals.includedLength > 0) {
+          totalsPerMTd.textContent = ((totals.volume / totals.includedLength) * 1000).toFixed(1);
+        } else { totalsPerMTd.textContent = '0.0'; }
+        totalsTr.appendChild(totalsPerMTd);
+        tbody.appendChild(totalsTr);
       }
     }
 
@@ -434,6 +488,50 @@ const VolumeCalc = (() => {
     };
     setup('production_liner_info_btn', 'production_liner_info_tooltip');
     setup('reservoir_default_info_btn', 'reservoir_default_info_tooltip');
+  }
+
+  // Size ID inputs: small editable inputs below each size select that show the numeric ID used for calculations
+  function setupSizeIdInputs() {
+    const pairs = [
+      ['conductor_size', 'conductor_size_id'],
+      ['surface_size', 'surface_size_id'],
+      ['intermediate_size', 'intermediate_size_id'],
+      ['production_size', 'production_size_id'],
+      ['tieback_size', 'tieback_size_id'],
+      ['reservoir_size', 'reservoir_size_id'],
+      ['riser_type', 'riser_type_id']
+    ];
+
+    pairs.forEach(([selId, idInputId]) => {
+      const sel = el(selId);
+      const idInput = el(idInputId);
+      if (!sel || !idInput) return;
+
+      // Initialize value if empty
+      if (!idInput.value) idInput.value = sel.value;
+
+      // When select changes, update ID input only if user hasn't edited it
+      sel.addEventListener('change', () => {
+        if (!idInput.dataset.userEdited) idInput.value = sel.value;
+        scheduleSave();
+        calculateVolume();
+      });
+
+      // If user edits the ID input, mark as user edited and trigger recalculation
+      idInput.addEventListener('input', () => {
+        idInput.dataset.userEdited = 'true';
+        scheduleSave();
+        calculateVolume();
+      });
+    });
+  }
+
+  // Helper to prefer user-edited ID input over select value
+  function sizeIdValue(selectId, fallbackValue) {
+    const idInput = el(`${selectId}_id`);
+    if (!idInput) return fallbackValue;
+    const v = clampNumber(Number(idInput.value));
+    return (typeof v !== 'undefined' && !isNaN(v)) ? v : fallbackValue;
   }
 
   function setupWellheadSync() {
@@ -563,7 +661,7 @@ const VolumeCalc = (() => {
     // initial canvas sizing
     resizeCanvasForDPR(); window.addEventListener('resize', debouncedResize);
     // setup
-    setupEventDelegation(); setupCasingToggles(); setupButtons(); setupTooltips(); setupWellheadSync(); setupTiebackBehavior(); setupProductionToggleButtons(); setupRiserTypeHandler(); setupRiserPositionToggle(); setupNavActive();
+    setupEventDelegation(); setupCasingToggles(); setupButtons(); setupTooltips(); setupSizeIdInputs(); setupWellheadSync(); setupTiebackBehavior(); setupProductionToggleButtons(); setupRiserTypeHandler(); setupRiserPositionToggle(); setupNavActive();
     // compute initial
     calculateVolume();
   }

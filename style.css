@@ -128,14 +128,16 @@ header {
 
 /* Main card container */
 .container {
-  max-width: 900px;
+  /* slightly wider to accommodate the volume table without horizontal scrollbar */
+  max-width: 980px;
   margin: 28px auto;
   padding: 22px;
   background: var(--card-bg);
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   display: grid;
-  grid-template-columns: 1fr 360px;
+  /* give more space to the right column so the table fits without scrolling */
+  grid-template-columns: 1fr 400px;
   gap: 24px;
   align-items: start;
 }
@@ -393,20 +395,33 @@ select:focus {
 }
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .volume-table {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; /* ensure borders/padding don't cause overflow */
   border-collapse: collapse;
   margin-top: 8px;
   background: #fff;
   border: 1px solid rgba(20,34,42,0.06);
+  table-layout: fixed; /* prevent the browser from forcing a wide layout */
 }
 .volume-table th,
 .volume-table td {
-  padding: 8px 10px;
+  padding: 6px 8px;
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   border-bottom: 1px solid rgba(20,34,42,0.04);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Allow header labels to wrap so they don't force table wider */
+.volume-table thead th {
+  white-space: normal;
+  line-height: 1.1;
+  padding: 8px 8px;
 }
 .volume-table thead th {
   background: linear-gradient(90deg, rgba(227,27,35,0.04), rgba(255,59,77,0.02));
@@ -414,6 +429,12 @@ select:focus {
 }
 .volume-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* Totals row styling */
+.volume-table .totals-row {
+  font-weight: 700;
+  background: linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
 }
 .small-note { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
 
@@ -428,6 +449,30 @@ select:focus {
   width: auto; /* do not stretch full width */
   min-width: 120px;
 }
+
+/* Vertical wrapper for select and small editable ID input */
+.size-with-id {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.size-id-input {
+  width: 100px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent; /* subtle, non-boxed look */
+  border-radius: 6px;
+  text-align: center;
+}
+.size-id-input:focus {
+  outline: none;
+  border-color: rgba(20,34,42,0.06);
+}
+.size-id-input[aria-label] { /* ensure small text is slightly muted */
+  color: var(--muted);
+} 
 
 .well-schematic {
   width: 100%;
