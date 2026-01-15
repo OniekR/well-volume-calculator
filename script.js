@@ -420,6 +420,12 @@ const VolumeCalc = (() => {
         useTie.checked = true;
         if (casingBtn) { casingBtn.classList.add('hidden'); casingBtn.setAttribute('aria-hidden','true'); }
         if (prodInfoBtn) { prodInfoBtn.classList.add('hidden'); prodInfoBtn.setAttribute('aria-hidden','true'); }
+        // When tie-back is enabled, apply the Liner default behavior (set Production top depth) and make Liner active.
+        const linerBtnEl = qs('.liner-default-btn')[0];
+        if (linerBtnEl) {
+          // Trigger the same action as pressing the Liner button
+          linerBtnEl.click();
+        }
       } else {
         tiebackCasing.classList.add('hidden');
         tiebackCasing.setAttribute('aria-hidden','true');
