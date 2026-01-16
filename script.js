@@ -125,52 +125,8 @@ const VolumeCalc = (() => {
   const PRESETS_KEY = "keino_presets_v1";
 
   // Built-in presets available to all users (read-only)
-  // Sourced from keino_presets_2026-01-16_20_54_15.json
+  // Sourced from keino_presets_2026-01-16_20_54_15.json (P-9 only)
   const BUILTIN_PRESETS = {
-    "P-45 A": {
-      savedAt: 1768559635981,
-      state: {
-        theme_toggle: { type: "checkbox", value: false },
-        riser_subsea: { type: "checkbox", value: true },
-        wellhead_depth: { type: "input", value: "362" },
-        use_riser: { type: "checkbox", value: true },
-        riser_type: { type: "select", value: "17.5" },
-        riser_type_id: { type: "input", value: "17.5" },
-        depth_riser: { type: "input", value: "362" },
-        use_18: { type: "checkbox", value: true },
-        conductor_size: { type: "select", value: "28" },
-        conductor_size_id: { type: "input", value: "28" },
-        depth_18_top: { type: "input", value: "368.4" },
-        depth_18_bottom: { type: "input", value: "528" },
-        use_13: { type: "checkbox", value: true },
-        surface_size: { type: "select", value: "17.8" },
-        surface_size_id: { type: "input", value: "17.8" },
-        depth_13_top: { type: "input", value: "361.5" },
-        depth_13: { type: "input", value: "1137.2" },
-        use_9: { type: "checkbox", value: true },
-        intermediate_size: { type: "select", value: "12.375" },
-        intermediate_size_id: { type: "input", value: "12.375" },
-        depth_9_top: { type: "input", value: "363" },
-        depth_9: { type: "input", value: "2132" },
-        use_7: { type: "checkbox", value: true },
-        production_is_liner: { type: "checkbox", value: true },
-        production_size: { type: "select", value: "8.535" },
-        production_size_id: { type: "input", value: "8.535" },
-        depth_7_top: { type: "input", value: "2086.8" },
-        depth_7: { type: "input", value: "3277.5" },
-        use_tieback: { type: "checkbox", value: true },
-        dummy_hanger: { type: "checkbox", value: true },
-        tieback_size: { type: "select", value: "8.535" },
-        tieback_size_id: { type: "input", value: "8.535" },
-        depth_tb_top: { type: "input", value: "362" },
-        depth_tb: { type: "input", value: "437" },
-        use_5: { type: "checkbox", value: true },
-        reservoir_size: { type: "select", value: "6.184" },
-        reservoir_size_id: { type: "input", value: "6.184" },
-        depth_5_top: { type: "input", value: "3228.2" },
-        depth_5: { type: "input", value: "4065" },
-      },
-    },
     "P-9": {
       savedAt: 1768596702517,
       state: {
