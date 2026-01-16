@@ -55,6 +55,8 @@ const VolumeCalc = (() => {
   let saveTimer = null;
   let drawScheduled = false;
   let lastDrawArgs = null;
+  // Currently loaded or saved preset name (displayed on the canvas)
+  let currentPresetName = '';
 
   // Utilities
   const clampNumber = (v) => (isNaN(v) ? undefined : Number(v));
@@ -127,16 +129,16 @@ const VolumeCalc = (() => {
   // Built-in presets loaded from an external JSON file (read-only)
   // Update `keino_presets_2026-01-16_20_54_15.json` to change these
   let BUILTIN_PRESETS = {};
-  const BUILTIN_PRESETS_URL = './keino_presets_2026-01-16_20_54_15.json';
+  const BUILTIN_PRESETS_URL = "./keino_presets_2026-01-16_20_54_15.json";
 
   async function loadBuiltinPresets() {
     try {
-      const res = await fetch(BUILTIN_PRESETS_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const res = await fetch(BUILTIN_PRESETS_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const payload = await res.json();
-      if (payload && payload.presets && typeof payload.presets === 'object') {
+      if (payload && payload.presets && typeof payload.presets === "object") {
         BUILTIN_PRESETS = payload.presets;
-      } else if (payload && typeof payload === 'object') {
+      } else if (payload && typeof payload === "object") {
         BUILTIN_PRESETS = payload;
       }
       // refresh UI if already initialized
@@ -146,7 +148,10 @@ const VolumeCalc = (() => {
         /* ignore */
       }
     } catch (err) {
-      console.warn('Failed to load built-in presets from ' + BUILTIN_PRESETS_URL + ':', err && err.message ? err.message : err);
+      console.warn(
+        "Failed to load built-in presets from " + BUILTIN_PRESETS_URL + ":",
+        err && err.message ? err.message : err
+      );
       BUILTIN_PRESETS = BUILTIN_PRESETS || {};
     }
   }
@@ -166,9 +171,19 @@ const VolumeCalc = (() => {
     return state;
   }
 
+  // IDs we should not populate when loading a preset
+  // IDs we should not populate when loading a preset (UI-only controls)
+  const _SKIP_POPULATE_ON_LOAD = new Set([
+    "preset_name",
+    "preset_list",
+    "import_presets_input",
+  ]);
+
   function applyStateObject(state) {
     if (!state) return;
     Object.entries(state).forEach(([id, item]) => {
+      // never populate reserved UI controls when loading a preset
+      if (_SKIP_POPULATE_ON_LOAD.has(id)) return;
       const input = el(id);
       if (!input) return;
       try {
@@ -178,6 +193,9 @@ const VolumeCalc = (() => {
         // ignore invalid values
       }
     });
+    // ensure the visible Preset name field isn't auto-filled when loading
+    const presetNameEl = el("preset_name");
+    if (presetNameEl) presetNameEl.value = "";
     // update UI and persist
     calculateVolume();
     scheduleSave();
@@ -210,6 +228,10 @@ const VolumeCalc = (() => {
     const presets = loadPresetsFromStorage();
     presets[name] = { savedAt: Date.now(), state: captureStateObject() };
     savePresetsToStorage(presets);
+    // show the saved name on the canvas
+    currentPresetName = name;
+    // trigger redraw
+    calculateVolume();
     return true;
   }
 
@@ -229,8 +251,13 @@ const VolumeCalc = (() => {
   function getPresetNames() {
     const stored = loadPresetsFromStorage();
     const builtInNames = Object.keys(BUILTIN_PRESETS || {}).sort();
-    const storedNames = Object.keys(stored || {}).sort((a, b) => (stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0));
-    return [...builtInNames, ...storedNames.filter((n) => !builtInNames.includes(n))];
+    const storedNames = Object.keys(stored || {}).sort((a, b) =>
+      stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0
+    );
+    return [
+      ...builtInNames,
+      ...storedNames.filter((n) => !builtInNames.includes(n)),
+    ];
   }
 
   function getPresetState(name) {
@@ -358,7 +385,10 @@ const VolumeCalc = (() => {
         nameInput.focus();
         return alert("Enter a name for the preset.");
       }
-      if (BUILTIN_PRESETS[name]) return alert('That name is reserved for a built-in preset. Please choose another name.');
+      if (BUILTIN_PRESETS[name])
+        return alert(
+          "That name is reserved for a built-in preset. Please choose another name."
+        );
       const presets = loadPresetsFromStorage();
       if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`))
         return;
@@ -372,22 +402,33 @@ const VolumeCalc = (() => {
       if (!name) return alert("Choose a preset to load.");
       const state = getPresetState(name);
       if (!state) return alert("Preset not found.");
+      // set the current preset name (shows on canvas)
+      currentPresetName = name;
       applyStateObject(state);
     });
 
-    // disable delete for built-in presets
-    sel.addEventListener('change', ()=>{
+    // disable delete for built-in presets and clear the Preset name field on selection
+    sel.addEventListener("change", () => {
       const opt = sel.selectedOptions && sel.selectedOptions[0];
-      const isBuiltin = opt && opt.dataset && opt.dataset.builtin === '1';
+      const isBuiltin = opt && opt.dataset && opt.dataset.builtin === "1";
       delBtn.disabled = !!isBuiltin;
+      // Clear the adjacent Preset name input to avoid confusion when selecting/load presets
+      const presetNameEl = el("preset_name");
+      if (presetNameEl) presetNameEl.value = "";
     });
 
     delBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to delete.");
-      if (BUILTIN_PRESETS[name]) return alert("Built-in presets cannot be deleted.");
+      if (BUILTIN_PRESETS[name])
+        return alert("Built-in presets cannot be deleted.");
       if (!confirm(`Delete preset "${name}"?`)) return;
       deletePreset(name);
+      // Clear canvas label if it was the deleted preset
+      if (currentPresetName === name) {
+        currentPresetName = '';
+        calculateVolume();
+      }
       populatePresetsUI();
     });
 
@@ -451,6 +492,37 @@ const VolumeCalc = (() => {
       waterGrad.addColorStop(1, "#87CEFA");
       ctx.fillStyle = waterGrad;
       ctx.fillRect(0, startY, rect.width, waterEndY - startY);
+    }
+
+    // draw current preset name (if any) near top-left of canvas
+    if (typeof currentPresetName === 'string' && currentPresetName.trim() !== '') {
+      ctx.save();
+      const themeIsDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const fontSize = Math.max(12, Math.round(rect.width * 0.018));
+      ctx.font = `600 ${fontSize}px Arial`;
+      ctx.textBaseline = 'top';
+      const paddingX = 10;
+      const paddingY = 6;
+      const text = currentPresetName;
+      const metrics = ctx.measureText(text);
+      const textW = metrics.width;
+      const boxX = 12 - paddingX;
+      const boxY = 8 - paddingY;
+      const boxW = textW + paddingX * 2;
+      const boxH = fontSize + paddingY * 2;
+      // background
+      if (themeIsDark) {
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = '#fff';
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = '#111';
+      }
+      // text
+      ctx.fillText(text, 12, 8);
+      ctx.restore();
     }
 
     // wellhead

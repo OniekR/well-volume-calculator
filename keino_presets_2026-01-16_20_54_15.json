@@ -1,7 +1,6 @@
 {
   "exported_at": "2026-01-16T20:54:15.825Z",
   "presets": {
-
     "P-9": {
       "savedAt": 1768596702517,
       "state": {
@@ -160,18 +159,6 @@
         "depth_5": {
           "type": "input",
           "value": "3798"
-        },
-        "preset_name": {
-          "type": "input",
-          "value": "P-9"
-        },
-        "import_presets_input": {
-          "type": "input",
-          "value": ""
-        },
-        "preset_list": {
-          "type": "select",
-          "value": ""
         }
       }
     }
