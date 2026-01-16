@@ -3,8 +3,94 @@
   --equinor-accent: #ff3b4d;
   --equinor-blue: #e9f4f8;
   --card-bg: #ffffff;
+  --surface-bg: #ffffff; /* inner surfaces / cards */
+  --input-bg: #ffffff;
+  --input-border: #e6e6e6;
   --text-color: #14222a;
   --muted: #6b6b6b;
+
+  /* Table / breakdown colors */
+  --table-bg: var(--surface-bg);
+  --table-border: rgba(20, 34, 42, 0.06);
+  --table-row-border: rgba(20, 34, 42, 0.04);
+  --table-header-bg: linear-gradient(90deg, rgba(227, 27, 35, 0.04), rgba(255, 59, 77, 0.02));
+  --table-header-color: var(--text-color);
+  --table-row-hover: rgba(20, 34, 42, 0.03);
+  --table-totals-bg: linear-gradient(90deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
+}
+
+/* Dark theme overrides — toggled via `data-theme="dark"` on <html> */
+[data-theme='dark'] {
+  --equinor-blue: #071018; /* page background */
+  --card-bg: #08161b; /* slightly lighter card background for contrast */
+  --surface-bg: #0f2730; /* lighter surfaces within cards */
+  --input-bg: #0b222a; /* inputs slightly lighter for readability */
+  --input-border: rgba(255, 255, 255, 0.06);
+  --text-color: #e6eef2;
+  --muted: #90a1a8;
+  --equinor-red: #ff7b80;
+
+  /* Table color overrides for dark theme */
+  --table-bg: var(--surface-bg);
+  --table-border: rgba(255, 255, 255, 0.06);
+  --table-row-border: rgba(255, 255, 255, 0.03);
+  --table-header-bg: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  --table-header-color: var(--text-color);
+  --table-row-hover: rgba(255,255,255,0.02);
+  --table-totals-bg: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+}
+
+/* Header controls positioned top-right */
+.header-controls {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* Theme switch (uses existing .switch styles) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+.switch input {
+  display: none;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider {
+  background-color: var(--equinor-red);
+}
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* small visual tweak for header when dark mode applied */
+header {
+  background: var(--card-bg);
 }
 
 * {
@@ -14,8 +100,7 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: var(--equinor-blue);
   color: var(--text-color);
   min-height: 100vh;
@@ -58,11 +143,7 @@ header {
 /* Hover and focus states */
 .nav-link:hover,
 .nav-link:focus {
-  background: linear-gradient(
-    90deg,
-    rgba(227, 27, 35, 0.08),
-    rgba(255, 59, 77, 0.04)
-  );
+  background: linear-gradient(90deg, rgba(227, 27, 35, 0.08), rgba(255, 59, 77, 0.04));
   color: var(--equinor-red);
   transform: translateY(-1px);
 }
@@ -100,7 +181,7 @@ header {
 }
 .slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 18px;
   width: 18px;
   left: 3px;
@@ -162,7 +243,7 @@ h1 {
 }
 
 .casing-input {
-  background: #fff;
+  background: var(--surface-bg);
   padding: 0; /* header and body manage padding */
   border-radius: 8px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
@@ -176,11 +257,11 @@ h1 {
   cursor: pointer;
 }
 .casing-header:focus {
-  outline: 3px solid rgba(20,34,42,0.06);
+  outline: 3px solid rgba(20, 34, 42, 0.06);
   border-radius: 6px;
 }
 .casing-header:focus-visible {
-  outline: 3px solid rgba(227,27,35,0.12);
+  outline: 3px solid rgba(227, 27, 35, 0.12);
 }
 /* Header inline control (e.g., Liner?) */
 .casing-header .header-inline {
@@ -195,7 +276,7 @@ h1 {
   margin: 0;
   font-size: 1.05rem;
 }
-.casing-header input[type="checkbox"] {
+.casing-header input[type='checkbox'] {
   width: 18px;
   height: 18px;
 }
@@ -206,7 +287,7 @@ h1 {
 .casing-input.collapsed .casing-body {
   display: none;
 }
-.casing-input.collapsed .casing-header input[type="checkbox"] {
+.casing-input.collapsed .casing-header input[type='checkbox'] {
   display: none;
 }
 .casing-input h3 {
@@ -228,9 +309,15 @@ input,
 select {
   width: 100%;
   padding: 10px;
-  border: 1px solid #e6e6e6;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+input::placeholder,
+select::placeholder {
+  color: var(--muted);
+  opacity: 0.9;
 }
 input:focus,
 select:focus {
@@ -263,7 +350,7 @@ select:focus {
   color: var(--text-color);
 }
 .default-top-btn:not(.active):hover {
-  background: #fff;
+  background: var(--card-bg);
 }
 .default-top-btn:active {
   transform: translateY(1px);
@@ -272,22 +359,40 @@ select:focus {
 .liner-default-btn:focus,
 .wellhead-btn:focus,
 .info-btn:focus {
-  outline: 3px solid rgba(227,27,35,0.12);
+  outline: 3px solid rgba(227, 27, 35, 0.12);
   outline-offset: 2px;
 }
 
 /* Liner default button visually matches the Default button */
 .liner-default-btn {
-  background: #f5f5f5;
-  border: 1px solid #e6e6e6;
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
   padding: 6px 10px;
   border-radius: 6px;
   font-weight: 700;
   cursor: pointer;
   color: var(--text-color);
 }
+
+/* Reservoir Liner button: use same non-active styling as wellhead / liner default */
+.reservoir-default-btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-color);
+}
+.reservoir-default-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+.reservoir-default-btn:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
 .liner-default-btn:not(.active):hover {
-  background: #fff;
+  background: var(--card-bg);
 }
 .liner-default-btn:active {
   transform: translateY(1px);
@@ -299,12 +404,12 @@ select:focus {
   background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
   color: #fff;
   border: none;
-  box-shadow: 0 6px 18px rgba(227,27,35,0.12);
+  box-shadow: 0 6px 18px rgba(227, 27, 35, 0.12);
 }
 .casing-btn.active:hover,
 .liner-default-btn.active:hover {
   filter: brightness(0.98);
-} 
+}
 
 /* Small info button shown next to Default when Liner is active */
 .info-btn {
@@ -315,7 +420,7 @@ select:focus {
   height: 26px;
   border-radius: 50%;
   border: 1px solid #e6e6e6;
-  background: #f8f8f8;
+  background: var(--card-bg);
   color: var(--muted);
   font-weight: 700;
   cursor: default;
@@ -333,8 +438,8 @@ select:focus {
   top: -8px;
   left: calc(100% + 8px);
   transform: translateY(-50%);
-  background: #fff;
-  border: 1px solid #e6e6e6;
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
   padding: 8px 10px;
   border-radius: 6px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -342,11 +447,11 @@ select:focus {
   font-size: 0.85rem;
   min-width: 200px;
   z-index: 30;
-  display: none;
+  /* visibility controlled by .hidden utility */
   pointer-events: auto; /* allow hover to keep it visible */
 }
 .info-tooltip::after {
-  content: "";
+  content: '';
   position: absolute;
   left: -6px;
   top: 50%;
@@ -359,10 +464,10 @@ select:focus {
   margin: 0;
 }
 
-/* Wellhead button styling (same as Default button) */
+/* Wellhead button styling — match the non-active Liner button for improved readability */
 .wellhead-btn {
-  background: #f5f5f5;
-  border: 1px solid #e6e6e6;
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
   padding: 6px 10px;
   border-radius: 6px;
   font-weight: 700;
@@ -370,10 +475,14 @@ select:focus {
   color: var(--text-color);
 }
 .wellhead-btn:not(.active):hover {
-  background: #fff;
+  background: var(--card-bg);
 }
 .wellhead-btn:active {
   transform: translateY(1px);
+}
+.wellhead-btn:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
 }
 
 /* Inline checkbox label styling (e.g., Liner?) */
@@ -384,7 +493,7 @@ select:focus {
   color: var(--text-color);
   font-weight: 600;
 }
-.inline-checkbox input[type="checkbox"] {
+.inline-checkbox input[type='checkbox'] {
   width: 16px;
   height: 16px;
 }
@@ -403,29 +512,30 @@ select:focus {
   box-sizing: border-box; /* ensure borders/padding don't cause overflow */
   border-collapse: collapse;
   margin-top: 8px;
-  background: #fff;
-  border: 1px solid rgba(20,34,42,0.06);
+  background: var(--table-bg);
+  border: 1px solid var(--table-border);
   table-layout: fixed; /* prevent the browser from forcing a wide layout */
+  color: var(--text-color);
 }
 .volume-table th,
 .volume-table td {
   padding: 6px 8px;
   text-align: left;
   font-size: 0.92rem;
-  border-bottom: 1px solid rgba(20,34,42,0.04);
+  border-bottom: 1px solid var(--table-row-border);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--text-color);
 }
 /* Allow header labels to wrap so they don't force table wider */
 .volume-table thead th {
   white-space: normal;
   line-height: 1.1;
   padding: 8px 8px;
-}
-.volume-table thead th {
-  background: linear-gradient(90deg, rgba(227,27,35,0.04), rgba(255,59,77,0.02));
+  background: var(--table-header-bg);
   font-weight: 700;
+  color: var(--table-header-color);
 }
 .volume-table tbody tr:last-child td {
   border-bottom: none;
@@ -434,10 +544,18 @@ select:focus {
 /* Totals row styling */
 .volume-table .totals-row {
   font-weight: 700;
-  background: linear-gradient(90deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
+  background: var(--table-totals-bg);
+  color: var(--text-color);
 }
-.small-note { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
 
+.volume-table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+.small-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
 
 /* Horizontal container for Size select + inline controls */
 .size-with-ctrl {
@@ -468,11 +586,12 @@ select:focus {
 }
 .size-id-input:focus {
   outline: none;
-  border-color: rgba(20,34,42,0.06);
+  border-color: rgba(20, 34, 42, 0.06);
 }
-.size-id-input[aria-label] { /* ensure small text is slightly muted */
+.size-id-input[aria-label] {
+  /* ensure small text is slightly muted */
   color: var(--muted);
-} 
+}
 
 .well-schematic {
   width: 100%;
