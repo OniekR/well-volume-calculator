@@ -124,54 +124,32 @@ const VolumeCalc = (() => {
   // Presets
   const PRESETS_KEY = "keino_presets_v1";
 
-  // Built-in presets available to all users (read-only)
-  // Sourced from keino_presets_2026-01-16_20_54_15.json (P-9 only)
-  const BUILTIN_PRESETS = {
-    "P-9": {
-      savedAt: 1768596702517,
-      state: {
-        theme_toggle: { type: "checkbox", value: false },
-        riser_subsea: { type: "checkbox", value: true },
-        wellhead_depth: { type: "input", value: "362" },
-        use_riser: { type: "checkbox", value: true },
-        riser_type: { type: "select", value: "17.5" },
-        riser_type_id: { type: "input", value: "17.5" },
-        depth_riser: { type: "input", value: "362" },
-        use_18: { type: "checkbox", value: true },
-        conductor_size: { type: "select", value: "28" },
-        conductor_size_id: { type: "input", value: "28" },
-        depth_18_top: { type: "input", value: "362" },
-        depth_18_bottom: { type: "input", value: "528" },
-        use_13: { type: "checkbox", value: true },
-        surface_size: { type: "select", value: "17.8" },
-        surface_size_id: { type: "input", value: "17.8" },
-        depth_13_top: { type: "input", value: "361.7" },
-        depth_13: { type: "input", value: "1009" },
-        use_9: { type: "checkbox", value: true },
-        intermediate_size: { type: "select", value: "12.375" },
-        intermediate_size_id: { type: "input", value: "12.375" },
-        depth_9_top: { type: "input", value: "361.5" },
-        depth_9: { type: "input", value: "1600" },
-        use_7: { type: "checkbox", value: true },
-        production_is_liner: { type: "checkbox", value: false },
-        production_size: { type: "select", value: "8.535" },
-        production_size_id: { type: "input", value: "8.535" },
-        depth_7_top: { type: "input", value: "362" },
-        depth_7: { type: "input", value: "2800" },
-        use_tieback: { type: "checkbox", value: false },
-        dummy_hanger: { type: "checkbox", value: true },
-        tieback_size: { type: "select", value: "8.535" },
-        tieback_size_id: { type: "input", value: "8.535" },
-        depth_tb_top: { type: "input", value: "362" },
-        depth_tb: { type: "input", value: "1550" },
-        use_5: { type: "checkbox", value: true },
-        reservoir_size: { type: "select", value: "6.184" },
-        reservoir_size_id: { type: "input", value: "6.184" },
-        depth_5_top: { type: "input", value: "2748" },
-        depth_5: { type: "input", value: "3798" },
-      },
-    },
-  };
+  // Built-in presets loaded from an external JSON file (read-only)
+  // Update `keino_presets_2026-01-16_20_54_15.json` to change these
+  let BUILTIN_PRESETS = {};
+  const BUILTIN_PRESETS_URL = './keino_presets_2026-01-16_20_54_15.json';
+
+  async function loadBuiltinPresets() {
+    try {
+      const res = await fetch(BUILTIN_PRESETS_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const payload = await res.json();
+      if (payload && payload.presets && typeof payload.presets === 'object') {
+        BUILTIN_PRESETS = payload.presets;
+      } else if (payload && typeof payload === 'object') {
+        BUILTIN_PRESETS = payload;
+      }
+      // refresh UI if already initialized
+      try {
+        populatePresetsUI();
+      } catch (e) {
+        /* ignore */
+      }
+    } catch (err) {
+      console.warn('Failed to load built-in presets from ' + BUILTIN_PRESETS_URL + ':', err && err.message ? err.message : err);
+      BUILTIN_PRESETS = BUILTIN_PRESETS || {};
+    }
+  }
 
   function captureStateObject() {
     const state = {};
@@ -370,6 +348,9 @@ const VolumeCalc = (() => {
         e.target.value = "";
       });
     }
+
+    // Load built-in presets (async) from external JSON file
+    loadBuiltinPresets();
 
     saveBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
