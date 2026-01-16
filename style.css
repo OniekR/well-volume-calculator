@@ -13,14 +13,22 @@
   --table-bg: var(--surface-bg);
   --table-border: rgba(20, 34, 42, 0.06);
   --table-row-border: rgba(20, 34, 42, 0.04);
-  --table-header-bg: linear-gradient(90deg, rgba(227, 27, 35, 0.04), rgba(255, 59, 77, 0.02));
+  --table-header-bg: linear-gradient(
+    90deg,
+    rgba(227, 27, 35, 0.04),
+    rgba(255, 59, 77, 0.02)
+  );
   --table-header-color: var(--text-color);
   --table-row-hover: rgba(20, 34, 42, 0.03);
-  --table-totals-bg: linear-gradient(90deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
+  --table-totals-bg: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.02),
+    rgba(0, 0, 0, 0.01)
+  );
 }
 
 /* Dark theme overrides — toggled via `data-theme="dark"` on <html> */
-[data-theme='dark'] {
+[data-theme="dark"] {
   --equinor-blue: #071018; /* page background */
   --card-bg: #08161b; /* slightly lighter card background for contrast */
   --surface-bg: #0f2730; /* lighter surfaces within cards */
@@ -34,10 +42,18 @@
   --table-bg: var(--surface-bg);
   --table-border: rgba(255, 255, 255, 0.06);
   --table-row-border: rgba(255, 255, 255, 0.03);
-  --table-header-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  --table-header-bg: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.01)
+  );
   --table-header-color: var(--text-color);
   --table-row-hover: rgba(255, 255, 255, 0.02);
-  --table-totals-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  --table-totals-bg: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.01)
+  );
 }
 
 /* Header controls positioned top-right */
@@ -72,7 +88,7 @@
 }
 .slider:before {
   position: absolute;
-  content: '';
+  content: "";
   height: 22px;
   width: 22px;
   left: 3px;
@@ -109,7 +125,8 @@ header {
 }
 
 body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
   background-color: var(--equinor-blue);
   color: var(--text-color);
   min-height: 100vh;
@@ -152,7 +169,11 @@ header {
 /* Hover and focus states */
 .nav-link:hover,
 .nav-link:focus {
-  background: linear-gradient(90deg, rgba(227, 27, 35, 0.08), rgba(255, 59, 77, 0.04));
+  background: linear-gradient(
+    90deg,
+    rgba(227, 27, 35, 0.08),
+    rgba(255, 59, 77, 0.04)
+  );
   color: var(--equinor-red);
   transform: translateY(-1px);
 }
@@ -190,7 +211,7 @@ header {
 }
 .slider:before {
   position: absolute;
-  content: '';
+  content: "";
   height: 18px;
   width: 18px;
   left: 3px;
@@ -262,8 +283,10 @@ h1 {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 8px; /* reduced padding for more compact headers */
   cursor: pointer;
+  transition: padding 0.12s ease, gap 0.12s ease, background 0.12s ease,
+    color 0.12s ease;
 }
 .casing-header:focus {
   outline: 3px solid rgba(20, 34, 42, 0.06);
@@ -283,25 +306,73 @@ h1 {
 }
 .casing-header h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem; /* slightly smaller heading for active state */
+  transition: font-size 0.12s ease, opacity 0.12s ease;
 }
-.casing-header input[type='checkbox'] {
+.casing-header input[type="checkbox"] {
   width: 18px;
   height: 18px;
 }
 .casing-body {
-  padding: 6px 12px;
+  padding: 4px 8px; /* reduce body padding to compact layout */
   border-top: 1px solid #f0f0f0;
 }
 .casing-input.collapsed .casing-body {
   display: none;
 }
-.casing-input.collapsed .casing-header input[type='checkbox'] {
+.casing-input.collapsed .casing-header input[type="checkbox"] {
   display: none;
+}
+/* Compact header style when collapsed: smaller padding and reduced h3 size */
+.casing-input.collapsed .casing-header {
+  padding: 4px 8px;
+  gap: 8px;
+  opacity: 0.95;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 6px;
+}
+.casing-input.collapsed .casing-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.9;
 }
 .casing-input h3 {
   margin-bottom: 10px;
   color: var(--text-color);
+}
+
+/* Even more compact collapsed state and horizontal layout */
+.casing-input.collapsed {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(50% - 12px);
+  margin-right: 12px;
+  margin-bottom: 8px;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 6px;
+}
+.casing-input.collapsed .casing-header {
+  padding: 2px 6px;
+  gap: 6px;
+  opacity: 0.95;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 6px;
+}
+.casing-input.collapsed .casing-header h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Ensure a responsive fallback on smaller screens */
+@media (max-width: 900px) {
+  .casing-input.collapsed {
+    width: 100%;
+    display: block;
+    margin-right: 0;
+  }
 }
 
 .input-group {
@@ -460,7 +531,7 @@ select:focus {
   pointer-events: auto; /* allow hover to keep it visible */
 }
 .info-tooltip::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -6px;
   top: 50%;
@@ -494,6 +565,82 @@ select:focus {
   outline-offset: 2px;
 }
 
+/* Presets panel styling */
+.presets {
+  margin-top: 18px;
+}
+.presets-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.presets-controls input#preset_name {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+.presets-controls select#preset_list {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+  min-width: 160px;
+}
+.presets-controls button {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--surface-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: 700;
+}
+/* Primary save button */
+.presets-controls button#save_preset_btn {
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(227, 27, 35, 0.12);
+}
+.presets-controls button#save_preset_btn:hover {
+  filter: brightness(0.98);
+}
+/* Secondary actions */
+.presets-controls button#load_preset_btn,
+.presets-controls button#delete_preset_btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+}
+.presets-controls button#delete_preset_btn {
+  color: var(--equinor-red);
+  border-color: rgba(227, 27, 35, 0.12);
+}
+/* Export / Import buttons (inline, small) */
+#export_presets_btn,
+#import_presets_btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--text-color);
+}
+#export_presets_btn:hover,
+#import_presets_btn:hover {
+  background: var(--card-bg);
+}
+.presets-controls button:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
+@media (min-width: 640px) {
+  .presets-controls {
+    flex-direction: column;
+  }
+}
+
 /* Inline checkbox label styling (e.g., Liner?) */
 .inline-checkbox {
   display: inline-flex;
@@ -502,7 +649,7 @@ select:focus {
   color: var(--text-color);
   font-weight: 600;
 }
-.inline-checkbox input[type='checkbox'] {
+.inline-checkbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
 }

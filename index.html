@@ -21,18 +21,30 @@
         <nav>
           <div class="linker">
             <a class="nav-link" href="https://oniekr.github.io/">Home</a>
-            <a class="nav-link" href="https://oniekr.github.io/FV.github.io/">Flow velocity</a>
-            <a class="nav-link" href="https://oniekr.github.io/pressurevolume.github.io/"
+            <a class="nav-link" href="https://oniekr.github.io/FV.github.io/"
+              >Flow velocity</a
+            >
+            <a
+              class="nav-link"
+              href="https://oniekr.github.io/pressurevolume.github.io/"
               >Volume / pressure</a
             >
-            <a class="nav-link" href="https://oniekr.github.io/stringlift.github.io/"
+            <a
+              class="nav-link"
+              href="https://oniekr.github.io/stringlift.github.io/"
               >String lift calculator</a
             >
           </div>
           <div class="header-controls">
-            <span id="theme_label" class="theme-label" aria-live="polite">Dark mode</span>
+            <span id="theme_label" class="theme-label" aria-live="polite"
+              >Dark mode</span
+            >
             <label class="switch" title="Toggle dark mode">
-              <input id="theme_toggle" type="checkbox" aria-label="Toggle dark mode" />
+              <input
+                id="theme_toggle"
+                type="checkbox"
+                aria-label="Toggle dark mode"
+              />
               <span class="slider" aria-hidden="true"></span>
             </label>
           </div>
@@ -59,7 +71,9 @@
                   />
                   <span class="slider round"></span>
                 </label>
-                <span id="riser_position_label" class="small-note-inline">Subsea -</span>
+                <span id="riser_position_label" class="small-note-inline"
+                  >Subsea -</span
+                >
               </div>
             </div>
 
@@ -82,7 +96,12 @@
 
           <div class="casing-input">
             <div class="casing-header">
-              <input type="checkbox" class="use-checkbox" id="use_riser" checked />
+              <input
+                type="checkbox"
+                class="use-checkbox"
+                id="use_riser"
+                checked
+              />
               <h3>Riser</h3>
             </div>
             <div class="casing-body">
@@ -105,11 +124,18 @@
                     />
                   </div>
                 </div>
-                <div class="input-inline input-inline--narrow" id="depth_riser_container">
+                <div
+                  class="input-inline input-inline--narrow"
+                  id="depth_riser_container"
+                >
                   <label>Depth (m):</label>
                   <input type="number" id="depth_riser" step="1.0" value="0" />
                   <div style="margin-top: 8px">
-                    <button type="button" class="wellhead-btn" data-target="depth_riser">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_riser"
+                    >
                       Wellhead
                     </button>
                   </div>
@@ -152,7 +178,11 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button type="button" class="wellhead-btn" data-target="depth_18_top">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_18_top"
+                    >
                       Wellhead
                     </button>
                   </div>
@@ -167,7 +197,11 @@
                     value="0"
                     min="0"
                   />
-                  <div id="conductor_length_note" class="small-note" aria-live="polite"></div>
+                  <div
+                    id="conductor_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -208,15 +242,30 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button type="button" class="wellhead-btn" data-target="depth_13_top">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_13_top"
+                    >
                       Wellhead
                     </button>
                   </div>
                 </div>
                 <div class="input-inline">
                   <label for="depth_13">Shoe (m):</label>
-                  <input type="number" id="depth_13" name="depth_13" step="1.0" value="0" min="0" />
-                  <div id="surface_length_note" class="small-note" aria-live="polite"></div>
+                  <input
+                    type="number"
+                    id="depth_13"
+                    name="depth_13"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="surface_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -257,15 +306,30 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button type="button" class="wellhead-btn" data-target="depth_9_top">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_9_top"
+                    >
                       Wellhead
                     </button>
                   </div>
                 </div>
                 <div class="input-inline">
                   <label for="depth_9">Shoe (m):</label>
-                  <input type="number" id="depth_9" name="depth_9" step="1.0" value="0" min="0" />
-                  <div id="intermediate_length_note" class="small-note" aria-live="polite"></div>
+                  <input
+                    type="number"
+                    id="depth_9"
+                    name="depth_9"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="intermediate_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -275,7 +339,10 @@
             <div class="casing-header">
               <input type="checkbox" class="use-checkbox" id="use_7" checked />
               <h3>Production Casing/liner</h3>
-              <label class="header-inline inline-checkbox" style="margin-left: auto">
+              <label
+                class="header-inline inline-checkbox"
+                style="margin-left: auto"
+              >
                 <input type="checkbox" id="production_is_liner" />
                 Tie-back
               </label>
@@ -300,7 +367,9 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label id="production_top_label" for="depth_7_top">Top (m):</label>
+                  <label id="production_top_label" for="depth_7_top"
+                    >Top (m):</label
+                  >
                   <input
                     type="number"
                     id="depth_7_top"
@@ -365,21 +434,48 @@
                 </div>
                 <div class="input-inline">
                   <label for="depth_7">Shoe (m):</label>
-                  <input type="number" id="depth_7" name="depth_7" step="1.0" value="0" min="0" />
-                  <div id="production_length_note" class="small-note" aria-live="polite"></div>
+                  <input
+                    type="number"
+                    id="depth_7"
+                    name="depth_7"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="production_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Tie-back Casing: shown when Production 'Liner?' is checked -->
-          <div class="casing-input hidden" id="tieback_casing" aria-hidden="true">
+          <div
+            class="casing-input hidden"
+            id="tieback_casing"
+            aria-hidden="true"
+          >
             <div class="casing-header">
-              <input type="checkbox" class="use-checkbox" id="use_tieback" checked />
+              <input
+                type="checkbox"
+                class="use-checkbox"
+                id="use_tieback"
+                checked
+              />
               <h3>Tie-back Casing</h3>
               <!-- New control: Dummy hanger (toggle only, functionality to be added later) -->
-              <label class="header-inline inline-checkbox" style="margin-left: auto">
-                <input type="checkbox" id="dummy_hanger" aria-label="Dummy hanger" />
+              <label
+                class="header-inline inline-checkbox"
+                style="margin-left: auto"
+              >
+                <input
+                  type="checkbox"
+                  id="dummy_hanger"
+                  aria-label="Dummy hanger"
+                />
                 Dummy hanger
               </label>
             </div>
@@ -412,7 +508,11 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button type="button" class="wellhead-btn" data-target="depth_tb_top">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_tb_top"
+                    >
                       Wellhead
                     </button>
                   </div>
@@ -428,7 +528,11 @@
                     value="0"
                     readonly
                   />
-                  <div id="tieback_length_note" class="small-note" aria-live="polite"></div>
+                  <div
+                    id="tieback_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -506,8 +610,19 @@
                 </div>
                 <div class="input-inline">
                   <label for="depth_5">Shoe (m):</label>
-                  <input type="number" id="depth_5" name="depth_5" step="1.0" value="0" min="0" />
-                  <div id="reservoir_length_note" class="small-note" aria-live="polite"></div>
+                  <input
+                    type="number"
+                    id="depth_5"
+                    name="depth_5"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="reservoir_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -556,6 +671,56 @@
             </table>
             <div id="volume-breakdown-note" class="small-note">
               Values update automatically when inputs change.
+            </div>
+          </div>
+        </section>
+
+        <section id="presets" class="presets" aria-labelledby="presets-title">
+          <h2 id="presets-title">Presets</h2>
+          <div class="table-wrap">
+            <div class="presets-controls">
+              <input type="text" id="preset_name" placeholder="Preset name" />
+              <div style="display: flex; gap: 8px; align-items: center">
+                <button type="button" id="save_preset_btn">Save</button>
+                <button
+                  type="button"
+                  id="export_presets_btn"
+                  title="Download presets as JSON"
+                >
+                  Export
+                </button>
+                <button
+                  type="button"
+                  id="import_presets_btn"
+                  title="Upload presets JSON"
+                >
+                  Import
+                </button>
+                <input
+                  id="import_presets_input"
+                  type="file"
+                  accept=".json,application/json"
+                  style="display: none"
+                  aria-hidden="true"
+                />
+              </div>
+              <div
+                style="
+                  margin-top: 8px;
+                  display: flex;
+                  gap: 8px;
+                  align-items: center;
+                "
+              >
+                <select id="preset_list" aria-label="Saved presets">
+                  <option value="">— Select a preset —</option>
+                </select>
+                <button type="button" id="load_preset_btn">Load</button>
+                <button type="button" id="delete_preset_btn">Delete</button>
+              </div>
+            </div>
+            <div id="presets_note" class="small-note">
+              Save and recall named input presets.
             </div>
           </div>
         </section>
