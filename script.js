@@ -12,17 +12,17 @@ const VolumeCalc = (() => {
   const STORAGE_KEY = 'keino_volume_state_v2';
 
   const OD = {
-    conductor: { '17.8': 18.625, '28': 30, '27': 30 },
-    riser: { '17.5': 20, '8.5': 9.5 },
-    surface: { '18.73': 20, '17.8': 18.625 },
-    intermediate: { '12.347': 13.375, '12.375': 13.625 },
-    production: { '6.276': 7, '8.921': 9.625 },
-    tieback: { '8.921': 9.625, '10.75': 11.5 },
-    reservoir: { '6.276': 7, '4.778': 5.5 },
+    conductor: { 17.8: 18.625, 28: 30, 27: 30 },
+    riser: { 17.5: 20, 8.5: 9.5 },
+    surface: { 18.73: 20, 17.8: 18.625 },
+    intermediate: { 12.347: 13.375, 12.375: 13.625 },
+    production: { 6.276: 7, 8.921: 9.625 },
+    tieback: { 8.921: 9.625, 10.75: 11.5 },
+    reservoir: { 6.276: 7, 4.778: 5.5 },
   };
 
-  const el = id => document.getElementById(id);
-  const qs = selector => Array.from(document.querySelectorAll(selector));
+  const el = (id) => document.getElementById(id);
+  const qs = (selector) => Array.from(document.querySelectorAll(selector));
 
   // Cached DOM
   const canvas = el('wellSchematic');
@@ -125,9 +125,9 @@ const VolumeCalc = (() => {
 
     const maxDepth = Math.max(
       opts && !isNaN(opts.waterDepth) ? opts.waterDepth : 0,
-      casings.length ? Math.max(...casings.map(c => c.depth)) : 0
+      casings.length ? Math.max(...casings.map((c) => c.depth)) : 0
     );
-    const maxOD = casings.length ? Math.max(...casings.map(c => c.od)) : 18.625;
+    const maxOD = casings.length ? Math.max(...casings.map((c) => c.od)) : 18.625;
     if (maxDepth === 0) return;
 
     const centerX = rect.width / 2;
@@ -152,8 +152,10 @@ const VolumeCalc = (() => {
 
     const colors = ['#8B4513', '#A0522D', '#CD853F', '#DEB887', '#F4A460'];
 
-    casings.slice().sort((a, b) => (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od)
-      .forEach(casing => {
+    casings
+      .slice()
+      .sort((a, b) => (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od)
+      .forEach((casing) => {
         const idx = casing.index % colors.length;
         const startDepth = casing.prevDepth * scale + startY;
         const endDepth = casing.depth * scale + startY;
@@ -186,7 +188,7 @@ const VolumeCalc = (() => {
     // Read common values
     const riserTypeVal = el('riser_type')?.value;
     const riserID = sizeIdValue('riser_type', clampNumber(Number(riserTypeVal)));
-    const riserOD = riserTypeVal === 'none' ? 0 : (OD.riser[riserTypeVal] || 20);
+    const riserOD = riserTypeVal === 'none' ? 0 : OD.riser[riserTypeVal] || 20;
 
     const riserDepthVal = clampNumber(Number(el('depth_riser')?.value));
     const wellheadDepthVal = clampNumber(Number(el('wellhead_depth')?.value));
@@ -199,50 +201,131 @@ const VolumeCalc = (() => {
 
     // per-casing
     // prefer explicit ID input values if provided
-    const conductorID = sizeIdValue('conductor_size', clampNumber(Number(el('conductor_size')?.value)));
+    const conductorID = sizeIdValue(
+      'conductor_size',
+      clampNumber(Number(el('conductor_size')?.value))
+    );
     const conductorOD = OD.conductor[conductorID] || 30;
     const conductorTopInputVal = clampNumber(Number(el('depth_18_top')?.value));
 
     const surfaceID = sizeIdValue('surface_size', clampNumber(Number(el('surface_size')?.value)));
     const surfaceOD = OD.surface[surfaceID] || 20;
 
-    const intermediateID = sizeIdValue('intermediate_size', clampNumber(Number(el('intermediate_size')?.value)));
+    const intermediateID = sizeIdValue(
+      'intermediate_size',
+      clampNumber(Number(el('intermediate_size')?.value))
+    );
     const intermediateOD = OD.intermediate[intermediateID] || 13.375;
 
-    const productionID = sizeIdValue('production_size', clampNumber(Number(el('production_size')?.value)));
+    const productionID = sizeIdValue(
+      'production_size',
+      clampNumber(Number(el('production_size')?.value))
+    );
     const productionOD = OD.production[productionID] || 9.625;
 
-    const reservoirID = sizeIdValue('reservoir_size', clampNumber(Number(el('reservoir_size')?.value)));
+    const reservoirID = sizeIdValue(
+      'reservoir_size',
+      clampNumber(Number(el('reservoir_size')?.value))
+    );
     const reservoirOD = OD.reservoir[reservoirID] || 5.5;
 
     const tiebackID = sizeIdValue('tieback_size', clampNumber(Number(el('tieback_size')?.value)));
     const tiebackOD = OD.tieback[tiebackID] || productionOD;
 
     // compute auto tops
-    let surfaceTopFinal; let surfaceTopAuto = false;
+    let surfaceTopFinal;
+    let surfaceTopAuto = false;
     const surfaceTopInputVal = clampNumber(Number(el('depth_13_top')?.value));
     if (!isNaN(surfaceTopInputVal)) surfaceTopFinal = surfaceTopInputVal;
-    else if (el('use_riser')?.checked && surfaceInUse && !isNaN(riserDepthVal) && surfaceBottomVal > riserDepthVal) {
-      surfaceTopFinal = riserDepthVal; surfaceTopAuto = true;
+    else if (
+      el('use_riser')?.checked &&
+      surfaceInUse &&
+      !isNaN(riserDepthVal) &&
+      surfaceBottomVal > riserDepthVal
+    ) {
+      surfaceTopFinal = riserDepthVal;
+      surfaceTopAuto = true;
     }
 
-    let intermediateTopFinal; let intermediateTopAuto = false;
+    let intermediateTopFinal;
+    let intermediateTopAuto = false;
     const intermediateTopInputVal = clampNumber(Number(el('depth_9_top')?.value));
     if (!isNaN(intermediateTopInputVal)) intermediateTopFinal = intermediateTopInputVal;
-    else if (el('use_riser')?.checked && intermediateInUse && !isNaN(riserDepthVal) && !isNaN(intermediateBottomVal) && intermediateBottomVal > riserDepthVal) {
-      intermediateTopFinal = riserDepthVal; intermediateTopAuto = true;
+    else if (
+      el('use_riser')?.checked &&
+      intermediateInUse &&
+      !isNaN(riserDepthVal) &&
+      !isNaN(intermediateBottomVal) &&
+      intermediateBottomVal > riserDepthVal
+    ) {
+      intermediateTopFinal = riserDepthVal;
+      intermediateTopAuto = true;
     }
 
     // connect notes removed (UI simplified)
     // gather casings
     const casingsInput = [
-      { role: 'riser', id: riserID, depth: clampNumber(Number(el('depth_riser')?.value)), use: !!el('use_riser')?.checked, od: riserOD },
-      { role: 'conductor', id: conductorID, top: !isNaN(conductorTopInputVal) ? conductorTopInputVal : undefined, depth: clampNumber(Number(el('depth_18_bottom')?.value)), use: !!el('use_18')?.checked, od: conductorOD },
-      { role: 'surface', id: surfaceID, top: surfaceTopFinal, depth: clampNumber(Number(el('depth_13')?.value)), use: !!el('use_13')?.checked, od: surfaceOD },
-      { role: 'intermediate', id: intermediateID, top: intermediateTopFinal, depth: clampNumber(Number(el('depth_9')?.value)), use: !!el('use_9')?.checked, od: intermediateOD },
-      { role: 'production', id: productionID, top: !isNaN(clampNumber(Number(el('depth_7_top')?.value))) ? clampNumber(Number(el('depth_7_top')?.value)) : undefined, depth: clampNumber(Number(el('depth_7')?.value)), use: !!el('use_7')?.checked, od: productionOD },
-      { role: 'tieback', id: tiebackID, top: !isNaN(clampNumber(Number(el('depth_tb_top')?.value))) ? clampNumber(Number(el('depth_tb_top')?.value)) : undefined, depth: clampNumber(Number(el('depth_tb')?.value)), use: !!el('use_tieback')?.checked, od: tiebackOD },
-      { role: 'reservoir', id: reservoirID, top: !isNaN(clampNumber(Number(el('depth_5_top')?.value))) ? clampNumber(Number(el('depth_5_top')?.value)) : undefined, depth: clampNumber(Number(el('depth_5')?.value)), use: !!el('use_5')?.checked, od: reservoirOD }
+      {
+        role: 'riser',
+        id: riserID,
+        depth: clampNumber(Number(el('depth_riser')?.value)),
+        use: !!el('use_riser')?.checked,
+        od: riserOD,
+      },
+      {
+        role: 'conductor',
+        id: conductorID,
+        top: !isNaN(conductorTopInputVal) ? conductorTopInputVal : undefined,
+        depth: clampNumber(Number(el('depth_18_bottom')?.value)),
+        use: !!el('use_18')?.checked,
+        od: conductorOD,
+      },
+      {
+        role: 'surface',
+        id: surfaceID,
+        top: surfaceTopFinal,
+        depth: clampNumber(Number(el('depth_13')?.value)),
+        use: !!el('use_13')?.checked,
+        od: surfaceOD,
+      },
+      {
+        role: 'intermediate',
+        id: intermediateID,
+        top: intermediateTopFinal,
+        depth: clampNumber(Number(el('depth_9')?.value)),
+        use: !!el('use_9')?.checked,
+        od: intermediateOD,
+      },
+      {
+        role: 'production',
+        id: productionID,
+        top: !isNaN(clampNumber(Number(el('depth_7_top')?.value)))
+          ? clampNumber(Number(el('depth_7_top')?.value))
+          : undefined,
+        depth: clampNumber(Number(el('depth_7')?.value)),
+        use: !!el('use_7')?.checked,
+        od: productionOD,
+      },
+      {
+        role: 'tieback',
+        id: tiebackID,
+        top: !isNaN(clampNumber(Number(el('depth_tb_top')?.value)))
+          ? clampNumber(Number(el('depth_tb_top')?.value))
+          : undefined,
+        depth: clampNumber(Number(el('depth_tb')?.value)),
+        use: !!el('use_tieback')?.checked,
+        od: tiebackOD,
+      },
+      {
+        role: 'reservoir',
+        id: reservoirID,
+        top: !isNaN(clampNumber(Number(el('depth_5_top')?.value)))
+          ? clampNumber(Number(el('depth_5_top')?.value))
+          : undefined,
+        depth: clampNumber(Number(el('depth_5')?.value)),
+        use: !!el('use_5')?.checked,
+        od: reservoirOD,
+      },
     ];
 
     // Recompute volumes using depth-segments so the *smallest ID* casing wins overlapping segments
@@ -256,14 +339,32 @@ const VolumeCalc = (() => {
         role: c.role,
         includedLength: 0,
         volume: 0,
-        perMeter_m3: (c.id ? Math.PI * Math.pow((c.id / 2) * 0.0254, 2) : 0),
-        physicalLength: (typeof c.top !== 'undefined') ? Math.max(0, c.depth - c.top) : undefined,
-        use: !!c.use
+        perMeter_m3: c.id ? Math.PI * Math.pow((c.id / 2) * 0.0254, 2) : 0,
+        physicalLength: typeof c.top !== 'undefined' ? Math.max(0, c.depth - c.top) : undefined,
+        use: !!c.use,
       };
       // prepare draw entries as before
       const drawStart = typeof c.top !== 'undefined' ? c.top : 0;
       if (c.use && c.depth > drawStart) {
-        casingsToDraw.push({ id: c.id, od: c.od, depth: c.depth, prevDepth: drawStart, index: 0, z: c.role === 'conductor' ? -1 : c.role === 'reservoir' ? 4 : c.role === 'production' || c.role === 'tieback' ? 3 : c.role === 'intermediate' ? 2 : c.role === 'surface' ? 1 : 0 });
+        casingsToDraw.push({
+          id: c.id,
+          od: c.od,
+          depth: c.depth,
+          prevDepth: drawStart,
+          index: 0,
+          z:
+            c.role === 'conductor'
+              ? -1
+              : c.role === 'reservoir'
+              ? 4
+              : c.role === 'production' || c.role === 'tieback'
+              ? 3
+              : c.role === 'intermediate'
+              ? 2
+              : c.role === 'surface'
+              ? 1
+              : 0,
+        });
       }
     });
 
@@ -286,7 +387,7 @@ const VolumeCalc = (() => {
       const covering = casingsInput.filter((c) => {
         if (!c.use) return false;
         if (c.depth <= segStart) return false; // bottom at or above segment start -> does not cover
-        const topVal = (typeof c.top !== 'undefined') ? c.top : 0;
+        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
         if (topVal >= segEnd) return false; // top at or below segment end -> does not cover
         // preserve existing role exclusions
         if (c.role === 'conductor' && surfaceInUse) return false;
@@ -311,8 +412,14 @@ const VolumeCalc = (() => {
     }
 
     // Convert perCasingMap to array in stable order and preserve use flag
-    const perCasingVolumes = casingsInput.map(c => {
-      const p = perCasingMap[c.role] || { role: c.role, includedLength: 0, volume: 0, perMeter_m3: 0, physicalLength: undefined };
+    const perCasingVolumes = casingsInput.map((c) => {
+      const p = perCasingMap[c.role] || {
+        role: c.role,
+        includedLength: 0,
+        volume: 0,
+        perMeter_m3: 0,
+        physicalLength: undefined,
+      };
       p.use = !!c.use;
       return p;
     });
@@ -333,7 +440,7 @@ const VolumeCalc = (() => {
           intermediate: 'Intermediate',
           production: 'Production',
           tieback: 'Tie-back',
-          reservoir: 'Reservoir'
+          reservoir: 'Reservoir',
         };
         let totals = { volume: 0, includedLength: 0 };
 
@@ -342,15 +449,23 @@ const VolumeCalc = (() => {
           if (!c.use) return;
 
           const tr = document.createElement('tr');
-          const nameTd = document.createElement('td'); nameTd.textContent = roleLabel[c.role] || c.role; tr.appendChild(nameTd);
+          const nameTd = document.createElement('td');
+          nameTd.textContent = roleLabel[c.role] || c.role;
+          tr.appendChild(nameTd);
           // New column order: Volume, Included length, Volume per m
-          const volTd = document.createElement('td'); volTd.textContent = (c.volume || 0).toFixed(1); tr.appendChild(volTd);
-          const lenTd = document.createElement('td'); lenTd.textContent = (c.includedLength || 0).toFixed(1); tr.appendChild(lenTd);
-          const perMtd = document.createElement('td'); perMtd.textContent = ((c.perMeter_m3 || 0) * 1000).toFixed(1); tr.appendChild(perMtd);
+          const volTd = document.createElement('td');
+          volTd.textContent = (c.volume || 0).toFixed(1);
+          tr.appendChild(volTd);
+          const lenTd = document.createElement('td');
+          lenTd.textContent = (c.includedLength || 0).toFixed(1);
+          tr.appendChild(lenTd);
+          const perMtd = document.createElement('td');
+          perMtd.textContent = ((c.perMeter_m3 || 0) * 1000).toFixed(1);
+          tr.appendChild(perMtd);
           tbody.appendChild(tr);
 
-          totals.volume += (c.volume || 0);
-          totals.includedLength += (c.includedLength || 0);
+          totals.volume += c.volume || 0;
+          totals.includedLength += c.includedLength || 0;
         });
 
         // Update per-role physical length notes (under each Shoe input) for all casings
@@ -361,7 +476,7 @@ const VolumeCalc = (() => {
           intermediate: 'intermediate_length_note',
           production: 'production_length_note',
           tieback: 'tieback_length_note',
-          reservoir: 'reservoir_length_note'
+          reservoir: 'reservoir_length_note',
         };
         perCasingVolumes.forEach((c) => {
           const noteEl = el(noteIdMap[c.role]);
@@ -376,23 +491,38 @@ const VolumeCalc = (() => {
         });
 
         // Totals row
-        const totalsTr = document.createElement('tr'); totalsTr.classList.add('totals-row');
-        const totalsLabelTd = document.createElement('td'); totalsLabelTd.textContent = 'Totals'; totalsTr.appendChild(totalsLabelTd);
-        const totalsVolTd = document.createElement('td'); totalsVolTd.textContent = (totals.volume || 0).toFixed(1); totalsTr.appendChild(totalsVolTd);
-        const totalsLenTd = document.createElement('td'); totalsLenTd.textContent = (totals.includedLength || 0).toFixed(1); totalsTr.appendChild(totalsLenTd);
+        const totalsTr = document.createElement('tr');
+        totalsTr.classList.add('totals-row');
+        const totalsLabelTd = document.createElement('td');
+        totalsLabelTd.textContent = 'Totals';
+        totalsTr.appendChild(totalsLabelTd);
+        const totalsVolTd = document.createElement('td');
+        totalsVolTd.textContent = (totals.volume || 0).toFixed(1);
+        totalsTr.appendChild(totalsVolTd);
+        const totalsLenTd = document.createElement('td');
+        totalsLenTd.textContent = (totals.includedLength || 0).toFixed(1);
+        totalsTr.appendChild(totalsLenTd);
         const totalsPerMTd = document.createElement('td');
         if (totals.includedLength > 0) {
           totalsPerMTd.textContent = ((totals.volume / totals.includedLength) * 1000).toFixed(1);
-        } else { totalsPerMTd.textContent = '0.0'; }
+        } else {
+          totalsPerMTd.textContent = '0.0';
+        }
         totalsTr.appendChild(totalsPerMTd);
         tbody.appendChild(totalsTr);
       }
     }
 
     // Show subsea water column when appropriate
-    let showWater = false; let waterDepth;
-    if (!isNaN(wellheadDepthVal) && wellheadDepthVal > 0) { showWater = true; waterDepth = wellheadDepthVal; }
-    else if (riserTypeVal === 'none' && !isNaN(riserDepthVal) && riserDepthVal > 0) { showWater = true; waterDepth = riserDepthVal; }
+    let showWater = false;
+    let waterDepth;
+    if (!isNaN(wellheadDepthVal) && wellheadDepthVal > 0) {
+      showWater = true;
+      waterDepth = wellheadDepthVal;
+    } else if (riserTypeVal === 'none' && !isNaN(riserDepthVal) && riserDepthVal > 0) {
+      showWater = true;
+      waterDepth = riserDepthVal;
+    }
 
     scheduleDraw(casingsToDraw, { showWater, waterDepth });
   }
@@ -402,93 +532,200 @@ const VolumeCalc = (() => {
     // handle input/change on form level
     form.addEventListener('input', (e) => {
       if (!e.target) return;
-      if (e.target.matches('input, select')) { calculateVolume(); scheduleSave(); }
+      if (e.target.matches('input, select')) {
+        calculateVolume();
+        scheduleSave();
+      }
     });
-    form.addEventListener('change', (e) => { if (e.target && e.target.matches('input, select')) { calculateVolume(); scheduleSave(); } });
+    form.addEventListener('change', (e) => {
+      if (e.target && e.target.matches('input, select')) {
+        calculateVolume();
+        scheduleSave();
+      }
+    });
   }
 
   function setupCasingToggles() {
     qs('.casing-input').forEach((section) => {
-      const checkbox = section.querySelector('.use-checkbox') || section.querySelector('input[type=checkbox]');
+      const checkbox =
+        section.querySelector('.use-checkbox') || section.querySelector('input[type=checkbox]');
       const header = section.querySelector('.casing-header');
       if (!checkbox || !header) return;
 
       const update = () => {
-        if (checkbox.checked) { section.classList.remove('collapsed'); header.setAttribute('aria-expanded','true'); }
-        else { section.classList.add('collapsed'); header.setAttribute('aria-expanded','false'); }
+        if (checkbox.checked) {
+          section.classList.remove('collapsed');
+          header.setAttribute('aria-expanded', 'true');
+        } else {
+          section.classList.add('collapsed');
+          header.setAttribute('aria-expanded', 'false');
+        }
       };
 
-      checkbox.addEventListener('change', () => { update(); calculateVolume(); scheduleSave(); });
+      checkbox.addEventListener('change', () => {
+        update();
+        calculateVolume();
+        scheduleSave();
+      });
 
       header.addEventListener('click', (e) => {
         const target = e.target;
         if (target.closest('.header-inline') || target.tagName.toLowerCase() === 'button') return;
-        if (target.tagName.toLowerCase() === 'h3') { checkbox.checked = !checkbox.checked; checkbox.dispatchEvent(new Event('change', { bubbles: true })); }
+        if (target.tagName.toLowerCase() === 'h3') {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       });
 
       // keyboard support
       header.tabIndex = 0;
-      header.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); checkbox.checked = !checkbox.checked; checkbox.dispatchEvent(new Event('change', { bubbles: true })); } });
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
 
       update();
     });
   }
 
   function setupButtons() {
-    qs('.wellhead-btn').forEach(btn => btn.addEventListener('click', (e) => {
-      const targetId = btn.getAttribute('data-target'); const input = el(targetId); const well = el('wellhead_depth'); if (!input || !well) return; if (well.value === '') return; input.value = well.value; scheduleSave(); calculateVolume();
-    }));
+    qs('.wellhead-btn').forEach((btn) =>
+      btn.addEventListener('click', (e) => {
+        const targetId = btn.getAttribute('data-target');
+        const input = el(targetId);
+        const well = el('wellhead_depth');
+        if (!input || !well) return;
+        if (well.value === '') return;
+        input.value = well.value;
+        scheduleSave();
+        calculateVolume();
+      })
+    );
 
-    qs('.default-top-btn').forEach(btn => btn.addEventListener('click', (e) => {
-      const targetId = btn.getAttribute('data-target'); const input = el(targetId); if (!input) return;
-      if (targetId === 'depth_7_top') {
-        const btnText = btn.textContent.trim().toLowerCase(); const interVal = el('depth_9')?.value; const wellVal = el('wellhead_depth')?.value;
-        if (btnText === 'default') {
-          if (interVal !== undefined && interVal !== '') { input.value = String(Number(interVal) - 50); const tb = el('depth_tb'); if (tb) tb.value = input.value; scheduleSave(); calculateVolume(); return; }
-          if (wellVal !== undefined && wellVal !== '') { input.value = wellVal; const tb = el('depth_tb'); if (tb) tb.value = input.value; scheduleSave(); calculateVolume(); return; }
+    qs('.default-top-btn').forEach((btn) =>
+      btn.addEventListener('click', (e) => {
+        const targetId = btn.getAttribute('data-target');
+        const input = el(targetId);
+        if (!input) return;
+        if (targetId === 'depth_7_top') {
+          const btnText = btn.textContent.trim().toLowerCase();
+          const interVal = el('depth_9')?.value;
+          const wellVal = el('wellhead_depth')?.value;
+          if (btnText === 'default') {
+            if (interVal !== undefined && interVal !== '') {
+              input.value = String(Number(interVal) - 50);
+              const tb = el('depth_tb');
+              if (tb) tb.value = input.value;
+              scheduleSave();
+              calculateVolume();
+              return;
+            }
+            if (wellVal !== undefined && wellVal !== '') {
+              input.value = wellVal;
+              const tb = el('depth_tb');
+              if (tb) tb.value = input.value;
+              scheduleSave();
+              calculateVolume();
+              return;
+            }
+          }
+          if (btnText === 'wellhead' || btnText === 'casing') {
+            if (wellVal !== undefined && wellVal !== '') {
+              input.value = wellVal;
+              const tb = el('depth_tb');
+              if (tb) tb.value = input.value;
+              scheduleSave();
+              calculateVolume();
+              return;
+            }
+          }
         }
-        if (btnText === 'wellhead' || btnText === 'casing') { if (wellVal !== undefined && wellVal !== '') { input.value = wellVal; const tb = el('depth_tb'); if (tb) tb.value = input.value; scheduleSave(); calculateVolume(); return; } }
-      }
-      const tb = el('depth_tb'); if (tb) tb.value = input.value; scheduleSave(); calculateVolume();
-    }));
+        const tb = el('depth_tb');
+        if (tb) tb.value = input.value;
+        scheduleSave();
+        calculateVolume();
+      })
+    );
 
     // Liner default button (use Intermediate Bottom - 50, fallback to wellhead)
-    qs('.liner-default-btn').forEach(btn => btn.addEventListener('click', () => {
-      const target = el('depth_7_top'); if (!target) return;
-      const inter = el('depth_9')?.value; const well = el('wellhead_depth')?.value;
-      if (inter !== undefined && inter !== '') { const val = Number(inter); if (!isNaN(val)) target.value = String(val - 50); }
-      else if (well !== undefined && well !== '') { target.value = well; }
-      const tb = el('depth_tb'); if (tb) tb.value = target.value;
-      scheduleSave(); calculateVolume();
-    }));
+    qs('.liner-default-btn').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const target = el('depth_7_top');
+        if (!target) return;
+        const inter = el('depth_9')?.value;
+        const well = el('wellhead_depth')?.value;
+        if (inter !== undefined && inter !== '') {
+          const val = Number(inter);
+          if (!isNaN(val)) target.value = String(val - 50);
+        } else if (well !== undefined && well !== '') {
+          target.value = well;
+        }
+        const tb = el('depth_tb');
+        if (tb) tb.value = target.value;
+        scheduleSave();
+        calculateVolume();
+      })
+    );
 
     // Reservoir Liner button: use Production Bottom - 50
-    qs('.reservoir-default-btn').forEach(btn => btn.addEventListener('click', () => {
-      const target = el('depth_5_top'); if (!target) return;
-      const prodBottom = el('depth_7')?.value;
-      if (prodBottom !== undefined && prodBottom !== '') {
-        const val = Number(prodBottom);
-        if (!isNaN(val)) target.value = String(val - 50);
-      } else {
-        target.value = '';
-      }
-      scheduleSave(); calculateVolume();
-    }));
+    qs('.reservoir-default-btn').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const target = el('depth_5_top');
+        if (!target) return;
+        const prodBottom = el('depth_7')?.value;
+        if (prodBottom !== undefined && prodBottom !== '') {
+          const val = Number(prodBottom);
+          if (!isNaN(val)) target.value = String(val - 50);
+        } else {
+          target.value = '';
+        }
+        scheduleSave();
+        calculateVolume();
+      })
+    );
   }
 
   function setupTooltips() {
     // Generic tooltip behavior: button shows tooltip and can persist on click. Tooltip elements carry 'hidden' class by default.
     const setup = (btnId, tipId) => {
-      const btn = el(btnId); const tip = el(tipId); if (!btn || !tip) return;
+      const btn = el(btnId);
+      const tip = el(tipId);
+      if (!btn || !tip) return;
       btn.removeAttribute('title');
       let persistOpen = false;
-      const show = () => { tip.classList.remove('hidden'); tip.setAttribute('aria-hidden','false'); };
-      const hide = () => { tip.classList.add('hidden'); tip.setAttribute('aria-hidden','true'); };
-      btn.addEventListener('mouseenter', show); btn.addEventListener('focus', show);
-      btn.addEventListener('mouseleave', () => { if (!persistOpen) hide(); }); btn.addEventListener('blur', hide);
-      tip.addEventListener('mouseenter', show); tip.addEventListener('mouseleave', () => { if (!persistOpen) hide(); });
-      btn.addEventListener('click', (e) => { e.stopPropagation(); persistOpen = true; show(); btn.focus(); });
-      document.addEventListener('click', (e) => { if (!btn.contains(e.target) && !tip.contains(e.target)) { persistOpen = false; hide(); } });
+      const show = () => {
+        tip.classList.remove('hidden');
+        tip.setAttribute('aria-hidden', 'false');
+      };
+      const hide = () => {
+        tip.classList.add('hidden');
+        tip.setAttribute('aria-hidden', 'true');
+      };
+      btn.addEventListener('mouseenter', show);
+      btn.addEventListener('focus', show);
+      btn.addEventListener('mouseleave', () => {
+        if (!persistOpen) hide();
+      });
+      btn.addEventListener('blur', hide);
+      tip.addEventListener('mouseenter', show);
+      tip.addEventListener('mouseleave', () => {
+        if (!persistOpen) hide();
+      });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        persistOpen = true;
+        show();
+        btn.focus();
+      });
+      document.addEventListener('click', (e) => {
+        if (!btn.contains(e.target) && !tip.contains(e.target)) {
+          persistOpen = false;
+          hide();
+        }
+      });
     };
     setup('production_liner_info_btn', 'production_liner_info_tooltip');
     setup('reservoir_default_info_btn', 'reservoir_default_info_tooltip');
@@ -503,7 +740,7 @@ const VolumeCalc = (() => {
       ['production_size', 'production_size_id'],
       ['tieback_size', 'tieback_size_id'],
       ['reservoir_size', 'reservoir_size_id'],
-      ['riser_type', 'riser_type_id']
+      ['riser_type', 'riser_type_id'],
     ];
 
     pairs.forEach(([selId, idInputId]) => {
@@ -535,33 +772,65 @@ const VolumeCalc = (() => {
     const idInput = el(`${selectId}_id`);
     if (!idInput) return fallbackValue;
     const v = clampNumber(Number(idInput.value));
-    return (typeof v !== 'undefined' && !isNaN(v)) ? v : fallbackValue;
+    return typeof v !== 'undefined' && !isNaN(v) ? v : fallbackValue;
   }
 
   function setupWellheadSync() {
-    const well = el('wellhead_depth'); const riser = el('depth_riser'); if (!well || !riser) return;
+    const well = el('wellhead_depth');
+    const riser = el('depth_riser');
+    if (!well || !riser) return;
 
     // Ensure container is visible (previous HTML used inline 'display:none', replaced with .hidden utility)
     const wellheadContainer = el('wellhead-depth-container');
-    if (wellheadContainer) { wellheadContainer.classList.remove('hidden'); wellheadContainer.setAttribute('aria-hidden','false'); }
+    if (wellheadContainer) {
+      wellheadContainer.classList.remove('hidden');
+      wellheadContainer.setAttribute('aria-hidden', 'false');
+    }
 
-    well.addEventListener('input', () => { if (riser.value !== well.value) { riser.value = well.value; scheduleSave(); calculateVolume(); } });
+    well.addEventListener('input', () => {
+      if (riser.value !== well.value) {
+        riser.value = well.value;
+        scheduleSave();
+        calculateVolume();
+      }
+    });
     if (well.value !== '' && riser.value !== well.value) riser.value = well.value;
 
     // when toggling to Subsea, apply to tops
-    const toggle = el('riser_subsea'); if (toggle) toggle.addEventListener('change', (e) => { if (e.target.checked && well.value !== '') { ['depth_18_top','depth_13_top'].forEach(id => { const v = el(id); if (v) v.value = well.value; }); scheduleSave(); calculateVolume(); } });
+    const toggle = el('riser_subsea');
+    if (toggle)
+      toggle.addEventListener('change', (e) => {
+        if (e.target.checked && well.value !== '') {
+          ['depth_18_top', 'depth_13_top'].forEach((id) => {
+            const v = el(id);
+            if (v) v.value = well.value;
+          });
+          scheduleSave();
+          calculateVolume();
+        }
+      });
   }
 
   function setupTiebackBehavior() {
-    const prodLinerChk = el('production_is_liner'); const tiebackCasing = el('tieback_casing'); const useTie = el('use_tieback'); const casingBtn = el('production_casing_btn'); if (!prodLinerChk || !tiebackCasing || !useTie) return;
+    const prodLinerChk = el('production_is_liner');
+    const tiebackCasing = el('tieback_casing');
+    const useTie = el('use_tieback');
+    const casingBtn = el('production_casing_btn');
+    if (!prodLinerChk || !tiebackCasing || !useTie) return;
     const prodInfoBtn = el('production_liner_info_btn');
     const update = () => {
       if (prodLinerChk.checked) {
         tiebackCasing.classList.remove('hidden');
-        tiebackCasing.setAttribute('aria-hidden','false');
+        tiebackCasing.setAttribute('aria-hidden', 'false');
         useTie.checked = true;
-        if (casingBtn) { casingBtn.classList.add('hidden'); casingBtn.setAttribute('aria-hidden','true'); }
-        if (prodInfoBtn) { prodInfoBtn.classList.add('hidden'); prodInfoBtn.setAttribute('aria-hidden','true'); }
+        if (casingBtn) {
+          casingBtn.classList.add('hidden');
+          casingBtn.setAttribute('aria-hidden', 'true');
+        }
+        if (prodInfoBtn) {
+          prodInfoBtn.classList.add('hidden');
+          prodInfoBtn.setAttribute('aria-hidden', 'true');
+        }
         // When tie-back is enabled, apply the Liner default behavior (set Production top depth) and make Liner active.
         const linerBtnEl = qs('.liner-default-btn')[0];
         if (linerBtnEl) {
@@ -570,21 +839,36 @@ const VolumeCalc = (() => {
         }
       } else {
         tiebackCasing.classList.add('hidden');
-        tiebackCasing.setAttribute('aria-hidden','true');
+        tiebackCasing.setAttribute('aria-hidden', 'true');
         useTie.checked = false;
-        if (casingBtn) { casingBtn.classList.remove('hidden'); casingBtn.setAttribute('aria-hidden','false'); }
-        if (prodInfoBtn) { prodInfoBtn.classList.remove('hidden'); prodInfoBtn.setAttribute('aria-hidden','false'); }
+        if (casingBtn) {
+          casingBtn.classList.remove('hidden');
+          casingBtn.setAttribute('aria-hidden', 'false');
+        }
+        if (prodInfoBtn) {
+          prodInfoBtn.classList.remove('hidden');
+          prodInfoBtn.setAttribute('aria-hidden', 'false');
+        }
       }
       scheduleSave();
       calculateVolume();
     };
-    prodLinerChk.addEventListener('change', update); update();
+    prodLinerChk.addEventListener('change', update);
+    update();
 
     // Mirror production top to tie-back bottom
-    const prodTop = el('depth_7_top'); const tieBottom = el('depth_tb'); if (prodTop && tieBottom) {
-      const sync = () => { tieBottom.value = prodTop.value === '' ? '' : prodTop.value; scheduleSave(); calculateVolume(); };
-      prodTop.addEventListener('input', sync); prodTop.addEventListener('change', sync);
-      const well = el('wellhead_depth'); if (well) well.addEventListener('input', sync);
+    const prodTop = el('depth_7_top');
+    const tieBottom = el('depth_tb');
+    if (prodTop && tieBottom) {
+      const sync = () => {
+        tieBottom.value = prodTop.value === '' ? '' : prodTop.value;
+        scheduleSave();
+        calculateVolume();
+      };
+      prodTop.addEventListener('input', sync);
+      prodTop.addEventListener('change', sync);
+      const well = el('wellhead_depth');
+      if (well) well.addEventListener('input', sync);
       sync();
     }
   }
@@ -606,14 +890,21 @@ const VolumeCalc = (() => {
     };
 
     // initialise aria-pressed state
-    [casingBtn, linerBtn].forEach((b) => { if (b) b.setAttribute('aria-pressed', b.classList.contains('active') ? 'true' : 'false'); });
+    [casingBtn, linerBtn].forEach((b) => {
+      if (b) b.setAttribute('aria-pressed', b.classList.contains('active') ? 'true' : 'false');
+    });
 
     if (casingBtn) {
       casingBtn.addEventListener('click', () => {
         if (useTie && useTie.checked) return;
         setActive(casingBtn);
       });
-      casingBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); casingBtn.click(); } });
+      casingBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          casingBtn.click();
+        }
+      });
     }
 
     if (linerBtn) {
@@ -621,13 +912,21 @@ const VolumeCalc = (() => {
         if (useTie && useTie.checked) return;
         setActive(linerBtn);
       });
-      linerBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); linerBtn.click(); } });
+      linerBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          linerBtn.click();
+        }
+      });
     }
 
     const updateTieback = () => {
       if (prodLinerChk && prodLinerChk.checked) {
         if (linerBtn) setActive(linerBtn);
-        if (casingBtn) { casingBtn.classList.remove('active'); casingBtn.setAttribute('aria-pressed','false'); }
+        if (casingBtn) {
+          casingBtn.classList.remove('active');
+          casingBtn.setAttribute('aria-pressed', 'false');
+        }
       }
     };
 
@@ -635,7 +934,9 @@ const VolumeCalc = (() => {
     updateTieback();
 
     // Default: if no button is active and tie-back is not forcing Liner, make Liner active
-    const anyActive = (casingBtn && casingBtn.classList.contains('active')) || (linerBtn && linerBtn.classList.contains('active'));
+    const anyActive =
+      (casingBtn && casingBtn.classList.contains('active')) ||
+      (linerBtn && linerBtn.classList.contains('active'));
     if (!anyActive) {
       if (!(prodLinerChk && prodLinerChk.checked) && linerBtn) setActive(linerBtn);
     }
@@ -649,29 +950,75 @@ const VolumeCalc = (() => {
       label.textContent = toggle.checked ? 'Subsea' : 'Fixed';
       toggle.setAttribute('aria-checked', toggle.checked ? 'true' : 'false');
     };
-    toggle.addEventListener('change', () => { update(); scheduleSave(); calculateVolume(); });
+    toggle.addEventListener('change', () => {
+      update();
+      scheduleSave();
+      calculateVolume();
+    });
     update();
   }
 
   function setupRiserTypeHandler() {
-    const select = el('riser_type'); const riserDepthEl = el('depth_riser'); const wellEl = el('wellhead_depth'); const riserContainer = el('depth_riser_container'); if (!select || !riserDepthEl) return;
-    const update = () => { if (select.value === 'none') { riserDepthEl.value = '0'; if (riserContainer) riserContainer.classList.add('hidden'); } else { if (riserContainer) riserContainer.classList.remove('hidden'); if (wellEl && wellEl.value !== '') riserDepthEl.value = wellEl.value; } scheduleSave(); calculateVolume(); };
-    select.addEventListener('change', update); update();
+    const select = el('riser_type');
+    const riserDepthEl = el('depth_riser');
+    const wellEl = el('wellhead_depth');
+    const riserContainer = el('depth_riser_container');
+    if (!select || !riserDepthEl) return;
+    const update = () => {
+      if (select.value === 'none') {
+        riserDepthEl.value = '0';
+        if (riserContainer) riserContainer.classList.add('hidden');
+      } else {
+        if (riserContainer) riserContainer.classList.remove('hidden');
+        if (wellEl && wellEl.value !== '') riserDepthEl.value = wellEl.value;
+      }
+      scheduleSave();
+      calculateVolume();
+    };
+    select.addEventListener('change', update);
+    update();
   }
 
   function init() {
     // load state before initial calc
     loadState();
     // initial canvas sizing
-    resizeCanvasForDPR(); window.addEventListener('resize', debouncedResize);
+    resizeCanvasForDPR();
+    window.addEventListener('resize', debouncedResize);
     // setup
-    setupEventDelegation(); setupCasingToggles(); setupButtons(); setupTooltips(); setupSizeIdInputs(); setupWellheadSync(); setupTiebackBehavior(); setupProductionToggleButtons(); setupRiserTypeHandler(); setupRiserPositionToggle(); setupNavActive();
+    setupEventDelegation();
+    setupCasingToggles();
+    setupButtons();
+    setupTooltips();
+    setupSizeIdInputs();
+    setupWellheadSync();
+    setupTiebackBehavior();
+    setupProductionToggleButtons();
+    setupRiserTypeHandler();
+    setupRiserPositionToggle();
+    setupNavActive();
     // compute initial
     calculateVolume();
   }
 
   function setupNavActive() {
-    const links = qs('.linker a'); if (!links || !links.length) return; const current = window.location.href.replace(/\/$/, ''); links.forEach((a) => { try { const href = a.href.replace(/\/$/, ''); if (href === current || current.startsWith(href) || href.startsWith(current) || href.includes(window.location.pathname)) a.classList.add('active'); } catch (e) { /* ignore */ } });
+    const links = qs('.linker a');
+    if (!links || !links.length) return;
+    const current = window.location.href.replace(/\/$/, '');
+    links.forEach((a) => {
+      try {
+        const href = a.href.replace(/\/$/, '');
+        if (
+          href === current ||
+          current.startsWith(href) ||
+          href.startsWith(current) ||
+          href.includes(window.location.pathname)
+        )
+          a.classList.add('active');
+      } catch (e) {
+        /* ignore */
+      }
+    });
   }
 
   return { init, calculateVolume, saveState };
