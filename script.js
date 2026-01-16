@@ -218,6 +218,78 @@ const VolumeCalc = (() => {
     });
   }
 
+  // Export presets as JSON file for sharing
+  function exportPresets() {
+    try {
+      const raw = localStorage.getItem(PRESETS_KEY) || "{}";
+      const payload = {
+        exported_at: new Date().toISOString(),
+        presets: JSON.parse(raw),
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `keino_presets_${new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[:T]/g, "_")}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(
+        "Export failed: " + (err && err.message ? err.message : String(err))
+      );
+    }
+  }
+
+  // Import presets from a JSON File object
+  function importPresetsFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        let incoming = null;
+        if (parsed && typeof parsed === "object") {
+          incoming =
+            parsed.presets && typeof parsed.presets === "object"
+              ? parsed.presets
+              : parsed;
+        }
+        if (!incoming || typeof incoming !== "object") {
+          return alert("Invalid presets file.");
+        }
+        const existing = loadPresetsFromStorage() || {};
+        const conflicts = Object.keys(incoming).filter((n) => existing[n]);
+        if (conflicts.length > 0) {
+          const ok = confirm(
+            `Import will overwrite ${
+              conflicts.length
+            } existing preset(s):\n${conflicts.join(
+              ", "
+            )}\n\nContinue and overwrite?`
+          );
+          if (!ok) return;
+        }
+        const merged = Object.assign({}, existing, incoming);
+        savePresetsToStorage(merged);
+        populatePresetsUI();
+        alert(`Imported ${Object.keys(incoming).length} preset(s).`);
+      } catch (err) {
+        alert(
+          "Error importing presets: " +
+            (err && err.message ? err.message : String(err))
+        );
+      }
+    };
+    reader.onerror = () => alert("Error reading file.");
+    reader.readAsText(file);
+  }
+
   function setupPresetsUI() {
     const saveBtn = el("save_preset_btn");
     const loadBtn = el("load_preset_btn");
@@ -226,6 +298,20 @@ const VolumeCalc = (() => {
     const sel = el("preset_list");
 
     if (!saveBtn || !loadBtn || !delBtn || !nameInput || !sel) return;
+
+    const exportBtn = el("export_presets_btn");
+    const importBtn = el("import_presets_btn");
+    const importInput = el("import_presets_input");
+
+    if (exportBtn) exportBtn.addEventListener("click", exportPresets);
+    if (importBtn && importInput) {
+      importBtn.addEventListener("click", () => importInput.click());
+      importInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) importPresetsFile(file);
+        e.target.value = "";
+      });
+    }
 
     saveBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();

@@ -680,7 +680,30 @@
           <div class="table-wrap">
             <div class="presets-controls">
               <input type="text" id="preset_name" placeholder="Preset name" />
-              <button type="button" id="save_preset_btn">Save</button>
+              <div style="display: flex; gap: 8px; align-items: center">
+                <button type="button" id="save_preset_btn">Save</button>
+                <button
+                  type="button"
+                  id="export_presets_btn"
+                  title="Download presets as JSON"
+                >
+                  Export
+                </button>
+                <button
+                  type="button"
+                  id="import_presets_btn"
+                  title="Upload presets JSON"
+                >
+                  Import
+                </button>
+                <input
+                  id="import_presets_input"
+                  type="file"
+                  accept=".json,application/json"
+                  style="display: none"
+                  aria-hidden="true"
+                />
+              </div>
               <div
                 style="
                   margin-top: 8px;
