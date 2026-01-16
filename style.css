@@ -88,6 +88,15 @@
   transform: translateX(22px);
 }
 
+/* Theme label next to switch */
+.header-controls .theme-label {
+  margin-right: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.95rem;
+  align-self: center;
+}
+
 /* small visual tweak for header when dark mode applied */
 header {
   background: var(--card-bg);
