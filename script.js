@@ -124,6 +124,44 @@ const VolumeCalc = (() => {
   // Presets
   const PRESETS_KEY = "keino_presets_v1";
 
+  // Built-in presets available to all users (read-only)
+  const BUILTIN_PRESETS = {
+    "Offshore - Subsea Demo": {
+      savedAt: 0,
+      state: {
+        wellhead_depth: { type: "input", value: "250" },
+        riser_subsea: { type: "checkbox", value: true },
+        riser_type: { type: "select", value: "17.5" },
+        depth_riser: { type: "input", value: "250" },
+        use_13: { type: "checkbox", value: true },
+        depth_13: { type: "input", value: "900" },
+        use_9: { type: "checkbox", value: true },
+        depth_9: { type: "input", value: "1500" },
+        use_7: { type: "checkbox", value: true },
+        depth_7: { type: "input", value: "2500" },
+        depth_5: { type: "input", value: "3000" },
+        production_size: { type: "select", value: "8.535" },
+      },
+    },
+    "Onshore - Shallow Demo": {
+      savedAt: 0,
+      state: {
+        wellhead_depth: { type: "input", value: "20" },
+        riser_subsea: { type: "checkbox", value: false },
+        riser_type: { type: "select", value: "none" },
+        depth_riser: { type: "input", value: "0" },
+        use_13: { type: "checkbox", value: true },
+        depth_13: { type: "input", value: "50" },
+        use_9: { type: "checkbox", value: true },
+        depth_9: { type: "input", value: "300" },
+        use_7: { type: "checkbox", value: true },
+        depth_7: { type: "input", value: "800" },
+        depth_5: { type: "input", value: "1200" },
+        production_size: { type: "select", value: "8.535" },
+      },
+    },
+  };
+
   function captureStateObject() {
     const state = {};
     qs("input[id], select[id]").forEach((input) => {
@@ -176,6 +214,10 @@ const VolumeCalc = (() => {
 
   function savePreset(name) {
     if (!name) return false;
+    // prevent clashing with built-in preset names
+    if (BUILTIN_PRESETS[name]) {
+      return false;
+    }
     const presets = loadPresetsFromStorage();
     presets[name] = { savedAt: Date.now(), state: captureStateObject() };
     savePresetsToStorage(presets);
@@ -184,6 +226,8 @@ const VolumeCalc = (() => {
 
   function deletePreset(name) {
     if (!name) return false;
+    // do not allow deleting built-in presets
+    if (BUILTIN_PRESETS[name]) return false;
     const presets = loadPresetsFromStorage();
     if (presets[name]) {
       delete presets[name];
@@ -194,15 +238,17 @@ const VolumeCalc = (() => {
   }
 
   function getPresetNames() {
-    const presets = loadPresetsFromStorage();
-    return Object.keys(presets).sort((a, b) =>
-      presets[a] && presets[b] ? presets[a].savedAt - presets[b].savedAt : 0
-    );
+    const stored = loadPresetsFromStorage();
+    const builtInNames = Object.keys(BUILTIN_PRESETS || {}).sort();
+    const storedNames = Object.keys(stored || {}).sort((a, b) => (stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0));
+    return [...builtInNames, ...storedNames.filter((n) => !builtInNames.includes(n))];
   }
 
   function getPresetState(name) {
-    const presets = loadPresetsFromStorage();
-    return presets[name] ? presets[name].state : null;
+    const stored = loadPresetsFromStorage();
+    if (stored[name]) return stored[name].state;
+    if (BUILTIN_PRESETS[name]) return BUILTIN_PRESETS[name].state;
+    return null;
   }
 
   function populatePresetsUI() {
@@ -214,6 +260,7 @@ const VolumeCalc = (() => {
       const opt = document.createElement("option");
       opt.value = n;
       opt.textContent = n;
+      if (BUILTIN_PRESETS[n]) opt.dataset.builtin = "1";
       sel.appendChild(opt);
     });
   }
@@ -319,6 +366,7 @@ const VolumeCalc = (() => {
         nameInput.focus();
         return alert("Enter a name for the preset.");
       }
+      if (BUILTIN_PRESETS[name]) return alert('That name is reserved for a built-in preset. Please choose another name.');
       const presets = loadPresetsFromStorage();
       if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`))
         return;
@@ -335,9 +383,17 @@ const VolumeCalc = (() => {
       applyStateObject(state);
     });
 
+    // disable delete for built-in presets
+    sel.addEventListener('change', ()=>{
+      const opt = sel.selectedOptions && sel.selectedOptions[0];
+      const isBuiltin = opt && opt.dataset && opt.dataset.builtin === '1';
+      delBtn.disabled = !!isBuiltin;
+    });
+
     delBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to delete.");
+      if (BUILTIN_PRESETS[name]) return alert("Built-in presets cannot be deleted.");
       if (!confirm(`Delete preset "${name}"?`)) return;
       deletePreset(name);
       populatePresetsUI();
