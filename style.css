@@ -34,10 +34,10 @@
   --table-bg: var(--surface-bg);
   --table-border: rgba(255, 255, 255, 0.06);
   --table-row-border: rgba(255, 255, 255, 0.03);
-  --table-header-bg: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  --table-header-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
   --table-header-color: var(--text-color);
-  --table-row-hover: rgba(255,255,255,0.02);
-  --table-totals-bg: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  --table-row-hover: rgba(255, 255, 255, 0.02);
+  --table-totals-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
 }
 
 /* Header controls positioned top-right */
