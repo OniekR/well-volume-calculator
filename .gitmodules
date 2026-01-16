@@ -1,3 +1,7 @@
 [submodule "FV.github.io"]
 	path = FV.github.io
 	url = https://github.com/OniekR/FV.github.io.git
+
+[submodule "stringlift.github.io"]
+	path = stringlift.github.io
+	url = https://github.com/OniekR/stringlift.github.io.git
