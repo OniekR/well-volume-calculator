@@ -1,0 +1,11 @@
+feat(volume-calc): tie-back & dummy hanger behavior; tie-back 10 3/4" 60.7# (ID 9.66)
+
+Summary:
+- Updated tie-back option label to "10 3/4" 60.7#" and ID to 9.66 for calculations.
+- Seeded Tie-back Bottom with Wellhead + 75 when enabled.
+- Implemented Dummy hanger behavior: when checked, Tie-back Top = Wellhead and Tie-back Bottom = Wellhead + 75 (unlocked, user-editable); when unchecked Bottom mirrors Production Top and is locked.
+- Added size-id inputs, smoke tests (jsdom), and updated CHANGELOG.md.
+
+Recommended:
+- Consider making the Dummy hanger offset configurable (instead of fixed 75).
+- Ensure CI runs the smoke tests with appropriate canvas/polyfills for JSDOM (or mock canvas) to avoid runtime errors.
