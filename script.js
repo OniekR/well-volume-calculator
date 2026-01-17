@@ -56,7 +56,7 @@ const VolumeCalc = (() => {
   let drawScheduled = false;
   let lastDrawArgs = null;
   // Currently loaded or saved preset name (displayed on the canvas)
-  let currentPresetName = '';
+  let currentPresetName = "";
 
   // Utilities
   const clampNumber = (v) => (isNaN(v) ? undefined : Number(v));
@@ -426,7 +426,7 @@ const VolumeCalc = (() => {
       deletePreset(name);
       // Clear canvas label if it was the deleted preset
       if (currentPresetName === name) {
-        currentPresetName = '';
+        currentPresetName = "";
         calculateVolume();
       }
       populatePresetsUI();
@@ -494,13 +494,45 @@ const VolumeCalc = (() => {
       ctx.fillRect(0, startY, rect.width, waterEndY - startY);
     }
 
+    // Draw plug line if provided
+    if (
+      opts &&
+      typeof opts.plugDepth !== "undefined" &&
+      !isNaN(opts.plugDepth)
+    ) {
+      const pd = opts.plugDepth;
+      if (pd >= 0 && pd <= maxDepth) {
+        const y = pd * scale + startY;
+        ctx.save();
+        ctx.strokeStyle = "#ff0000";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(centerX - rect.width * 0.45, y);
+        ctx.lineTo(centerX + rect.width * 0.45, y);
+        ctx.stroke();
+        ctx.fillStyle = "#ff0000";
+        ctx.font = `${Math.max(10, Math.round(rect.width * 0.012))}px Arial`;
+        ctx.textBaseline = "bottom";
+        ctx.fillText(
+          "Plug @ " + pd.toFixed(1) + " m",
+          centerX + rect.width * 0.46,
+          y
+        );
+        ctx.restore();
+      }
+    }
+
     // draw current preset name (if any) near top-left of canvas
-    if (typeof currentPresetName === 'string' && currentPresetName.trim() !== '') {
+    if (
+      typeof currentPresetName === "string" &&
+      currentPresetName.trim() !== ""
+    ) {
       ctx.save();
-      const themeIsDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const themeIsDark =
+        document.documentElement.getAttribute("data-theme") === "dark";
       const fontSize = Math.max(12, Math.round(rect.width * 0.018));
       ctx.font = `600 ${fontSize}px Arial`;
-      ctx.textBaseline = 'top';
+      ctx.textBaseline = "top";
       const paddingX = 10;
       const paddingY = 6;
       const text = currentPresetName;
@@ -512,13 +544,13 @@ const VolumeCalc = (() => {
       const boxH = fontSize + paddingY * 2;
       // background
       if (themeIsDark) {
-        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
         ctx.fillRect(boxX, boxY, boxW, boxH);
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = "#fff";
       } else {
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
         ctx.fillRect(boxX, boxY, boxW, boxH);
-        ctx.fillStyle = '#111';
+        ctx.fillStyle = "#111";
       }
       // text
       ctx.fillText(text, 12, 8);
@@ -638,6 +670,12 @@ const VolumeCalc = (() => {
       clampNumber(Number(el("tieback_size")?.value))
     );
     const tiebackOD = OD.tieback[tiebackID] || productionOD;
+
+    // Plug input: depth where a plug is placed. If provided, compute volumes above and below.
+    const plugDepthVal = clampNumber(Number(el("plug_depth")?.value));
+    const plugEnabled = !!el("use_plug")?.checked;
+    let plugAboveVolume = 0;
+    let plugBelowVolume = 0;
 
     // compute auto tops
     let surfaceTopFinal;
@@ -819,9 +857,34 @@ const VolumeCalc = (() => {
       const winner = covering[0];
       const area = perCasingMap[winner.role].perMeter_m3; // m^3 per meter
       const segVol = area * segLength;
+
+      // accumulate totals
       totalVolume += segVol;
       perCasingMap[winner.role].volume += segVol;
       perCasingMap[winner.role].includedLength += segLength;
+
+      // If a plug is enabled and defined, split the segment's volume into above/below portions
+      if (
+        plugEnabled &&
+        !isNaN(plugDepthVal) &&
+        typeof plugDepthVal !== "undefined"
+      ) {
+        if (segEnd <= plugDepthVal) {
+          // entire segment is above the plug
+          plugAboveVolume += segVol;
+        } else if (segStart >= plugDepthVal) {
+          // entire segment is below the plug
+          plugBelowVolume += segVol;
+        } else {
+          // plug is inside the segment: split into two
+          const aboveLen = Math.max(0, plugDepthVal - segStart);
+          const belowLen = Math.max(0, segEnd - plugDepthVal);
+          const volAbove = area * aboveLen;
+          const volBelow = area * belowLen;
+          plugAboveVolume += volAbove;
+          plugBelowVolume += volBelow;
+        }
+      }
     }
 
     // Convert perCasingMap to array in stable order and preserve use flag
@@ -839,6 +902,24 @@ const VolumeCalc = (() => {
 
     if (totalVolumeEl)
       totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + " m³";
+
+    // Update plug split results (if plug depth provided)
+    const plugAboveEl = el("plugAboveVolume");
+    const plugBelowEl = el("plugBelowVolume");
+    if (plugAboveEl)
+      plugAboveEl.textContent =
+        !plugEnabled ||
+        typeof plugDepthVal === "undefined" ||
+        isNaN(plugDepthVal)
+          ? "— m³"
+          : (plugAboveVolume || 0).toFixed(2) + " m³";
+    if (plugBelowEl)
+      plugBelowEl.textContent =
+        !plugEnabled ||
+        typeof plugDepthVal === "undefined" ||
+        isNaN(plugDepthVal)
+          ? "— m³"
+          : (plugBelowVolume || 0).toFixed(2) + " m³";
 
     // Render per-casing volume table
     const casingVolumesTable = el("casingVolumes");
@@ -945,7 +1026,16 @@ const VolumeCalc = (() => {
       waterDepth = riserDepthVal;
     }
 
-    scheduleDraw(casingsToDraw, { showWater, waterDepth });
+    scheduleDraw(casingsToDraw, {
+      showWater,
+      waterDepth,
+      plugDepth:
+        plugEnabled &&
+        typeof plugDepthVal !== "undefined" &&
+        !isNaN(plugDepthVal)
+          ? plugDepthVal
+          : undefined,
+    });
   }
 
   // UI helpers
@@ -1672,6 +1762,25 @@ const VolumeCalc = (() => {
     update();
   }
 
+  function setupPlugToggle() {
+    const toggle = el("use_plug");
+    const panel = el("plug-panel");
+    if (!toggle || !panel) return;
+    const update = () => {
+      if (toggle.checked) {
+        panel.classList.remove("hidden");
+        panel.setAttribute("aria-hidden", "false");
+      } else {
+        panel.classList.add("hidden");
+        panel.setAttribute("aria-hidden", "true");
+      }
+      scheduleSave();
+      calculateVolume();
+    };
+    toggle.addEventListener("change", update);
+    update();
+  }
+
   function init() {
     // load state before initial calc
     loadState();
@@ -1690,6 +1799,7 @@ const VolumeCalc = (() => {
     setupProductionToggleButtons();
     setupRiserTypeHandler();
     setupRiserPositionToggle();
+    setupPlugToggle();
     setupNavActive();
     setupThemeToggle();
     // compute initial

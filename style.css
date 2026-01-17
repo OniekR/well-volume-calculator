@@ -308,6 +308,9 @@ h1 {
   margin: 0;
   font-size: 0.95rem; /* slightly smaller heading for active state */
   transition: font-size 0.12s ease, opacity 0.12s ease;
+  /* nudge down slightly so text bottom aligns with checkbox */
+  position: relative;
+  top: 6px;
 }
 .casing-header input[type="checkbox"] {
   width: 18px;
@@ -331,10 +334,16 @@ h1 {
   background: rgba(0, 0, 0, 0.01);
   border-radius: 6px;
 }
+/* hide inline header controls (e.g., Tie-back, Dummy hanger) when the casing section is collapsed */
+.casing-input.collapsed .header-inline {
+  display: none;
+}
 .casing-input.collapsed .casing-header h3 {
   font-size: 0.95rem;
   font-weight: 600;
   opacity: 0.9;
+  position: relative;
+  top: 2px;
 }
 .casing-input h3 {
   margin-bottom: 10px;
@@ -364,6 +373,8 @@ h1 {
   font-weight: 700;
   opacity: 0.85;
   margin: 0;
+  position: relative;
+  top: 2px;
 }
 
 /* Ensure a responsive fallback on smaller screens */
@@ -773,6 +784,7 @@ select:focus {
   background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
   color: #fff;
   text-align: center;
+  position: relative;
 }
 .result h2,
 .result p {
@@ -781,6 +793,59 @@ select:focus {
 .result p {
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+/* Plug panel (moved below Total Volume) */
+.plug-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-bg);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+.plug-toggle {
+  /* moved down to sit visually below the Total Volume card */
+  margin-top: 3rem;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 600;
+}
+/* responsive fallback: smaller spacing on narrow viewports */
+@media (max-width: 600px) {
+  .plug-toggle {
+    margin-top: 1rem;
+  }
+}
+.plug-panel .plug-control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plug-panel input {
+  width: 140px;
+  max-width: 40%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+.plug-volumes {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  display: flex;
+  gap: 12px;
+  justify-content: center;
 }
 
 /* small utilities */

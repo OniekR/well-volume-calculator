@@ -632,6 +632,45 @@
             <h2>Total Volume</h2>
             <p id="totalVolume">0.00 m³</p>
           </div>
+
+          <div class="plug-toggle" aria-hidden="false">
+            <label class="inline-checkbox">
+              <input
+                type="checkbox"
+                id="use_plug"
+                checked
+                aria-controls="plug-panel"
+              />
+              Plug
+            </label>
+          </div>
+
+          <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
+            <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
+              Plug
+            </h3>
+
+            <div class="plug-control">
+              <label for="plug_depth">depth (m):</label>
+              <input
+                type="number"
+                id="plug_depth"
+                name="plug_depth"
+                step="1"
+                placeholder="Optional"
+                min="0"
+              />
+            </div>
+
+            <div class="plug-volumes">
+              <div>
+                Volume above plug: <span id="plugAboveVolume">— m³</span>
+              </div>
+              <div>
+                Volume below plug: <span id="plugBelowVolume">— m³</span>
+              </div>
+            </div>
+          </div>
         </form>
       </main>
 
