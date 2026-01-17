@@ -34,7 +34,7 @@
         },
         "use_18": {
           "type": "checkbox",
-          "value": true
+          "value": false
         },
         "conductor_size": {
           "type": "select",
@@ -54,7 +54,7 @@
         },
         "use_13": {
           "type": "checkbox",
-          "value": true
+          "value": false
         },
         "surface_size": {
           "type": "select",
@@ -74,7 +74,7 @@
         },
         "use_9": {
           "type": "checkbox",
-          "value": true
+          "value": false
         },
         "intermediate_size": {
           "type": "select",
@@ -168,6 +168,10 @@
           "type": "input",
           "value": ""
         },
+        "use_small_liner": {
+          "type": "checkbox",
+          "value": true
+        },
         "small_liner_size": {
           "type": "select",
           "value": "4.276"
@@ -183,6 +187,26 @@
         "depth_small": {
           "type": "input",
           "value": "4992"
+        },
+        "use_open_hole": {
+          "type": "checkbox",
+          "value": false
+        },
+        "open_hole_size": {
+          "type": "select",
+          "value": ""
+        },
+        "open_hole_size_id": {
+          "type": "input",
+          "value": ""
+        },
+        "depth_open_top": {
+          "type": "input",
+          "value": ""
+        },
+        "depth_open": {
+          "type": "input",
+          "value": ""
         }
       }
     }

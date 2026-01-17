@@ -18,7 +18,7 @@ const VolumeCalc = (() => {
     intermediate: { 12.347: 13.375, 12.375: 13.625 },
     production: { 6.276: 7, 8.921: 9.625 },
     tieback: { 8.535: 9.625, 8.921: 9.625, 9.66: 11.5 },
-    reservoir: { 6.276: 7, 4.778: 5.5 },
+    reservoir: { 6.184: 7, 6.276: 7, 4.778: 5.5 },
     small_liner: { 4.276: 5, 3.958: 4.5 },
   };
 
@@ -198,6 +198,82 @@ const VolumeCalc = (() => {
     const presetNameEl = el("preset_name");
     if (presetNameEl) presetNameEl.value = "";
 
+    // If preset omitted a casing 'use' checkbox but provided inputs for it,
+    // treat that as intent to enable the casing. This helps older built-in
+    // presets that didn't include explicit `use_*` flags.
+    const casingGroups = [
+      {
+        useId: "use_small_liner",
+        keys: [
+          "small_liner_size",
+          "small_liner_size_id",
+          "depth_small_top",
+          "depth_small",
+        ],
+      },
+      {
+        useId: "use_open_hole",
+        keys: [
+          "open_hole_size",
+          "open_hole_size_id",
+          "depth_open_top",
+          "depth_open",
+        ],
+      },
+      {
+        useId: "use_tieback",
+        keys: ["tieback_size", "tieback_size_id", "depth_tb_top", "depth_tb"],
+      },
+      {
+        useId: "use_5",
+        keys: ["reservoir_size", "reservoir_size_id", "depth_5_top", "depth_5"],
+      },
+      {
+        useId: "use_7",
+        keys: [
+          "production_size",
+          "production_size_id",
+          "depth_7_top",
+          "depth_7",
+        ],
+      },
+      {
+        useId: "use_9",
+        keys: [
+          "intermediate_size",
+          "intermediate_size_id",
+          "depth_9_top",
+          "depth_9",
+        ],
+      },
+      {
+        useId: "use_13",
+        keys: ["surface_size", "surface_size_id", "depth_13_top", "depth_13"],
+      },
+      {
+        useId: "use_18",
+        keys: [
+          "conductor_size",
+          "conductor_size_id",
+          "depth_18_top",
+          "depth_18_bottom",
+        ],
+      },
+    ];
+
+    casingGroups.forEach((group) => {
+      if (typeof state[group.useId] === "undefined") {
+        const shouldEnable = group.keys.some((k) => {
+          const v = state[k] && state[k].value;
+          return v !== undefined && v !== null && String(v).trim() !== "";
+        });
+        if (shouldEnable) {
+          const checkboxEl = el(group.useId);
+          if (checkboxEl) checkboxEl.checked = true;
+        }
+      }
+    });
+
     // Ensure casing sections reflect the newly loaded checkbox states.
     // Some UI behaviour (collapsed state) is driven by change listeners attached
     // in `setupCasingToggles()` which expect change events to run their update
@@ -206,6 +282,24 @@ const VolumeCalc = (() => {
     qs(".use-checkbox").forEach((cb) =>
       cb.dispatchEvent(new Event("change", { bubbles: true }))
     );
+
+    // Ensure each casing section collapsed/expanded state matches its checkbox
+    // (some environments may not run checkbox change handlers reliably, so
+    // force the visible state here).
+    qs(".casing-input").forEach((section) => {
+      const checkbox =
+        section.querySelector(".use-checkbox") ||
+        section.querySelector("input[type=checkbox]");
+      const header = section.querySelector(".casing-header");
+      if (!checkbox || !header) return;
+      if (checkbox.checked) {
+        section.classList.remove("collapsed");
+        header.setAttribute("aria-expanded", "true");
+      } else {
+        section.classList.add("collapsed");
+        header.setAttribute("aria-expanded", "false");
+      }
+    });
 
     // update UI and persist (change events already trigger calculate/save but
     // we call once to ensure state is consistent)
@@ -412,7 +506,15 @@ const VolumeCalc = (() => {
     loadBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to load.");
-      const state = getPresetState(name);
+      // If the selected option is a built-in preset, prefer the built-in
+      // payload even if a same-named preset exists in localStorage.
+      const opt = sel.options[sel.selectedIndex];
+      let state = null;
+      if (opt && opt.dataset && opt.dataset.builtin === "1") {
+        state = BUILTIN_PRESETS[name] ? BUILTIN_PRESETS[name].state : null;
+      } else {
+        state = getPresetState(name);
+      }
       if (!state) return alert("Preset not found.");
       // set the current preset name (shows on canvas)
       currentPresetName = name;
@@ -587,6 +689,54 @@ const VolumeCalc = (() => {
         const idx = casing.index % colors.length;
         const startDepth = casing.prevDepth * scale + startY;
         const endDepth = casing.depth * scale + startY;
+
+        // Special rendering for Open Hole: darker brown and jagged sides
+        if (casing.role === "open_hole") {
+          const width = (casing.od / maxOD) * 80;
+          const topY = startDepth;
+          const bottomY = endDepth;
+
+          // Darker brown fill to represent open hole void/mud
+          ctx.fillStyle = "#4E342E";
+          ctx.strokeStyle = "#3E2723";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+
+          const jaggedAmp = 2; // horizontal jitter
+          const jaggedStep = 5; // vertical step
+
+          // Left side zigzag (down)
+          const leftBase = centerX - width / 2;
+          ctx.moveTo(leftBase, topY);
+          const steps = Math.ceil((bottomY - topY) / jaggedStep);
+          for (let i = 0; i <= steps; i++) {
+            const currY = Math.min(topY + i * jaggedStep, bottomY);
+            // zigzag offset
+            const offset = i % 2 ? -jaggedAmp : jaggedAmp;
+            ctx.lineTo(leftBase + offset, currY);
+          }
+
+          // Bottom edge
+          const rightBase = centerX + width / 2;
+          ctx.lineTo(rightBase, bottomY);
+
+          // Right side zigzag (up)
+          for (let i = steps; i >= 0; i--) {
+            const currY = Math.min(topY + i * jaggedStep, bottomY);
+            const offset = i % 2 ? jaggedAmp : -jaggedAmp; // mirror effect
+            ctx.lineTo(rightBase + offset, currY);
+          }
+
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "#fff";
+          ctx.font = "12px Arial";
+          ctx.fillText("Open hole", centerX - 28, (topY + bottomY) / 2);
+          return;
+        }
+
         const width = (casing.od / maxOD) * 80;
 
         ctx.fillStyle = colors[idx];
@@ -683,6 +833,15 @@ const VolumeCalc = (() => {
     );
     const smallLinerOD = OD.small_liner[smallLinerID] || 5;
 
+    // Open Hole: treat select value as the nominal drilled diameter (in inches)
+    const openHoleID = sizeIdValue(
+      "open_hole_size",
+      clampNumber(Number(el("open_hole_size")?.value))
+    );
+    // Use the same numeric value (inches) as the OD for drawing and calculations
+    const openHoleOD =
+      typeof openHoleID !== "undefined" && !isNaN(openHoleID) ? openHoleID : 0;
+
     const tiebackID = sizeIdValue(
       "tieback_size",
       clampNumber(Number(el("tieback_size")?.value))
@@ -726,6 +885,58 @@ const VolumeCalc = (() => {
     ) {
       intermediateTopFinal = riserDepthVal;
       intermediateTopAuto = true;
+    }
+
+    // Open Hole Top: always connect to the deepest casing shoe (across existing casings)
+    let openTopFinal;
+    let openTopAuto = false;
+    // collect candidate shoe depths
+    const conductorBottomVal = clampNumber(
+      Number(el("depth_18_bottom")?.value)
+    );
+    const productionBottomVal = clampNumber(Number(el("depth_7")?.value));
+    const reservoirBottomVal = clampNumber(Number(el("depth_5")?.value));
+    const smallLinerBottomVal = clampNumber(Number(el("depth_small")?.value));
+    const tiebackBottomVal = clampNumber(Number(el("depth_tb")?.value));
+
+    // Only consider shoes from casings that are enabled
+    const useConductorFlag = !!el("use_18")?.checked;
+    const useSurfaceFlag = !!el("use_13")?.checked;
+    const useIntermediateFlag = !!el("use_9")?.checked;
+    const useProductionFlag = !!el("use_7")?.checked;
+    const useReservoirFlag = !!el("use_5")?.checked;
+    const useSmallLinerFlag = !!el("use_small_liner")?.checked;
+    const useTiebackFlag = !!el("use_tieback")?.checked;
+
+    const shoeCandidates = [];
+    if (useConductorFlag && !isNaN(conductorBottomVal))
+      shoeCandidates.push(conductorBottomVal);
+    if (useSurfaceFlag && !isNaN(surfaceBottomVal))
+      shoeCandidates.push(surfaceBottomVal);
+    if (useIntermediateFlag && !isNaN(intermediateBottomVal))
+      shoeCandidates.push(intermediateBottomVal);
+    if (useProductionFlag && !isNaN(productionBottomVal))
+      shoeCandidates.push(productionBottomVal);
+    if (useReservoirFlag && !isNaN(reservoirBottomVal))
+      shoeCandidates.push(reservoirBottomVal);
+    if (useSmallLinerFlag && !isNaN(smallLinerBottomVal))
+      shoeCandidates.push(smallLinerBottomVal);
+    if (useTiebackFlag && !isNaN(tiebackBottomVal))
+      shoeCandidates.push(tiebackBottomVal);
+
+    if (shoeCandidates.length) {
+      const deepest = Math.max(...shoeCandidates);
+      openTopFinal = deepest;
+      openTopAuto = true;
+      const openTopEl = el("depth_open_top");
+      if (openTopEl) openTopEl.value = String(openTopFinal);
+      const openNoteEl = el("open_hole_length_note");
+      if (openNoteEl)
+        openNoteEl.textContent = `Top linked to deepest casing shoe: ${openTopFinal} m`;
+    } else {
+      openTopFinal = undefined;
+      const openNoteEl = el("open_hole_length_note");
+      if (openNoteEl) openNoteEl.textContent = "";
     }
 
     // connect notes removed (UI simplified)
@@ -802,6 +1013,17 @@ const VolumeCalc = (() => {
         use: !!el("use_small_liner")?.checked,
         od: smallLinerOD,
       },
+      {
+        role: "open_hole",
+        id: openHoleID,
+        top: !isNaN(clampNumber(Number(el("depth_open_top")?.value)))
+          ? clampNumber(Number(el("depth_open_top")?.value))
+          : undefined,
+        depth: clampNumber(Number(el("depth_open")?.value)),
+        use: !!el("use_open_hole")?.checked,
+        od: openHoleOD,
+        z: -1,
+      },
     ];
 
     // Recompute volumes using depth-segments so the *smallest ID* casing wins overlapping segments
@@ -826,6 +1048,7 @@ const VolumeCalc = (() => {
       const drawStart = typeof c.top !== "undefined" ? c.top : 0;
       if (c.use && c.depth > drawStart) {
         casingsToDraw.push({
+          role: c.role,
           id: c.id,
           od: c.od,
           depth: c.depth,
@@ -1306,6 +1529,7 @@ const VolumeCalc = (() => {
       ["tieback_size", "tieback_size_id"],
       ["reservoir_size", "reservoir_size_id"],
       ["small_liner_size", "small_liner_size_id"],
+      ["open_hole_size", "open_hole_size_id"],
       ["riser_type", "riser_type_id"],
     ];
 

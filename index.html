@@ -704,6 +704,79 @@
             </div>
           </div>
 
+          <!-- Open Hole -->
+          <div class="casing-input">
+            <div class="casing-header">
+              <input
+                type="checkbox"
+                class="use-checkbox"
+                id="use_open_hole"
+                checked
+              />
+              <h3>Open Hole</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="open_hole_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="open_hole_size" name="open_hole_size">
+                      <option value="17.5">17 1/2"</option>
+                      <option value="16">16"</option>
+                      <option value="12.25">12 1/4"</option>
+                      <option value="8.5">8 1/2"</option>
+                      <option value="6">6"</option>
+                    </select>
+                    <input
+                      id="open_hole_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.01"
+                      aria-label="Open hole size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_open_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_open_top"
+                    name="depth_open_top"
+                    step="0.1"
+                    placeholder="Optional"
+                    min="0"
+                  />
+                  <div
+                    style="
+                      margin-top: 8px;
+                      display: flex;
+                      gap: 8px;
+                      align-items: center;
+                    "
+                  >
+                    <!-- placeholder for potential defaults -->
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_open">TD (m):</label>
+                  <input
+                    type="number"
+                    id="depth_open"
+                    name="depth_open"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="open_hole_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="result">
             <h2>Total Volume</h2>
             <p id="totalVolume">0.00 m³</p>

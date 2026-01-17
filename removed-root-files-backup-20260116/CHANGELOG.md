@@ -17,6 +17,11 @@
 - Added smoke tests (tools/qa/smoke_test.js) using jsdom; tests pass locally.
 - UI: add "Dummy hanger" checkbox to Tie-back Casing header (placeholder, functionality to be implemented).
 
+- Feature: Add "Open Hole" casing input with selectable diameter and TD; the Open Hole top auto-links to the deepest enabled casing shoe and is rendered with a darker brown, jagged fill on the schematic to indicate excavated/drilled formation.
+- Fix: Ensure the renderer recognizes casings with `role: "open_hole"` so Open Hole draws correctly (jagged edges and color).
+- Fix: Presets — `P-9` updated to explicitly enable/disable Small Liner and Open Hole where appropriate. Loading built-in presets now prefers the built-in payload for built-in entries and UI sections are now synchronized (collapsed/expanded) to reflect loaded checkbox states.
+- Test: Added smoke tests to assert Open Hole auto-linking and preset/panel behavior to prevent regressions.
+
 ## Chores & improvements
 
 - Refactored JavaScript into an encapsulated module (`script.js`) with:
