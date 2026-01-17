@@ -17,4 +17,3 @@ All notable changes to this project are documented in this file.
 
 - Recommended: review `keino_presets_2026-01-16_20_54_15.json` for other presets that may benefit from including `small_liner` defaults.
 - Recommended: run a quick smoke test for all preset load/save flows to ensure the new controls persist and render as expected.
-
