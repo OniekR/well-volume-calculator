@@ -197,7 +197,18 @@ const VolumeCalc = (() => {
     // ensure the visible Preset name field isn't auto-filled when loading
     const presetNameEl = el("preset_name");
     if (presetNameEl) presetNameEl.value = "";
-    // update UI and persist
+
+    // Ensure casing sections reflect the newly loaded checkbox states.
+    // Some UI behaviour (collapsed state) is driven by change listeners attached
+    // in `setupCasingToggles()` which expect change events to run their update
+    // logic. Dispatch a 'change' event on each `.use-checkbox` so the UI and
+    // calculated volumes stay in sync with the loaded preset.
+    qs(".use-checkbox").forEach((cb) =>
+      cb.dispatchEvent(new Event("change", { bubbles: true }))
+    );
+
+    // update UI and persist (change events already trigger calculate/save but
+    // we call once to ensure state is consistent)
     calculateVolume();
     scheduleSave();
   }
