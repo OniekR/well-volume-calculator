@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, chore/cleanup ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install
+        run: npm ci
+      - name: Format check
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests + smoke
+        run: npm test
