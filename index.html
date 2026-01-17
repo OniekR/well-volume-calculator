@@ -628,6 +628,82 @@
             </div>
           </div>
 
+          <div class="casing-input">
+            <div class="casing-header">
+              <input
+                type="checkbox"
+                class="use-checkbox"
+                id="use_small_liner"
+                checked
+              />
+              <h3>Small liner</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="small_liner_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="small_liner_size" name="small_liner_size">
+                      <option value="4.276">5" 18#</option>
+                      <option value="3.958">4 1/2" 12.6#</option>
+                    </select>
+                    <input
+                      id="small_liner_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Small liner size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_small_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_small_top"
+                    name="depth_small_top"
+                    step="0.1"
+                    placeholder="Optional"
+                    min="0"
+                  />
+                  <div
+                    style="
+                      margin-top: 8px;
+                      display: flex;
+                      gap: 8px;
+                      align-items: center;
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="default-top-btn small-liner-default-btn"
+                      aria-label="Liner: set Small Liner Top to Reservoir shoe - 50"
+                      title="Liner: set Small Liner Top to Reservoir shoe - 50"
+                    >
+                      Liner
+                    </button>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_small">Shoe (m):</label>
+                  <input
+                    type="number"
+                    id="depth_small"
+                    name="depth_small"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="small_liner_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="result">
             <h2>Total Volume</h2>
             <p id="totalVolume">0.00 m³</p>

@@ -19,6 +19,7 @@ const VolumeCalc = (() => {
     production: { 6.276: 7, 8.921: 9.625 },
     tieback: { 8.535: 9.625, 8.921: 9.625, 9.66: 11.5 },
     reservoir: { 6.276: 7, 4.778: 5.5 },
+    small_liner: { 4.276: 5, 3.958: 4.5 },
   };
 
   const el = (id) => document.getElementById(id);
@@ -665,6 +666,12 @@ const VolumeCalc = (() => {
     );
     const reservoirOD = OD.reservoir[reservoirID] || 5.5;
 
+    const smallLinerID = sizeIdValue(
+      "small_liner_size",
+      clampNumber(Number(el("small_liner_size")?.value))
+    );
+    const smallLinerOD = OD.small_liner[smallLinerID] || 5;
+
     const tiebackID = sizeIdValue(
       "tieback_size",
       clampNumber(Number(el("tieback_size")?.value))
@@ -774,6 +781,16 @@ const VolumeCalc = (() => {
         use: !!el("use_5")?.checked,
         od: reservoirOD,
       },
+      {
+        role: "small_liner",
+        id: smallLinerID,
+        top: !isNaN(clampNumber(Number(el("depth_small_top")?.value)))
+          ? clampNumber(Number(el("depth_small_top")?.value))
+          : undefined,
+        depth: clampNumber(Number(el("depth_small")?.value)),
+        use: !!el("use_small_liner")?.checked,
+        od: smallLinerOD,
+      },
     ];
 
     // Recompute volumes using depth-segments so the *smallest ID* casing wins overlapping segments
@@ -806,6 +823,8 @@ const VolumeCalc = (() => {
           z:
             c.role === "conductor"
               ? -1
+              : c.role === "small_liner"
+              ? 5
               : c.role === "reservoir"
               ? 4
               : c.role === "production" || c.role === "tieback"
@@ -936,6 +955,7 @@ const VolumeCalc = (() => {
           production: "Production",
           tieback: "Tie-back",
           reservoir: "Reservoir",
+          small_liner: "Small liner",
         };
         let totals = { volume: 0, includedLength: 0 };
 
@@ -972,6 +992,7 @@ const VolumeCalc = (() => {
           production: "production_length_note",
           tieback: "tieback_length_note",
           reservoir: "reservoir_length_note",
+          small_liner: "small_liner_length_note",
         };
         perCasingVolumes.forEach((c) => {
           const noteEl = el(noteIdMap[c.role]);
@@ -1202,6 +1223,23 @@ const VolumeCalc = (() => {
         calculateVolume();
       })
     );
+
+    // Small liner default button: use Reservoir Shoe - 50
+    qs(".small-liner-default-btn").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const target = el("depth_small_top");
+        if (!target) return;
+        const reservoirShoe = el("depth_5")?.value;
+        if (reservoirShoe !== undefined && reservoirShoe !== "") {
+          const val = Number(reservoirShoe);
+          if (!isNaN(val)) target.value = String(val - 50);
+        } else {
+          target.value = "";
+        }
+        scheduleSave();
+        calculateVolume();
+      })
+    );
   }
 
   function setupTooltips() {
@@ -1256,6 +1294,7 @@ const VolumeCalc = (() => {
       ["production_size", "production_size_id"],
       ["tieback_size", "tieback_size_id"],
       ["reservoir_size", "reservoir_size_id"],
+      ["small_liner_size", "small_liner_size_id"],
       ["riser_type", "riser_type_id"],
     ];
 
