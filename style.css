@@ -489,6 +489,25 @@ select:focus {
   transform: translateY(1px);
 }
 
+/* Small Liner default button: ensure appearance is consistent and add dark-theme overrides */
+.small-liner-default-btn {
+  /* base appearance inherits from .default-top-btn; no extra rules needed for light theme */
+}
+
+/* Dark theme overrides for Small Liner Liner button */
+[data-theme="dark"] .small-liner-default-btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
+}
+[data-theme="dark"] .small-liner-default-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+[data-theme="dark"] .small-liner-default-btn:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
+
 /* Filled active state for Production buttons */
 .casing-btn.active,
 .liner-default-btn.active {
