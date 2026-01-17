@@ -159,6 +159,30 @@
         "depth_5": {
           "type": "input",
           "value": "3798"
+        },
+        "use_plug": {
+          "type": "checkbox",
+          "value": false
+        },
+        "plug_depth": {
+          "type": "input",
+          "value": ""
+        },
+        "small_liner_size": {
+          "type": "select",
+          "value": "4.276"
+        },
+        "small_liner_size_id": {
+          "type": "input",
+          "value": "4.276"
+        },
+        "depth_small_top": {
+          "type": "input",
+          "value": "3691"
+        },
+        "depth_small": {
+          "type": "input",
+          "value": "4992"
         }
       }
     }
