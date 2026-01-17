@@ -8,7 +8,6 @@ const files = fs
 
 if (!files.length) {
   console.log("No unit tests found.");
-  process.exit(0);
 }
 
 let failures = 0;
@@ -25,8 +24,9 @@ files.forEach((f) => {
 });
 
 if (failures > 0) {
-  console.error(`${failures} test(s) failed.`);
-  process.exit(1);
+  const msg = `${failures} test(s) failed.`;
+  console.error(msg);
+  throw new Error(msg);
 }
 
 console.log("All unit tests passed.");

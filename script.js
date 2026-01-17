@@ -335,7 +335,7 @@ const VolumeCalc = (() => {
   function populatePresetsUI() {
     const sel = el("preset_list");
     if (!sel) return;
-    sel.innerHTML = '<option value="">— Select a preset —</option>';
+    sel.innerHTML = "<option value=\"\">— Select a preset —</option>";
     const names = getPresetNames();
     names.forEach((n) => {
       const opt = document.createElement("option");
@@ -515,7 +515,6 @@ const VolumeCalc = (() => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const rect = canvas.getBoundingClientRect();
-    const pixelHeight = canvas.height; // already scaled
 
     // background
     const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);
@@ -605,6 +604,73 @@ const VolumeCalc = (() => {
 
     const colors = ["#8B4513", "#A0522D", "#CD853F", "#DEB887", "#F4A460"];
 
+    // Local renderer helpers for better separation of concerns
+    function renderOpenHole(casing, startDepth, endDepth) {
+      const width = (casing.od / maxOD) * 80;
+      const topY = startDepth;
+      const bottomY = endDepth;
+
+      ctx.fillStyle = "#4E342E";
+      ctx.strokeStyle = "#3E2723";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+
+      const jaggedAmp = 2; // horizontal jitter
+      const jaggedStep = 5; // vertical step
+
+      const leftBase = centerX - width / 2;
+      ctx.moveTo(leftBase, topY);
+      const steps = Math.ceil((bottomY - topY) / jaggedStep);
+      for (let i = 0; i <= steps; i++) {
+        const currY = Math.min(topY + i * jaggedStep, bottomY);
+        const offset = i % 2 ? -jaggedAmp : jaggedAmp;
+        ctx.lineTo(leftBase + offset, currY);
+      }
+
+      const rightBase = centerX + width / 2;
+      ctx.lineTo(rightBase, bottomY);
+
+      for (let i = steps; i >= 0; i--) {
+        const currY = Math.min(topY + i * jaggedStep, bottomY);
+        const offset = i % 2 ? jaggedAmp : -jaggedAmp;
+        ctx.lineTo(rightBase + offset, currY);
+      }
+
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = "#fff";
+      ctx.font = "12px Arial";
+      ctx.fillText("Open hole", centerX - 28, (topY + bottomY) / 2);
+      if (!isNaN(casing.depth)) {
+        ctx.fillText(casing.depth.toFixed(0) + "m", centerX + width / 2 + 10, bottomY);
+      }
+    }
+
+    function renderCasing(casing, startDepth, endDepth, idx) {
+      const width = (casing.od / maxOD) * 80;
+      ctx.fillStyle = colors[idx];
+      ctx.fillRect(centerX - width / 2, startDepth, width, endDepth - startDepth);
+
+      const innerWidth = (casing.id / maxOD) * 80;
+      ctx.fillStyle = "#e6e6e6";
+      ctx.fillRect(centerX - innerWidth / 2, startDepth, innerWidth, endDepth - startDepth);
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX - width / 2, startDepth);
+      ctx.lineTo(centerX - width / 2, endDepth);
+      ctx.moveTo(centerX + width / 2, startDepth);
+      ctx.lineTo(centerX + width / 2, endDepth);
+      ctx.stroke();
+
+      ctx.fillStyle = "#fff";
+      ctx.font = "12px Arial";
+      ctx.fillText(casing.depth.toFixed(0) + "m", centerX + width / 2 + 10, endDepth);
+    }
+
     casings
       .slice()
       .sort((a, b) => (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od)
@@ -613,79 +679,12 @@ const VolumeCalc = (() => {
         const startDepth = casing.prevDepth * scale + startY;
         const endDepth = casing.depth * scale + startY;
 
-        // Special rendering for Open Hole: darker brown and jagged sides
         if (casing.role === "open_hole") {
-          const width = (casing.od / maxOD) * 80;
-          const topY = startDepth;
-          const bottomY = endDepth;
-
-          // Darker brown fill to represent open hole void/mud
-          ctx.fillStyle = "#4E342E";
-          ctx.strokeStyle = "#3E2723";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-
-          const jaggedAmp = 2; // horizontal jitter
-          const jaggedStep = 5; // vertical step
-
-          // Left side zigzag (down)
-          const leftBase = centerX - width / 2;
-          ctx.moveTo(leftBase, topY);
-          const steps = Math.ceil((bottomY - topY) / jaggedStep);
-          for (let i = 0; i <= steps; i++) {
-            const currY = Math.min(topY + i * jaggedStep, bottomY);
-            // zigzag offset
-            const offset = i % 2 ? -jaggedAmp : jaggedAmp;
-            ctx.lineTo(leftBase + offset, currY);
-          }
-
-          // Bottom edge
-          const rightBase = centerX + width / 2;
-          ctx.lineTo(rightBase, bottomY);
-
-          // Right side zigzag (up)
-          for (let i = steps; i >= 0; i--) {
-            const currY = Math.min(topY + i * jaggedStep, bottomY);
-            const offset = i % 2 ? jaggedAmp : -jaggedAmp; // mirror effect
-            ctx.lineTo(rightBase + offset, currY);
-          }
-
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = "#fff";
-          ctx.font = "12px Arial";
-          ctx.fillText("Open hole", centerX - 28, (topY + bottomY) / 2);
-
-          // TD label (bottom-right of the open hole section)
-          if (!isNaN(casing.depth)) {
-            ctx.fillText(casing.depth.toFixed(0) + "m", centerX + width / 2 + 10, bottomY);
-          }
+          renderOpenHole(casing, startDepth, endDepth);
           return;
         }
 
-        const width = (casing.od / maxOD) * 80;
-
-        ctx.fillStyle = colors[idx];
-        ctx.fillRect(centerX - width / 2, startDepth, width, endDepth - startDepth);
-
-        const innerWidth = (casing.id / maxOD) * 80;
-        ctx.fillStyle = "#e6e6e6";
-        ctx.fillRect(centerX - innerWidth / 2, startDepth, innerWidth, endDepth - startDepth);
-
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(centerX - width / 2, startDepth);
-        ctx.lineTo(centerX - width / 2, endDepth);
-        ctx.moveTo(centerX + width / 2, startDepth);
-        ctx.lineTo(centerX + width / 2, endDepth);
-        ctx.stroke();
-
-        ctx.fillStyle = "#fff";
-        ctx.font = "12px Arial";
-        ctx.fillText(casing.depth.toFixed(0) + "m", centerX + width / 2 + 10, endDepth);
+        renderCasing(casing, startDepth, endDepth, idx);
       });
   }
 
@@ -760,7 +759,6 @@ const VolumeCalc = (() => {
 
     // compute auto tops
     let surfaceTopFinal;
-    let surfaceTopAuto = false;
     const surfaceTopInputVal = clampNumber(Number(el("depth_13_top")?.value));
     if (!isNaN(surfaceTopInputVal)) surfaceTopFinal = surfaceTopInputVal;
     else if (
@@ -770,11 +768,9 @@ const VolumeCalc = (() => {
       surfaceBottomVal > riserDepthVal
     ) {
       surfaceTopFinal = riserDepthVal;
-      surfaceTopAuto = true;
     }
 
     let intermediateTopFinal;
-    let intermediateTopAuto = false;
     const intermediateTopInputVal = clampNumber(Number(el("depth_9_top")?.value));
     if (!isNaN(intermediateTopInputVal)) intermediateTopFinal = intermediateTopInputVal;
     else if (
@@ -785,12 +781,29 @@ const VolumeCalc = (() => {
       intermediateBottomVal > riserDepthVal
     ) {
       intermediateTopFinal = riserDepthVal;
-      intermediateTopAuto = true;
     }
 
     // Open Hole Top: always connect to the deepest casing shoe (across existing casings)
+    /**
+     * Return the deepest (max) numeric value from an array of candidate depths.
+     * @param {Array<number>} candidates
+     * @returns {number|undefined}
+     */
+    function getDeepestShoe(candidates) {
+      if (!Array.isArray(candidates) || candidates.length === 0) return undefined;
+      const nums = candidates.filter((v) => typeof v === "number" && !isNaN(v));
+      if (nums.length === 0) return undefined;
+      return Math.max(...nums);
+    }
+
+    // expose for tests if environment allows
+    try {
+      if (typeof window !== "undefined") window.__TEST_getDeepestShoe = getDeepestShoe;
+    } catch (e) {
+      /* ignore */
+    }
+
     let openTopFinal;
-    let openTopAuto = false;
     // collect candidate shoe depths
     const conductorBottomVal = clampNumber(Number(el("depth_18_bottom")?.value));
     const productionBottomVal = clampNumber(Number(el("depth_7")?.value));
@@ -817,10 +830,9 @@ const VolumeCalc = (() => {
     if (useSmallLinerFlag && !isNaN(smallLinerBottomVal)) shoeCandidates.push(smallLinerBottomVal);
     if (useTiebackFlag && !isNaN(tiebackBottomVal)) shoeCandidates.push(tiebackBottomVal);
 
-    if (shoeCandidates.length) {
-      const deepest = Math.max(...shoeCandidates);
+    const deepest = getDeepestShoe(shoeCandidates);
+    if (typeof deepest !== "undefined") {
       openTopFinal = deepest;
-      openTopAuto = true;
       const openTopEl = el("depth_open_top");
       if (openTopEl) openTopEl.value = String(openTopFinal);
       const openNoteEl = el("open_hole_length_note");
@@ -1231,7 +1243,7 @@ const VolumeCalc = (() => {
 
   function setupButtons() {
     qs(".wellhead-btn").forEach((btn) =>
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-target");
         const input = el(targetId);
         const well = el("wellhead_depth");
@@ -1244,7 +1256,7 @@ const VolumeCalc = (() => {
     );
 
     qs(".default-top-btn").forEach((btn) =>
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-target");
         const input = el(targetId);
         if (!input) return;
