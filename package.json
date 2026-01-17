@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "jsdom": "^20.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-node": "^11.1.0",
+    "prettier": "^3.8.0"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js --ignore-pattern node_modules --color",
+    "lint:fix": "eslint . --ext .js --ignore-pattern node_modules --fix",
+    "format": "prettier --write \"**/*.{js,json,css,md,html}\"",
+    "test": "node _volume_sync_tmp/tools/qa/smoke_test.js"
+  }
+}

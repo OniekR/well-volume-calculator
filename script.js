@@ -29,14 +29,10 @@ const VolumeCalc = (() => {
   try {
     if (typeof window !== "undefined") {
       window.__TEST_applyTheme = (mode) => {
-        if (mode === "dark")
-          document.documentElement.setAttribute("data-theme", "dark");
+        if (mode === "dark") document.documentElement.setAttribute("data-theme", "dark");
         else document.documentElement.removeAttribute("data-theme");
         try {
-          localStorage.setItem(
-            "keino_theme",
-            mode === "dark" ? "dark" : "light"
-          );
+          localStorage.setItem("keino_theme", mode === "dark" ? "dark" : "light");
         } catch (e) {
           /* ignore */
         }
@@ -88,8 +84,7 @@ const VolumeCalc = (() => {
     const state = {};
     qs("input[id], select[id]").forEach((input) => {
       if (!input.id) return;
-      if (input.type === "checkbox")
-        state[input.id] = { type: "checkbox", value: !!input.checked };
+      if (input.type === "checkbox") state[input.id] = { type: "checkbox", value: !!input.checked };
       else
         state[input.id] = {
           type: input.tagName.toLowerCase(),
@@ -161,8 +156,7 @@ const VolumeCalc = (() => {
     const state = {};
     qs("input[id], select[id]").forEach((input) => {
       if (!input.id) return;
-      if (input.type === "checkbox")
-        state[input.id] = { type: "checkbox", value: !!input.checked };
+      if (input.type === "checkbox") state[input.id] = { type: "checkbox", value: !!input.checked };
       else
         state[input.id] = {
           type: input.tagName.toLowerCase(),
@@ -174,11 +168,7 @@ const VolumeCalc = (() => {
 
   // IDs we should not populate when loading a preset
   // IDs we should not populate when loading a preset (UI-only controls)
-  const _SKIP_POPULATE_ON_LOAD = new Set([
-    "preset_name",
-    "preset_list",
-    "import_presets_input",
-  ]);
+  const _SKIP_POPULATE_ON_LOAD = new Set(["preset_name", "preset_list", "import_presets_input"]);
 
   function applyStateObject(state) {
     if (!state) return;
@@ -204,21 +194,11 @@ const VolumeCalc = (() => {
     const casingGroups = [
       {
         useId: "use_small_liner",
-        keys: [
-          "small_liner_size",
-          "small_liner_size_id",
-          "depth_small_top",
-          "depth_small",
-        ],
+        keys: ["small_liner_size", "small_liner_size_id", "depth_small_top", "depth_small"],
       },
       {
         useId: "use_open_hole",
-        keys: [
-          "open_hole_size",
-          "open_hole_size_id",
-          "depth_open_top",
-          "depth_open",
-        ],
+        keys: ["open_hole_size", "open_hole_size_id", "depth_open_top", "depth_open"],
       },
       {
         useId: "use_tieback",
@@ -230,21 +210,11 @@ const VolumeCalc = (() => {
       },
       {
         useId: "use_7",
-        keys: [
-          "production_size",
-          "production_size_id",
-          "depth_7_top",
-          "depth_7",
-        ],
+        keys: ["production_size", "production_size_id", "depth_7_top", "depth_7"],
       },
       {
         useId: "use_9",
-        keys: [
-          "intermediate_size",
-          "intermediate_size_id",
-          "depth_9_top",
-          "depth_9",
-        ],
+        keys: ["intermediate_size", "intermediate_size_id", "depth_9_top", "depth_9"],
       },
       {
         useId: "use_13",
@@ -252,12 +222,7 @@ const VolumeCalc = (() => {
       },
       {
         useId: "use_18",
-        keys: [
-          "conductor_size",
-          "conductor_size_id",
-          "depth_18_top",
-          "depth_18_bottom",
-        ],
+        keys: ["conductor_size", "conductor_size_id", "depth_18_top", "depth_18_bottom"],
       },
     ];
 
@@ -279,17 +244,14 @@ const VolumeCalc = (() => {
     // in `setupCasingToggles()` which expect change events to run their update
     // logic. Dispatch a 'change' event on each `.use-checkbox` so the UI and
     // calculated volumes stay in sync with the loaded preset.
-    qs(".use-checkbox").forEach((cb) =>
-      cb.dispatchEvent(new Event("change", { bubbles: true }))
-    );
+    qs(".use-checkbox").forEach((cb) => cb.dispatchEvent(new Event("change", { bubbles: true })));
 
     // Ensure each casing section collapsed/expanded state matches its checkbox
     // (some environments may not run checkbox change handlers reliably, so
     // force the visible state here).
     qs(".casing-input").forEach((section) => {
       const checkbox =
-        section.querySelector(".use-checkbox") ||
-        section.querySelector("input[type=checkbox]");
+        section.querySelector(".use-checkbox") || section.querySelector("input[type=checkbox]");
       const header = section.querySelector(".casing-header");
       if (!checkbox || !header) return;
       if (checkbox.checked) {
@@ -360,10 +322,7 @@ const VolumeCalc = (() => {
     const storedNames = Object.keys(stored || {}).sort((a, b) =>
       stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0
     );
-    return [
-      ...builtInNames,
-      ...storedNames.filter((n) => !builtInNames.includes(n)),
-    ];
+    return [...builtInNames, ...storedNames.filter((n) => !builtInNames.includes(n))];
   }
 
   function getPresetState(name) {
@@ -410,9 +369,7 @@ const VolumeCalc = (() => {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert(
-        "Export failed: " + (err && err.message ? err.message : String(err))
-      );
+      alert("Export failed: " + (err && err.message ? err.message : String(err)));
     }
   }
 
@@ -424,10 +381,7 @@ const VolumeCalc = (() => {
         const parsed = JSON.parse(reader.result);
         let incoming = null;
         if (parsed && typeof parsed === "object") {
-          incoming =
-            parsed.presets && typeof parsed.presets === "object"
-              ? parsed.presets
-              : parsed;
+          incoming = parsed.presets && typeof parsed.presets === "object" ? parsed.presets : parsed;
         }
         if (!incoming || typeof incoming !== "object") {
           return alert("Invalid presets file.");
@@ -436,9 +390,7 @@ const VolumeCalc = (() => {
         const conflicts = Object.keys(incoming).filter((n) => existing[n]);
         if (conflicts.length > 0) {
           const ok = confirm(
-            `Import will overwrite ${
-              conflicts.length
-            } existing preset(s):\n${conflicts.join(
+            `Import will overwrite ${conflicts.length} existing preset(s):\n${conflicts.join(
               ", "
             )}\n\nContinue and overwrite?`
           );
@@ -449,10 +401,7 @@ const VolumeCalc = (() => {
         populatePresetsUI();
         alert(`Imported ${Object.keys(incoming).length} preset(s).`);
       } catch (err) {
-        alert(
-          "Error importing presets: " +
-            (err && err.message ? err.message : String(err))
-        );
+        alert("Error importing presets: " + (err && err.message ? err.message : String(err)));
       }
     };
     reader.onerror = () => alert("Error reading file.");
@@ -492,12 +441,9 @@ const VolumeCalc = (() => {
         return alert("Enter a name for the preset.");
       }
       if (BUILTIN_PRESETS[name])
-        return alert(
-          "That name is reserved for a built-in preset. Please choose another name."
-        );
+        return alert("That name is reserved for a built-in preset. Please choose another name.");
       const presets = loadPresetsFromStorage();
-      if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`))
-        return;
+      if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`)) return;
       savePreset(name);
       populatePresetsUI();
       nameInput.value = "";
@@ -534,8 +480,7 @@ const VolumeCalc = (() => {
     delBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to delete.");
-      if (BUILTIN_PRESETS[name])
-        return alert("Built-in presets cannot be deleted.");
+      if (BUILTIN_PRESETS[name]) return alert("Built-in presets cannot be deleted.");
       if (!confirm(`Delete preset "${name}"?`)) return;
       deletePreset(name);
       // Clear canvas label if it was the deleted preset
@@ -584,9 +529,7 @@ const VolumeCalc = (() => {
       opts && !isNaN(opts.waterDepth) ? opts.waterDepth : 0,
       casings.length ? Math.max(...casings.map((c) => c.depth)) : 0
     );
-    const maxOD = casings.length
-      ? Math.max(...casings.map((c) => c.od))
-      : 18.625;
+    const maxOD = casings.length ? Math.max(...casings.map((c) => c.od)) : 18.625;
     if (maxDepth === 0) return;
 
     const centerX = rect.width / 2;
@@ -594,12 +537,7 @@ const VolumeCalc = (() => {
     const availableHeight = rect.height - 100;
     const scale = availableHeight / maxDepth;
 
-    if (
-      opts &&
-      opts.showWater &&
-      !isNaN(opts.waterDepth) &&
-      opts.waterDepth > 0
-    ) {
+    if (opts && opts.showWater && !isNaN(opts.waterDepth) && opts.waterDepth > 0) {
       const waterEndY = opts.waterDepth * scale + startY;
       const waterGrad = ctx.createLinearGradient(0, startY, 0, waterEndY);
       waterGrad.addColorStop(0, "#1E90FF");
@@ -609,11 +547,7 @@ const VolumeCalc = (() => {
     }
 
     // Draw plug line if provided
-    if (
-      opts &&
-      typeof opts.plugDepth !== "undefined" &&
-      !isNaN(opts.plugDepth)
-    ) {
+    if (opts && typeof opts.plugDepth !== "undefined" && !isNaN(opts.plugDepth)) {
       const pd = opts.plugDepth;
       if (pd >= 0 && pd <= maxDepth) {
         const y = pd * scale + startY;
@@ -627,23 +561,15 @@ const VolumeCalc = (() => {
         ctx.fillStyle = "#ff0000";
         ctx.font = `${Math.max(10, Math.round(rect.width * 0.012))}px Arial`;
         ctx.textBaseline = "bottom";
-        ctx.fillText(
-          "Plug @ " + pd.toFixed(1) + " m",
-          centerX + rect.width * 0.46,
-          y
-        );
+        ctx.fillText("Plug @ " + pd.toFixed(1) + " m", centerX + rect.width * 0.46, y);
         ctx.restore();
       }
     }
 
     // draw current preset name (if any) near top-left of canvas
-    if (
-      typeof currentPresetName === "string" &&
-      currentPresetName.trim() !== ""
-    ) {
+    if (typeof currentPresetName === "string" && currentPresetName.trim() !== "") {
       ctx.save();
-      const themeIsDark =
-        document.documentElement.getAttribute("data-theme") === "dark";
+      const themeIsDark = document.documentElement.getAttribute("data-theme") === "dark";
       const fontSize = Math.max(12, Math.round(rect.width * 0.018));
       ctx.font = `600 ${fontSize}px Arial`;
       ctx.textBaseline = "top";
@@ -681,10 +607,7 @@ const VolumeCalc = (() => {
 
     casings
       .slice()
-      .sort(
-        (a, b) =>
-          (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od
-      )
+      .sort((a, b) => (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od)
       .forEach((casing) => {
         const idx = casing.index % colors.length;
         const startDepth = casing.prevDepth * scale + startY;
@@ -734,27 +657,22 @@ const VolumeCalc = (() => {
           ctx.fillStyle = "#fff";
           ctx.font = "12px Arial";
           ctx.fillText("Open hole", centerX - 28, (topY + bottomY) / 2);
+
+          // TD label (bottom-right of the open hole section)
+          if (!isNaN(casing.depth)) {
+            ctx.fillText(casing.depth.toFixed(0) + "m", centerX + width / 2 + 10, bottomY);
+          }
           return;
         }
 
         const width = (casing.od / maxOD) * 80;
 
         ctx.fillStyle = colors[idx];
-        ctx.fillRect(
-          centerX - width / 2,
-          startDepth,
-          width,
-          endDepth - startDepth
-        );
+        ctx.fillRect(centerX - width / 2, startDepth, width, endDepth - startDepth);
 
         const innerWidth = (casing.id / maxOD) * 80;
         ctx.fillStyle = "#e6e6e6";
-        ctx.fillRect(
-          centerX - innerWidth / 2,
-          startDepth,
-          innerWidth,
-          endDepth - startDepth
-        );
+        ctx.fillRect(centerX - innerWidth / 2, startDepth, innerWidth, endDepth - startDepth);
 
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 2;
@@ -767,11 +685,7 @@ const VolumeCalc = (() => {
 
         ctx.fillStyle = "#fff";
         ctx.font = "12px Arial";
-        ctx.fillText(
-          casing.depth.toFixed(0) + "m",
-          centerX + width / 2 + 10,
-          endDepth
-        );
+        ctx.fillText(casing.depth.toFixed(0) + "m", centerX + width / 2 + 10, endDepth);
       });
   }
 
@@ -779,10 +693,7 @@ const VolumeCalc = (() => {
   function calculateVolume() {
     // Read common values
     const riserTypeVal = el("riser_type")?.value;
-    const riserID = sizeIdValue(
-      "riser_type",
-      clampNumber(Number(riserTypeVal))
-    );
+    const riserID = sizeIdValue("riser_type", clampNumber(Number(riserTypeVal)));
     const riserOD = riserTypeVal === "none" ? 0 : OD.riser[riserTypeVal] || 20;
 
     const riserDepthVal = clampNumber(Number(el("depth_riser")?.value));
@@ -803,10 +714,7 @@ const VolumeCalc = (() => {
     const conductorOD = OD.conductor[conductorID] || 30;
     const conductorTopInputVal = clampNumber(Number(el("depth_18_top")?.value));
 
-    const surfaceID = sizeIdValue(
-      "surface_size",
-      clampNumber(Number(el("surface_size")?.value))
-    );
+    const surfaceID = sizeIdValue("surface_size", clampNumber(Number(el("surface_size")?.value)));
     const surfaceOD = OD.surface[surfaceID] || 20;
 
     const intermediateID = sizeIdValue(
@@ -839,13 +747,9 @@ const VolumeCalc = (() => {
       clampNumber(Number(el("open_hole_size")?.value))
     );
     // Use the same numeric value (inches) as the OD for drawing and calculations
-    const openHoleOD =
-      typeof openHoleID !== "undefined" && !isNaN(openHoleID) ? openHoleID : 0;
+    const openHoleOD = typeof openHoleID !== "undefined" && !isNaN(openHoleID) ? openHoleID : 0;
 
-    const tiebackID = sizeIdValue(
-      "tieback_size",
-      clampNumber(Number(el("tieback_size")?.value))
-    );
+    const tiebackID = sizeIdValue("tieback_size", clampNumber(Number(el("tieback_size")?.value)));
     const tiebackOD = OD.tieback[tiebackID] || productionOD;
 
     // Plug input: depth where a plug is placed. If provided, compute volumes above and below.
@@ -871,11 +775,8 @@ const VolumeCalc = (() => {
 
     let intermediateTopFinal;
     let intermediateTopAuto = false;
-    const intermediateTopInputVal = clampNumber(
-      Number(el("depth_9_top")?.value)
-    );
-    if (!isNaN(intermediateTopInputVal))
-      intermediateTopFinal = intermediateTopInputVal;
+    const intermediateTopInputVal = clampNumber(Number(el("depth_9_top")?.value));
+    if (!isNaN(intermediateTopInputVal)) intermediateTopFinal = intermediateTopInputVal;
     else if (
       el("use_riser")?.checked &&
       intermediateInUse &&
@@ -891,9 +792,7 @@ const VolumeCalc = (() => {
     let openTopFinal;
     let openTopAuto = false;
     // collect candidate shoe depths
-    const conductorBottomVal = clampNumber(
-      Number(el("depth_18_bottom")?.value)
-    );
+    const conductorBottomVal = clampNumber(Number(el("depth_18_bottom")?.value));
     const productionBottomVal = clampNumber(Number(el("depth_7")?.value));
     const reservoirBottomVal = clampNumber(Number(el("depth_5")?.value));
     const smallLinerBottomVal = clampNumber(Number(el("depth_small")?.value));
@@ -909,20 +808,14 @@ const VolumeCalc = (() => {
     const useTiebackFlag = !!el("use_tieback")?.checked;
 
     const shoeCandidates = [];
-    if (useConductorFlag && !isNaN(conductorBottomVal))
-      shoeCandidates.push(conductorBottomVal);
-    if (useSurfaceFlag && !isNaN(surfaceBottomVal))
-      shoeCandidates.push(surfaceBottomVal);
+    if (useConductorFlag && !isNaN(conductorBottomVal)) shoeCandidates.push(conductorBottomVal);
+    if (useSurfaceFlag && !isNaN(surfaceBottomVal)) shoeCandidates.push(surfaceBottomVal);
     if (useIntermediateFlag && !isNaN(intermediateBottomVal))
       shoeCandidates.push(intermediateBottomVal);
-    if (useProductionFlag && !isNaN(productionBottomVal))
-      shoeCandidates.push(productionBottomVal);
-    if (useReservoirFlag && !isNaN(reservoirBottomVal))
-      shoeCandidates.push(reservoirBottomVal);
-    if (useSmallLinerFlag && !isNaN(smallLinerBottomVal))
-      shoeCandidates.push(smallLinerBottomVal);
-    if (useTiebackFlag && !isNaN(tiebackBottomVal))
-      shoeCandidates.push(tiebackBottomVal);
+    if (useProductionFlag && !isNaN(productionBottomVal)) shoeCandidates.push(productionBottomVal);
+    if (useReservoirFlag && !isNaN(reservoirBottomVal)) shoeCandidates.push(reservoirBottomVal);
+    if (useSmallLinerFlag && !isNaN(smallLinerBottomVal)) shoeCandidates.push(smallLinerBottomVal);
+    if (useTiebackFlag && !isNaN(tiebackBottomVal)) shoeCandidates.push(tiebackBottomVal);
 
     if (shoeCandidates.length) {
       const deepest = Math.max(...shoeCandidates);
@@ -1038,10 +931,7 @@ const VolumeCalc = (() => {
         includedLength: 0,
         volume: 0,
         perMeter_m3: c.id ? Math.PI * Math.pow((c.id / 2) * 0.0254, 2) : 0,
-        physicalLength:
-          typeof c.top !== "undefined"
-            ? Math.max(0, c.depth - c.top)
-            : undefined,
+        physicalLength: typeof c.top !== "undefined" ? Math.max(0, c.depth - c.top) : undefined,
         use: !!c.use,
       };
       // prepare draw entries as before
@@ -1058,16 +948,16 @@ const VolumeCalc = (() => {
             c.role === "conductor"
               ? -1
               : c.role === "small_liner"
-              ? 5
-              : c.role === "reservoir"
-              ? 4
-              : c.role === "production" || c.role === "tieback"
-              ? 3
-              : c.role === "intermediate"
-              ? 2
-              : c.role === "surface"
-              ? 1
-              : 0,
+                ? 5
+                : c.role === "reservoir"
+                  ? 4
+                  : c.role === "production" || c.role === "tieback"
+                    ? 3
+                    : c.role === "intermediate"
+                      ? 2
+                      : c.role === "surface"
+                        ? 1
+                        : 0,
         });
       }
     });
@@ -1117,11 +1007,7 @@ const VolumeCalc = (() => {
       perCasingMap[winner.role].includedLength += segLength;
 
       // If a plug is enabled and defined, split the segment's volume into above/below portions
-      if (
-        plugEnabled &&
-        !isNaN(plugDepthVal) &&
-        typeof plugDepthVal !== "undefined"
-      ) {
+      if (plugEnabled && !isNaN(plugDepthVal) && typeof plugDepthVal !== "undefined") {
         if (segEnd <= plugDepthVal) {
           // entire segment is above the plug
           plugAboveVolume += segVol;
@@ -1153,24 +1039,19 @@ const VolumeCalc = (() => {
       return p;
     });
 
-    if (totalVolumeEl)
-      totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + " m³";
+    if (totalVolumeEl) totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + " m³";
 
     // Update plug split results (if plug depth provided)
     const plugAboveEl = el("plugAboveVolume");
     const plugBelowEl = el("plugBelowVolume");
     if (plugAboveEl)
       plugAboveEl.textContent =
-        !plugEnabled ||
-        typeof plugDepthVal === "undefined" ||
-        isNaN(plugDepthVal)
+        !plugEnabled || typeof plugDepthVal === "undefined" || isNaN(plugDepthVal)
           ? "— m³"
           : (plugAboveVolume || 0).toFixed(2) + " m³";
     if (plugBelowEl)
       plugBelowEl.textContent =
-        !plugEnabled ||
-        typeof plugDepthVal === "undefined" ||
-        isNaN(plugDepthVal)
+        !plugEnabled || typeof plugDepthVal === "undefined" || isNaN(plugDepthVal)
           ? "— m³"
           : (plugBelowVolume || 0).toFixed(2) + " m³";
 
@@ -1254,10 +1135,7 @@ const VolumeCalc = (() => {
         totalsTr.appendChild(totalsLenTd);
         const totalsPerMTd = document.createElement("td");
         if (totals.includedLength > 0) {
-          totalsPerMTd.textContent = (
-            (totals.volume / totals.includedLength) *
-            1000
-          ).toFixed(1);
+          totalsPerMTd.textContent = ((totals.volume / totals.includedLength) * 1000).toFixed(1);
         } else {
           totalsPerMTd.textContent = "0.0";
         }
@@ -1272,11 +1150,7 @@ const VolumeCalc = (() => {
     if (!isNaN(wellheadDepthVal) && wellheadDepthVal > 0) {
       showWater = true;
       waterDepth = wellheadDepthVal;
-    } else if (
-      riserTypeVal === "none" &&
-      !isNaN(riserDepthVal) &&
-      riserDepthVal > 0
-    ) {
+    } else if (riserTypeVal === "none" && !isNaN(riserDepthVal) && riserDepthVal > 0) {
       showWater = true;
       waterDepth = riserDepthVal;
     }
@@ -1285,9 +1159,7 @@ const VolumeCalc = (() => {
       showWater,
       waterDepth,
       plugDepth:
-        plugEnabled &&
-        typeof plugDepthVal !== "undefined" &&
-        !isNaN(plugDepthVal)
+        plugEnabled && typeof plugDepthVal !== "undefined" && !isNaN(plugDepthVal)
           ? plugDepthVal
           : undefined,
     });
@@ -1314,8 +1186,7 @@ const VolumeCalc = (() => {
   function setupCasingToggles() {
     qs(".casing-input").forEach((section) => {
       const checkbox =
-        section.querySelector(".use-checkbox") ||
-        section.querySelector("input[type=checkbox]");
+        section.querySelector(".use-checkbox") || section.querySelector("input[type=checkbox]");
       const header = section.querySelector(".casing-header");
       if (!checkbox || !header) return;
 
@@ -1337,11 +1208,7 @@ const VolumeCalc = (() => {
 
       header.addEventListener("click", (e) => {
         const target = e.target;
-        if (
-          target.closest(".header-inline") ||
-          target.tagName.toLowerCase() === "button"
-        )
-          return;
+        if (target.closest(".header-inline") || target.tagName.toLowerCase() === "button") return;
         if (target.tagName.toLowerCase() === "h3") {
           checkbox.checked = !checkbox.checked;
           checkbox.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1584,8 +1451,7 @@ const VolumeCalc = (() => {
         calculateVolume();
       }
     });
-    if (well.value !== "" && riser.value !== well.value)
-      riser.value = well.value;
+    if (well.value !== "" && riser.value !== well.value) riser.value = well.value;
 
     // when toggling to Subsea, apply to tops
     const toggle = el("riser_subsea");
@@ -1625,9 +1491,7 @@ const VolumeCalc = (() => {
         if (dummyEl && dummyEl.checked) {
           tb.removeAttribute("readonly");
           tb.classList.remove("readonly-input");
-          tb.value = Number(
-            (Number((wellEl && wellEl.value) || 0) + 75).toFixed(1)
-          );
+          tb.value = Number((Number((wellEl && wellEl.value) || 0) + 75).toFixed(1));
           delete tb.dataset.userEdited;
         } else {
           tb.setAttribute("readonly", "true");
@@ -1654,8 +1518,7 @@ const VolumeCalc = (() => {
           tb.removeAttribute("readonly");
           tb.classList.remove("readonly-input");
           const wellVal = Number(el("wellhead_depth")?.value || 0);
-          if (!tb.dataset.userEdited)
-            tb.value = Number((wellVal + 75).toFixed(1));
+          if (!tb.dataset.userEdited) tb.value = Number((wellVal + 75).toFixed(1));
         }
         // Fire a change event so other handlers see the programmatic change
         useTie.dispatchEvent(new Event("change", { bubbles: true }));
@@ -1736,17 +1599,13 @@ const VolumeCalc = (() => {
               tieBottom.removeAttribute("readonly");
               tieBottom.classList.remove("readonly-input");
               if (!userEdited) {
-                tieBottom.value = Number(
-                  (Number(well.value || 0) + 75).toFixed(1)
-                );
+                tieBottom.value = Number((Number(well.value || 0) + 75).toFixed(1));
                 scheduleSave();
                 calculateVolume();
                 // double-ensure we override other handlers that may run later
                 setTimeout(() => {
                   if (useTie && useTie.checked && !userEdited) {
-                    tieBottom.value = Number(
-                      (Number(well.value || 0) + 75).toFixed(1)
-                    );
+                    tieBottom.value = Number((Number(well.value || 0) + 75).toFixed(1));
                     scheduleSave();
                     calculateVolume();
                   }
@@ -1800,9 +1659,7 @@ const VolumeCalc = (() => {
           setTimeout(() => {
             if (dummy && dummy.checked) {
               tbTop.value = el("wellhead_depth")?.value || "";
-              tb.value = Number(
-                (Number(el("wellhead_depth")?.value || 0) + 75).toFixed(1)
-              );
+              tb.value = Number((Number(el("wellhead_depth")?.value || 0) + 75).toFixed(1));
               delete tb.dataset.userEdited;
               userEdited = false;
             }
@@ -1865,8 +1722,7 @@ const VolumeCalc = (() => {
         __updateDummy = updateDummy;
       }
       // always expose a safe test shim (no-op if dummy logic wasn't initialized)
-      if (typeof window !== "undefined")
-        window.__TEST_updateDummy = () => __updateDummy();
+      if (typeof window !== "undefined") window.__TEST_updateDummy = () => __updateDummy();
 
       // When the use_tieback checkbox toggles, change readonly state and seed value
       useTie.addEventListener("change", () => {
@@ -1909,15 +1765,13 @@ const VolumeCalc = (() => {
           tb.removeAttribute("readonly");
           tb.classList.remove("readonly-input");
           const wellVal = Number(el("wellhead_depth")?.value || 0);
-          if (!tb.dataset.userEdited)
-            tb.value = Number((wellVal + 75).toFixed(1));
+          if (!tb.dataset.userEdited) tb.value = Number((wellVal + 75).toFixed(1));
         }
       } else if (useTie && useTie.checked) {
         tieBottom.removeAttribute("readonly");
         tieBottom.classList.remove("readonly-input");
         const wellVal = well && well.value !== "" ? Number(well.value) : 0;
-        if (!tieBottom.dataset.userEdited)
-          tieBottom.value = Number((wellVal + 75).toFixed(1));
+        if (!tieBottom.dataset.userEdited) tieBottom.value = Number((wellVal + 75).toFixed(1));
       } else {
         tieBottom.setAttribute("readonly", "true");
         tieBottom.classList.add("readonly-input");
@@ -1943,11 +1797,7 @@ const VolumeCalc = (() => {
 
     // initialise aria-pressed state
     [casingBtn, linerBtn].forEach((b) => {
-      if (b)
-        b.setAttribute(
-          "aria-pressed",
-          b.classList.contains("active") ? "true" : "false"
-        );
+      if (b) b.setAttribute("aria-pressed", b.classList.contains("active") ? "true" : "false");
     });
 
     if (casingBtn) {
@@ -1994,8 +1844,7 @@ const VolumeCalc = (() => {
       (casingBtn && casingBtn.classList.contains("active")) ||
       (linerBtn && linerBtn.classList.contains("active"));
     if (!anyActive) {
-      if (!(prodLinerChk && prodLinerChk.checked) && linerBtn)
-        setActive(linerBtn);
+      if (!(prodLinerChk && prodLinerChk.checked) && linerBtn) setActive(linerBtn);
     }
   }
 
@@ -2158,10 +2007,7 @@ const VolumeCalc = (() => {
         window.__TEST_applyTheme = (mode) => {
           apply(mode === "dark" ? "dark" : "light");
           try {
-            localStorage.setItem(
-              "keino_theme",
-              mode === "dark" ? "dark" : "light"
-            );
+            localStorage.setItem("keino_theme", mode === "dark" ? "dark" : "light");
           } catch (e) {
             /* ignore */
           }
@@ -2173,9 +2019,7 @@ const VolumeCalc = (() => {
     document.addEventListener("change", (e) => {
       try {
         if (!e || !e.target) return;
-        const elTarget = e.target.closest
-          ? e.target.closest("#theme_toggle")
-          : null;
+        const elTarget = e.target.closest ? e.target.closest("#theme_toggle") : null;
         if (!elTarget) return;
         const next = elTarget.checked ? "dark" : "light";
         apply(next);
