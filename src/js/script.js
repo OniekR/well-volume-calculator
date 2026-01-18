@@ -283,6 +283,14 @@ const VolumeCalc = (() => {
       cb.dispatchEvent(new Event("change", { bubbles: true })),
     );
 
+    // Ensure production liner toggle handlers run so production buttons reflect loaded preset
+    try {
+      const prodLinerEl = el("production_is_liner");
+      if (prodLinerEl) prodLinerEl.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (e) {
+      /* ignore */
+    }
+
     // Ensure each casing section collapsed/expanded state matches its checkbox
     // (some environments may not run checkbox change handlers reliably, so
     // force the visible state here).
@@ -305,6 +313,44 @@ const VolumeCalc = (() => {
     // we call once to ensure state is consistent)
     calculateVolume();
     scheduleSave();
+
+    // Ensure production toggle buttons reflect the newly loaded preset values.
+    try {
+      const prodLinerEl = el("production_is_liner");
+      const casingBtn = el("production_casing_btn");
+      const linerBtn = document.querySelector(".liner-default-btn");
+      const prodTopEl = el("depth_7_top");
+      if (prodLinerEl && prodLinerEl.checked) {
+        if (linerBtn) {
+          linerBtn.classList.add("active");
+          linerBtn.setAttribute("aria-pressed", "true");
+        }
+        if (casingBtn) {
+          casingBtn.classList.remove("active");
+          casingBtn.setAttribute("aria-pressed", "false");
+        }
+      } else if (prodTopEl && prodTopEl.value !== "") {
+        if (casingBtn) {
+          casingBtn.classList.add("active");
+          casingBtn.setAttribute("aria-pressed", "true");
+        }
+        if (linerBtn) {
+          linerBtn.classList.remove("active");
+          linerBtn.setAttribute("aria-pressed", "false");
+        }
+      } else {
+        if (linerBtn) {
+          linerBtn.classList.add("active");
+          linerBtn.setAttribute("aria-pressed", "true");
+        }
+        if (casingBtn) {
+          casingBtn.classList.remove("active");
+          casingBtn.setAttribute("aria-pressed", "false");
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   function loadPresetsFromStorage() {
@@ -538,26 +584,64 @@ const VolumeCalc = (() => {
     loadBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to load.");
-      // If the selected option is a built-in preset, prefer the built-in payload even if a same-named preset exists in localStorage.
-      const opt = sel.options[sel.selectedIndex];
+      // Robust resolution: try localStorage first, then module helper, then built-in presets.
       let state = null;
-      if (opt && opt.dataset && opt.dataset.builtin === "1") {
-        state =
-          window.__KeinoPresets && window.__KeinoPresets.getPresetState
-            ? window.__KeinoPresets.getPresetState(name)
-            : BUILTIN_PRESETS[name]
-              ? BUILTIN_PRESETS[name].state
-              : null;
-      } else {
-        state =
-          window.__KeinoPresets && window.__KeinoPresets.getPresetState
-            ? window.__KeinoPresets.getPresetState(name)
-            : getPresetState(name);
+      try {
+        const raw = localStorage.getItem(PRESETS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed[name] && parsed[name].state) state = parsed[name].state;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+      if (!state && window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function") {
+        state = window.__KeinoPresets.getPresetState(name) || state;
+      }
+      if (!state) {
+        state = BUILTIN_PRESETS[name] ? BUILTIN_PRESETS[name].state : null;
       }
       if (!state) return alert("Preset not found.");
       // set the current preset name (shows on canvas)
       currentPresetName = name;
       applyStateObject(state);
+      // Ensure production button reflects newly loaded preset immediately (defensive)
+      try {
+        const prodLinerEl = el("production_is_liner");
+        const casingBtn = el("production_casing_btn");
+        const linerBtn = document.querySelector(".liner-default-btn");
+        const prodTopEl = el("depth_7_top");
+        if (prodLinerEl && prodLinerEl.checked) {
+          if (linerBtn) {
+            linerBtn.classList.add("active");
+            linerBtn.setAttribute("aria-pressed", "true");
+          }
+          if (casingBtn) {
+            casingBtn.classList.remove("active");
+            casingBtn.setAttribute("aria-pressed", "false");
+          }
+        } else if (prodTopEl && prodTopEl.value !== "") {
+          if (casingBtn) {
+            casingBtn.classList.add("active");
+            casingBtn.setAttribute("aria-pressed", "true");
+          }
+          if (linerBtn) {
+            linerBtn.classList.remove("active");
+            linerBtn.setAttribute("aria-pressed", "false");
+          }
+        } else {
+          if (linerBtn) {
+            linerBtn.classList.add("active");
+            linerBtn.setAttribute("aria-pressed", "true");
+          }
+          if (casingBtn) {
+            casingBtn.classList.remove("active");
+            casingBtn.setAttribute("aria-pressed", "false");
+          }
+        }
+      } catch (e) {
+        /* ignore */
+      }
     });
     // disable delete for built-in presets and clear the Preset name field on selection
     sel.addEventListener("change", () => {
@@ -1740,6 +1824,8 @@ const VolumeCalc = (() => {
           prodInfoBtn.classList.remove("hidden");
           prodInfoBtn.setAttribute("aria-hidden", "false");
         }
++        // When production_is_liner is cleared, prefer Casing as the active toggle if Production Top is present
++        if (casingBtn) setActive(casingBtn);
       }
       scheduleSave();
       calculateVolume();
@@ -2027,13 +2113,22 @@ const VolumeCalc = (() => {
     if (prodLinerChk) prodLinerChk.addEventListener("change", updateTieback);
     updateTieback();
 
-    // Default: if no button is active and tie-back is not forcing Liner, make Liner active
+    // Default: choose an appropriate active button based on preset/field values.
+    // - If production_is_liner is checked, choose Liner.
+    // - Else if Production Top has a value, choose Casing (reflects 'Casing' mode).
+    // - Otherwise, fall back to Liner.
     const anyActive =
       (casingBtn && casingBtn.classList.contains("active")) ||
       (linerBtn && linerBtn.classList.contains("active"));
     if (!anyActive) {
-      if (!(prodLinerChk && prodLinerChk.checked) && linerBtn)
-        setActive(linerBtn);
+      const prodTopEl = el("depth_7_top");
+      if (prodLinerChk && prodLinerChk.checked) {
+        if (linerBtn) setActive(linerBtn);
+      } else if (prodTopEl && prodTopEl.value !== "") {
+        if (casingBtn) setActive(casingBtn);
+      } else {
+        if (linerBtn) setActive(linerBtn);
+      }
     }
   }
 
