@@ -125,37 +125,9 @@ const VolumeCalc = (() => {
   }
 
   // Presets
-  const PRESETS_KEY = "well_presets_v1";
-
-  // Built-in presets loaded from an external JSON file (read-only)
-  // The built-in presets file now lives under `public/` after project restructure.
-  let BUILTIN_PRESETS = {};
-  const BUILTIN_PRESETS_URL = "./public/well-presets.json";
-
-  async function loadBuiltinPresets() {
-    try {
-      const res = await fetch(BUILTIN_PRESETS_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const payload = await res.json();
-      if (payload && payload.presets && typeof payload.presets === "object") {
-        BUILTIN_PRESETS = payload.presets;
-      } else if (payload && typeof payload === "object") {
-        BUILTIN_PRESETS = payload;
-      }
-      // refresh UI if already initialized
-      try {
-        populatePresetsUI();
-      } catch (e) {
-        /* ignore */
-      }
-    } catch (err) {
-      console.warn(
-        "Failed to load built-in presets from " + BUILTIN_PRESETS_URL + ":",
-        err && err.message ? err.message : err,
-      );
-      BUILTIN_PRESETS = BUILTIN_PRESETS || {};
-    }
-  }
+  // Preset management has been delegated to the module `src/js/presets.js`.
+  // The module attaches helpers to `window.__KeinoPresets` for compatibility.
+  // Keep `captureStateObject()` (used when saving a preset) in this file.
 
   function captureStateObject() {
     const state = {};
@@ -171,7 +143,6 @@ const VolumeCalc = (() => {
     });
     return state;
   }
-
   // IDs we should not populate when loading a preset
   // IDs we should not populate when loading a preset (UI-only controls)
   const _SKIP_POPULATE_ON_LOAD = new Set([
@@ -354,159 +325,24 @@ const VolumeCalc = (() => {
     }
   }
 
-  function loadPresetsFromStorage() {
-    try {
-      const raw = localStorage.getItem(PRESETS_KEY);
-      if (!raw) return {};
-      return JSON.parse(raw);
-    } catch (e) {
-      return {};
-    }
-  }
+  // Preset helpers are provided by the external module `src/js/presets.js`.
+  // We rely on `window.__KeinoPresets` for all preset storage and built-in preset
+  // handling. Keeping these functions here introduced duplication and bugs,
+  // so they are intentionally removed. Use the module APIs instead.
 
-  function savePresetsToStorage(obj) {
-    try {
-      localStorage.setItem(PRESETS_KEY, JSON.stringify(obj));
-    } catch (e) {
-      // ignore
-    }
-  }
+  // Export/import/save/delete/preset-name utilities are provided by the module.
+  // (Delegated to `src/js/presets.js` via `window.__KeinoPresets`).
 
-  function savePreset(name) {
-    if (!name) return false;
-    // prevent clashing with built-in preset names
-    if (BUILTIN_PRESETS[name]) {
-      return false;
-    }
-    const presets = loadPresetsFromStorage();
-    presets[name] = { savedAt: Date.now(), state: captureStateObject() };
-    savePresetsToStorage(presets);
-    // show the saved name on the canvas
-    currentPresetName = name;
-    // trigger redraw
-    calculateVolume();
-    return true;
-  }
-
-  function deletePreset(name) {
-    if (!name) return false;
-    // do not allow deleting built-in presets
-    if (BUILTIN_PRESETS[name]) return false;
-    const presets = loadPresetsFromStorage();
-    if (presets[name]) {
-      delete presets[name];
-      savePresetsToStorage(presets);
-      return true;
-    }
-    return false;
-  }
-
-  function getPresetNames() {
-    const stored = loadPresetsFromStorage();
-    const builtInNames = Object.keys(BUILTIN_PRESETS || {}).sort();
-    const storedNames = Object.keys(stored || {}).sort((a, b) =>
-      stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0,
-    );
-    return [
-      ...builtInNames,
-      ...storedNames.filter((n) => !builtInNames.includes(n)),
-    ];
-  }
-
-  function getPresetState(name) {
-    const stored = loadPresetsFromStorage();
-    if (stored[name]) return stored[name].state;
-    if (BUILTIN_PRESETS[name]) return BUILTIN_PRESETS[name].state;
-    return null;
-  }
-
-  function populatePresetsUI() {
-    const sel = el("preset_list");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">— Select a preset —</option>';
-    const names = getPresetNames();
-    names.forEach((n) => {
-      const opt = document.createElement("option");
-      opt.value = n;
-      opt.textContent = n;
-      if (BUILTIN_PRESETS[n]) opt.dataset.builtin = "1";
-      sel.appendChild(opt);
-    });
-  }
-
-  // Export presets as JSON file for sharing
-  function exportPresets() {
-    try {
-      const raw = localStorage.getItem(PRESETS_KEY) || "{}";
-      const payload = {
-        exported_at: new Date().toISOString(),
-        presets: JSON.parse(raw),
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `well-presets_${new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace(/[:T]/g, "_")}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      alert(
-        "Export failed: " + (err && err.message ? err.message : String(err)),
-      );
-    }
-  }
-
-  // Import presets from a JSON File object
+  // Import presets: delegate to the presets module
   function importPresetsFile(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        let incoming = null;
-        if (parsed && typeof parsed === "object") {
-          incoming =
-            parsed.presets && typeof parsed.presets === "object"
-              ? parsed.presets
-              : parsed;
-        }
-        if (!incoming || typeof incoming !== "object") {
-          return alert("Invalid presets file.");
-        }
-        const existing = loadPresetsFromStorage() || {};
-        const conflicts = Object.keys(incoming).filter((n) => existing[n]);
-        if (conflicts.length > 0) {
-          const ok = confirm(
-            `Import will overwrite ${
-              conflicts.length
-            } existing preset(s):\n${conflicts.join(
-              ", ",
-            )}\n\nContinue and overwrite?`,
-          );
-          if (!ok) return;
-        }
-        const merged = Object.assign({}, existing, incoming);
-        savePresetsToStorage(merged);
-        populatePresetsUI();
-        alert(`Imported ${Object.keys(incoming).length} preset(s).`);
-      } catch (err) {
-        alert(
-          "Error importing presets: " +
-            (err && err.message ? err.message : String(err)),
-        );
-      }
-    };
-    reader.onerror = () => alert("Error reading file.");
-    reader.readAsText(file);
+    if (window.__KeinoPresets && typeof window.__KeinoPresets.importPresetsFile === "function") {
+      return window.__KeinoPresets.importPresetsFile(file);
+    }
+    alert("Preset module unavailable.");
   }
 
   function setupPresetsUI() {
+    try { window.__presetsUIBound = true; } catch(e) {}
     const saveBtn = el("save_preset_btn");
     const loadBtn = el("load_preset_btn");
     const delBtn = el("delete_preset_btn");
@@ -519,12 +355,22 @@ const VolumeCalc = (() => {
     const importBtn = el("import_presets_btn");
     const importInput = el("import_presets_input");
 
-    if (exportBtn) exportBtn.addEventListener("click", exportPresets);
+    if (exportBtn) {
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.exportPresets === "function")
+        exportBtn.addEventListener("click", () => window.__KeinoPresets.exportPresets());
+      else
+        exportBtn.addEventListener("click", () => alert("Preset module unavailable."));
+    }
     if (importBtn && importInput) {
       importBtn.addEventListener("click", () => importInput.click());
       importInput.addEventListener("change", (e) => {
         const file = e.target.files && e.target.files[0];
-        if (file) importPresetsFile(file);
+        if (file) {
+          if (window.__KeinoPresets && typeof window.__KeinoPresets.importPresetsFile === "function")
+            window.__KeinoPresets.importPresetsFile(file);
+          else
+            alert("Preset module unavailable.");
+        }
         e.target.value = "";
       });
     }
@@ -536,7 +382,8 @@ const VolumeCalc = (() => {
     ) {
       window.__KeinoPresets.loadBuiltinPresets();
     } else {
-      loadBuiltinPresets();
+      // No module available (e.g., file:// CORS); builtin loading is a no-op here.
+      console.warn && console.warn("Presets module unavailable; built-in presets not loaded.");
     }
 
     saveBtn.addEventListener("click", () => {
@@ -545,72 +392,81 @@ const VolumeCalc = (() => {
         nameInput.focus();
         return alert("Enter a name for the preset.");
       }
-      const builtinExists =
-        window.__KeinoPresets && window.__KeinoPresets.getPresetState
-          ? !!window.__KeinoPresets.getPresetState(name) &&
-            !!window.__KeinoPresets.getPresetState(name).builtin
-          : !!BUILTIN_PRESETS[name];
+      // builtin detection uses dataset on the select option (module populates this)
+      const opt = sel.querySelector(`option[value="${name}"]`);
+      const builtinExists = opt && opt.dataset && opt.dataset.builtin === "1";
       if (builtinExists)
         return alert(
           "That name is reserved for a built-in preset. Please choose another name.",
         );
-      const presets =
-        window.__KeinoPresets && window.__KeinoPresets.loadPresetsFromStorage
-          ? window.__KeinoPresets.loadPresetsFromStorage()
-          : loadPresetsFromStorage();
-      if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`))
-        return;
-      if (
-        window.__KeinoPresets &&
-        typeof window.__KeinoPresets.savePreset === "function"
-      ) {
-        // capture current state object and save via module
-        const state = captureStateObject();
-        const ok = window.__KeinoPresets.savePreset(name, state);
-        if (!ok) return alert("Failed to save preset.");
-      } else {
-        savePreset(name);
-      }
-      if (
-        window.__KeinoPresets &&
-        typeof window.__KeinoPresets.populatePresetsUI === "function"
-      ) {
+      if (!window.__KeinoPresets || typeof window.__KeinoPresets.savePreset !== "function")
+        return alert("Preset module unavailable.");
+      const state = captureStateObject();
+      const ok = window.__KeinoPresets.savePreset(name, state);
+      if (!ok) return alert("Failed to save preset.");
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
         window.__KeinoPresets.populatePresetsUI();
-      } else {
-        populatePresetsUI();
-      }
       nameInput.value = "";
     });
 
     loadBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to load.");
-      // Robust resolution: try localStorage first, then module helper, then built-in presets.
+
+      // Prefer module lookup, but fall back to direct localStorage read if the
+      // module doesn't report the preset (helps file:// and race conditions).
+      // Try localStorage first (preserve previous file:// behavior), then module
       let state = null;
+      let usedLocal = false;
       try {
-        const raw = localStorage.getItem(PRESETS_KEY);
+        const raw = localStorage.getItem("well_presets_v1");
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && parsed[name] && parsed[name].state)
+          if (parsed && parsed[name] && parsed[name].state) {
             state = parsed[name].state;
+            usedLocal = true;
+          }
         }
       } catch (e) {
         /* ignore */
       }
-      if (
-        !state &&
-        window.__KeinoPresets &&
-        typeof window.__KeinoPresets.getPresetState === "function"
-      ) {
-        state = window.__KeinoPresets.getPresetState(name) || state;
+
+      if (!state && window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function") {
+        state = window.__KeinoPresets.getPresetState(name);
       }
-      if (!state) {
-        state = BUILTIN_PRESETS[name] ? BUILTIN_PRESETS[name].state : null;
-      }
+      // Log for debugging if something (test harness) captures page logs
+      console.log && console.log("Load preset:", name, {
+        moduleFound: !!(window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function"),
+        usedFallback,
+        stateFound: !!state,
+        depth_small: state && state.depth_small && state.depth_small.value,
+      });
+
       if (!state) return alert("Preset not found.");
+
+      // expose diagnostic info for test harness
+      try {
+        window.__lastPresetName = name;
+        window.__lastPresetApplied = state;
+      } catch (e) {
+        /* ignore */
+      }
+      console.log && console.log("Applying preset state (depth_small before apply):", document.getElementById("depth_small")?.value);
+      applyStateObject(state);
+      try {
+        window.__lastPresetAfterApply = {
+          depth_small: document.getElementById("depth_small")?.value,
+          depth_small_top: document.getElementById("depth_small_top")?.value,
+        };
+      } catch (e) {
+        /* ignore */
+      }
+      console.log && console.log("After applyStateObject (depth_small now):", document.getElementById("depth_small")?.value);
+
       // set the current preset name (shows on canvas)
       currentPresetName = name;
       applyStateObject(state);
+
       // Ensure production button reflects newly loaded preset immediately (defensive)
       try {
         const prodLinerEl = el("production_is_liner");
@@ -662,21 +518,31 @@ const VolumeCalc = (() => {
     delBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to delete.");
-      if (BUILTIN_PRESETS[name])
-        return alert("Built-in presets cannot be deleted.");
+      const opt = sel.selectedOptions && sel.selectedOptions[0];
+      const isBuiltin = opt && opt.dataset && opt.dataset.builtin === "1";
+      if (isBuiltin) return alert("Built-in presets cannot be deleted.");
       if (!confirm(`Delete preset "${name}"?`)) return;
-      deletePreset(name);
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.deletePreset === "function") {
+        window.__KeinoPresets.deletePreset(name);
+      } else {
+        alert("Preset module unavailable.");
+      }
       // Clear canvas label if it was the deleted preset
       if (currentPresetName === name) {
         currentPresetName = "";
         calculateVolume();
       }
-      populatePresetsUI();
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+        window.__KeinoPresets.populatePresetsUI();
     });
 
-    populatePresetsUI();
+    if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+      window.__KeinoPresets.populatePresetsUI();
     window.addEventListener("storage", (e) => {
-      if (e.key === PRESETS_KEY) populatePresetsUI();
+      if (e.key === "well_presets_v1") {
+        if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+          window.__KeinoPresets.populatePresetsUI();
+      }
     });
   }
 
@@ -2203,6 +2069,7 @@ const VolumeCalc = (() => {
   }
 
   function init() {
+    try { window.__initCalled = true; } catch (e) {}
     // load state before initial calc
     loadState();
     // initial canvas sizing
@@ -2214,7 +2081,12 @@ const VolumeCalc = (() => {
     setupButtons();
     setupTooltips();
     setupSizeIdInputs();
-    setupPresetsUI();
+    try {
+      setupPresetsUI();
+      try { window.__presetsUISetupCalled = true; } catch(e) {}
+    } catch (err) {
+      try { window.__presetsUIError = (err && err.message) || String(err); } catch (e) {}
+    }
     setupWellheadSync();
     setupTiebackBehavior();
     setupProductionToggleButtons();

@@ -28,6 +28,8 @@ const path = require("path");
 
   const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
   const page = await browser.newPage();
+  page.on('console', (msg) => console.log('PAGE_CONSOLE', msg.type(), msg.text()));
+  page.on('pageerror', (err) => console.log('PAGE_ERROR', err && err.message ? err.message : err));
   try {
     await page.goto(indexPath, {
       waitUntil: "domcontentloaded",
@@ -69,6 +71,11 @@ const path = require("path");
           typeof window.__KeinoPresets.getPresetState === "function"
             ? window.__KeinoPresets.getPresetState("P-9")
             : null,
+        presetsUIBound: window.__presetsUIBound || false,
+        presetsUISetupCalled: window.__presetsUISetupCalled || false,
+        presetsUIError: window.__presetsUIError || null,
+        initCalled: !!window.__initCalled,
+        loadBtnExists: !!document.getElementById('load_preset_btn'),
       };
     });
     console.log("preLoadState:", preLoadState);
@@ -76,6 +83,14 @@ const path = require("path");
     // Click Load
     await page.select("#preset_list", "P-9");
     await page.click("#load_preset_btn");
+
+    // Diagnostic: inspect any debug variables the app may have set during load
+    const diagState = await page.evaluate(() => ({
+      lastPresetName: window.__lastPresetName || null,
+      lastPresetAppliedKeys: window.__lastPresetApplied ? Object.keys(window.__lastPresetApplied) : null,
+      lastPresetAfter: window.__lastPresetAfterApply || null,
+    }));
+    console.log("DIAG_STATE", diagState);
 
     // Debug: capture immediate state and after short delays to detect overwrites
     const snap1 = await page.evaluate(() => ({
