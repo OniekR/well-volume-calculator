@@ -301,6 +301,29 @@ const VolumeCalc = (() => {
       }
     });
 
+    // Ensure Small Liner is visible when the loaded preset contains Small Liner data.
+    try {
+      const smallKeys = ["small_liner_size", "small_liner_size_id", "depth_small_top", "depth_small"];
+      const hasSmallData = smallKeys.some((k) => state[k] && state[k].value !== undefined && String(state[k].value).trim() !== "");
+      const smallUse = state["use_small_liner"] && state["use_small_liner"].value;
+      if (hasSmallData || smallUse) {
+        const cb = el("use_small_liner");
+        if (cb) {
+          cb.checked = true;
+          // trigger change so any dependent logic runs (tie-back, defaults, etc)
+          cb.dispatchEvent(new Event("change", { bubbles: true }));
+          const section = cb.closest(".casing-input");
+          if (section) {
+            section.classList.remove("collapsed");
+            const header = section.querySelector(".casing-header");
+            if (header) header.setAttribute("aria-expanded", "true");
+          }
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
+
     // update UI and persist (change events already trigger calculate/save but
     // we call once to ensure state is consistent)
     calculateVolume();
