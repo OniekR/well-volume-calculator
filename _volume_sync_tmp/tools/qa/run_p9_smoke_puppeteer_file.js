@@ -63,11 +63,15 @@ const path = require("path");
     // Debug: check that module can read the preset from localStorage / builtin loader
     const preLoadState = await page.evaluate(() => {
       return {
-        localStorageRaw: localStorage.getItem('well_presets_v1'),
-        moduleGet: (window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === 'function') ? window.__KeinoPresets.getPresetState('P-9') : null,
+        localStorageRaw: localStorage.getItem("well_presets_v1"),
+        moduleGet:
+          window.__KeinoPresets &&
+          typeof window.__KeinoPresets.getPresetState === "function"
+            ? window.__KeinoPresets.getPresetState("P-9")
+            : null,
       };
     });
-    console.log('preLoadState:', preLoadState);
+    console.log("preLoadState:", preLoadState);
 
     // Click Load
     await page.select("#preset_list", "P-9");
@@ -75,43 +79,79 @@ const path = require("path");
 
     // Debug: capture immediate state and after short delays to detect overwrites
     const snap1 = await page.evaluate(() => ({
-      use_small_liner: !!document.getElementById('use_small_liner')?.checked,
-      depth_small: document.getElementById('depth_small')?.value || '',
-      depth_small_top: document.getElementById('depth_small_top')?.value || '',
-      depth_5: document.getElementById('depth_5')?.value || '',
-      depth_7_top: document.getElementById('depth_7_top')?.value || '',
-      production_is_liner: !!document.getElementById('production_is_liner')?.checked,
-      production_casing_active: document.getElementById('production_casing_btn')?.classList.contains('active') || false,
-      production_liner_active: document.querySelector('.liner-default-btn')?.classList.contains('active') || false
+      use_small_liner: !!document.getElementById("use_small_liner")?.checked,
+      depth_small: document.getElementById("depth_small")?.value || "",
+      depth_small_top: document.getElementById("depth_small_top")?.value || "",
+      depth_5: document.getElementById("depth_5")?.value || "",
+      depth_7_top: document.getElementById("depth_7_top")?.value || "",
+      production_is_liner: !!document.getElementById("production_is_liner")
+        ?.checked,
+      production_casing_active:
+        document
+          .getElementById("production_casing_btn")
+          ?.classList.contains("active") || false,
+      production_liner_active:
+        document
+          .querySelector(".liner-default-btn")
+          ?.classList.contains("active") || false,
+      small_liner_expanded: (() => {
+        const el = document.getElementById("use_small_liner");
+        const section = el ? el.closest(".casing-input") : null;
+        return section ? !section.classList.contains("collapsed") : false;
+      })(),
     }));
 
     await new Promise((r) => setTimeout(r, 100));
     const snap2 = await page.evaluate(() => ({
-      use_small_liner: !!document.getElementById('use_small_liner')?.checked,
-      depth_small: document.getElementById('depth_small')?.value || '',
-      depth_small_top: document.getElementById('depth_small_top')?.value || '',
-      depth_5: document.getElementById('depth_5')?.value || '',
-      depth_7_top: document.getElementById('depth_7_top')?.value || '',
-      production_is_liner: !!document.getElementById('production_is_liner')?.checked,
-      production_casing_active: document.getElementById('production_casing_btn')?.classList.contains('active') || false,
-      production_liner_active: document.querySelector('.liner-default-btn')?.classList.contains('active') || false
+      use_small_liner: !!document.getElementById("use_small_liner")?.checked,
+      depth_small: document.getElementById("depth_small")?.value || "",
+      depth_small_top: document.getElementById("depth_small_top")?.value || "",
+      depth_5: document.getElementById("depth_5")?.value || "",
+      depth_7_top: document.getElementById("depth_7_top")?.value || "",
+      production_is_liner: !!document.getElementById("production_is_liner")
+        ?.checked,
+      production_casing_active:
+        document
+          .getElementById("production_casing_btn")
+          ?.classList.contains("active") || false,
+      production_liner_active:
+        document
+          .querySelector(".liner-default-btn")
+          ?.classList.contains("active") || false,
+      small_liner_expanded: (() => {
+        const el = document.getElementById("use_small_liner");
+        const section = el ? el.closest(".casing-input") : null;
+        return section ? !section.classList.contains("collapsed") : false;
+      })(),
     }));
 
     await new Promise((r) => setTimeout(r, 200));
     const snap3 = await page.evaluate(() => ({
-      use_small_liner: !!document.getElementById('use_small_liner')?.checked,
-      depth_small: document.getElementById('depth_small')?.value || '',
-      depth_small_top: document.getElementById('depth_small_top')?.value || '',
-      depth_5: document.getElementById('depth_5')?.value || '',
-      depth_7_top: document.getElementById('depth_7_top')?.value || '',
-      production_is_liner: !!document.getElementById('production_is_liner')?.checked,
-      production_casing_active: document.getElementById('production_casing_btn')?.classList.contains('active') || false,
-      production_liner_active: document.querySelector('.liner-default-btn')?.classList.contains('active') || false
+      use_small_liner: !!document.getElementById("use_small_liner")?.checked,
+      depth_small: document.getElementById("depth_small")?.value || "",
+      depth_small_top: document.getElementById("depth_small_top")?.value || "",
+      depth_5: document.getElementById("depth_5")?.value || "",
+      depth_7_top: document.getElementById("depth_7_top")?.value || "",
+      production_is_liner: !!document.getElementById("production_is_liner")
+        ?.checked,
+      production_casing_active:
+        document
+          .getElementById("production_casing_btn")
+          ?.classList.contains("active") || false,
+      production_liner_active:
+        document
+          .querySelector(".liner-default-btn")
+          ?.classList.contains("active") || false,
+      small_liner_expanded: (() => {
+        const el = document.getElementById("use_small_liner");
+        const section = el ? el.closest(".casing-input") : null;
+        return section ? !section.classList.contains("collapsed") : false;
+      })(),
     }));
 
-    console.log('SNAP1', snap1);
-    console.log('SNAP2', snap2);
-    console.log('SNAP3', snap3);
+    console.log("SNAP1", snap1);
+    console.log("SNAP2", snap2);
+    console.log("SNAP3", snap3);
 
     // Use snap3 as final state for assertions
     const finalResult = snap3;
@@ -124,9 +164,9 @@ const path = require("path");
     console.log("Final small liner state:", finalResult);
 
     if (
-      finalResult.checked &&
-      finalResult.collapsed === false &&
-      finalResult.depthSmall === "4992"
+      finalResult.use_small_liner === true &&
+      finalResult.depth_small === "4992" &&
+      finalResult.small_liner_expanded === true
     ) {
       console.log("PASS: Small Liner expanded and seeded correctly for P-9");
     } else {
@@ -139,25 +179,40 @@ const path = require("path");
           if (item.type === "checkbox") input.checked = !!item.value;
           else input.value = item.value;
         });
-        Array.from(document.querySelectorAll('.use-checkbox')).forEach(cb => cb.dispatchEvent(new Event('change', { bubbles: true })));
+        Array.from(document.querySelectorAll(".use-checkbox")).forEach((cb) =>
+          cb.dispatchEvent(new Event("change", { bubbles: true })),
+        );
       }, p9State);
       await new Promise((r) => setTimeout(r, 200));
       const manualResult = await page.evaluate(() => ({
-        depth_small: document.getElementById('depth_small')?.value || '',
-        depth_7_top: document.getElementById('depth_7_top')?.value || '',
-        production_casing_active: document.getElementById('production_casing_btn')?.classList.contains('active') || false,
-        production_liner_active: document.querySelector('.liner-default-btn')?.classList.contains('active') || false
+        depth_small: document.getElementById("depth_small")?.value || "",
+        depth_7_top: document.getElementById("depth_7_top")?.value || "",
+        production_casing_active:
+          document
+            .getElementById("production_casing_btn")
+            ?.classList.contains("active") || false,
+        production_liner_active:
+          document
+            .querySelector(".liner-default-btn")
+            ?.classList.contains("active") || false,
       }));
-      console.log('After manual apply:', manualResult);
+      console.log("After manual apply:", manualResult);
     }
 
     // Also check Production Liner/Casing active state: prefer Casing for P-9
-    if (finalResult.production_casing_active && !finalResult.production_liner_active) {
-      console.log('PASS: Production shows Casing active');
+    if (
+      finalResult.production_casing_active &&
+      !finalResult.production_liner_active
+    ) {
+      console.log("PASS: Production shows Casing active");
       await browser.close();
       process.exit(0);
     } else {
-      console.error('FAIL: Production toggle state incorrect', finalResult.production_casing_active, finalResult.production_liner_active);
+      console.error(
+        "FAIL: Production toggle state incorrect",
+        finalResult.production_casing_active,
+        finalResult.production_liner_active,
+      );
       await browser.close();
       process.exit(6);
     }
