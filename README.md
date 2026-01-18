@@ -11,4 +11,3 @@ Project structure
 - `src/` - source JS, CSS, assets, data
 - `index.html` - main HTML entry
 - `dist/` - build output
-

@@ -25,7 +25,8 @@ const path = require("path");
                 "..",
                 "..",
                 "..",
-                "keino_presets_2026-01-16_20_54_15.json"
+                "public",
+                "well-presets.json"
               ))
             ),
         });

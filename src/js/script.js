@@ -35,7 +35,7 @@ const VolumeCalc = (() => {
         try {
           localStorage.setItem(
             "keino_theme",
-            mode === "dark" ? "dark" : "light"
+            mode === "dark" ? "dark" : "light",
           );
         } catch (e) {
           /* ignore */
@@ -125,12 +125,12 @@ const VolumeCalc = (() => {
   }
 
   // Presets
-  const PRESETS_KEY = "keino_presets_v1";
+  const PRESETS_KEY = "well_presets_v1";
 
   // Built-in presets loaded from an external JSON file (read-only)
-  // Update `keino_presets_2026-01-16_20_54_15.json` to change these
+  // The built-in presets file now lives under `public/` after project restructure.
   let BUILTIN_PRESETS = {};
-  const BUILTIN_PRESETS_URL = "./keino_presets_2026-01-16_20_54_15.json";
+  const BUILTIN_PRESETS_URL = "./public/well-presets.json";
 
   async function loadBuiltinPresets() {
     try {
@@ -151,7 +151,7 @@ const VolumeCalc = (() => {
     } catch (err) {
       console.warn(
         "Failed to load built-in presets from " + BUILTIN_PRESETS_URL + ":",
-        err && err.message ? err.message : err
+        err && err.message ? err.message : err,
       );
       BUILTIN_PRESETS = BUILTIN_PRESETS || {};
     }
@@ -280,7 +280,7 @@ const VolumeCalc = (() => {
     // logic. Dispatch a 'change' event on each `.use-checkbox` so the UI and
     // calculated volumes stay in sync with the loaded preset.
     qs(".use-checkbox").forEach((cb) =>
-      cb.dispatchEvent(new Event("change", { bubbles: true }))
+      cb.dispatchEvent(new Event("change", { bubbles: true })),
     );
 
     // Ensure each casing section collapsed/expanded state matches its checkbox
@@ -300,29 +300,6 @@ const VolumeCalc = (() => {
         header.setAttribute("aria-expanded", "false");
       }
     });
-
-    // Ensure Small Liner is visible when the loaded preset contains Small Liner data.
-    try {
-      const smallKeys = ["small_liner_size", "small_liner_size_id", "depth_small_top", "depth_small"];
-      const hasSmallData = smallKeys.some((k) => state[k] && state[k].value !== undefined && String(state[k].value).trim() !== "");
-      const smallUse = state["use_small_liner"] && state["use_small_liner"].value;
-      if (hasSmallData || smallUse) {
-        const cb = el("use_small_liner");
-        if (cb) {
-          cb.checked = true;
-          // trigger change so any dependent logic runs (tie-back, defaults, etc)
-          cb.dispatchEvent(new Event("change", { bubbles: true }));
-          const section = cb.closest(".casing-input");
-          if (section) {
-            section.classList.remove("collapsed");
-            const header = section.querySelector(".casing-header");
-            if (header) header.setAttribute("aria-expanded", "true");
-          }
-        }
-      }
-    } catch (e) {
-      /* ignore */
-    }
 
     // update UI and persist (change events already trigger calculate/save but
     // we call once to ensure state is consistent)
@@ -381,7 +358,7 @@ const VolumeCalc = (() => {
     const stored = loadPresetsFromStorage();
     const builtInNames = Object.keys(BUILTIN_PRESETS || {}).sort();
     const storedNames = Object.keys(stored || {}).sort((a, b) =>
-      stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0
+      stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0,
     );
     return [
       ...builtInNames,
@@ -424,7 +401,7 @@ const VolumeCalc = (() => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `keino_presets_${new Date()
+      a.download = `well-presets_${new Date()
         .toISOString()
         .slice(0, 19)
         .replace(/[:T]/g, "_")}.json`;
@@ -434,7 +411,7 @@ const VolumeCalc = (() => {
       URL.revokeObjectURL(url);
     } catch (err) {
       alert(
-        "Export failed: " + (err && err.message ? err.message : String(err))
+        "Export failed: " + (err && err.message ? err.message : String(err)),
       );
     }
   }
@@ -462,8 +439,8 @@ const VolumeCalc = (() => {
             `Import will overwrite ${
               conflicts.length
             } existing preset(s):\n${conflicts.join(
-              ", "
-            )}\n\nContinue and overwrite?`
+              ", ",
+            )}\n\nContinue and overwrite?`,
           );
           if (!ok) return;
         }
@@ -474,7 +451,7 @@ const VolumeCalc = (() => {
       } catch (err) {
         alert(
           "Error importing presets: " +
-            (err && err.message ? err.message : String(err))
+            (err && err.message ? err.message : String(err)),
         );
       }
     };
@@ -505,8 +482,15 @@ const VolumeCalc = (() => {
       });
     }
 
-    // Load built-in presets (async) from external JSON file
-    loadBuiltinPresets();
+    // Load built-in presets (async) from external JSON file (prefer module impl if present)
+    if (
+      window.__KeinoPresets &&
+      typeof window.__KeinoPresets.loadBuiltinPresets === "function"
+    ) {
+      window.__KeinoPresets.loadBuiltinPresets();
+    } else {
+      loadBuiltinPresets();
+    }
 
     saveBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
@@ -514,67 +498,67 @@ const VolumeCalc = (() => {
         nameInput.focus();
         return alert("Enter a name for the preset.");
       }
-      if (BUILTIN_PRESETS[name])
+      const builtinExists =
+        window.__KeinoPresets && window.__KeinoPresets.getPresetState
+          ? !!window.__KeinoPresets.getPresetState(name) &&
+            !!window.__KeinoPresets.getPresetState(name).builtin
+          : !!BUILTIN_PRESETS[name];
+      if (builtinExists)
         return alert(
-          "That name is reserved for a built-in preset. Please choose another name."
+          "That name is reserved for a built-in preset. Please choose another name.",
         );
-      const presets = loadPresetsFromStorage();
+      const presets =
+        window.__KeinoPresets && window.__KeinoPresets.loadPresetsFromStorage
+          ? window.__KeinoPresets.loadPresetsFromStorage()
+          : loadPresetsFromStorage();
       if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`))
         return;
-      savePreset(name);
-      populatePresetsUI();
+      if (
+        window.__KeinoPresets &&
+        typeof window.__KeinoPresets.savePreset === "function"
+      ) {
+        // capture current state object and save via module
+        const state = captureStateObject();
+        const ok = window.__KeinoPresets.savePreset(name, state);
+        if (!ok) return alert("Failed to save preset.");
+      } else {
+        savePreset(name);
+      }
+      if (
+        window.__KeinoPresets &&
+        typeof window.__KeinoPresets.populatePresetsUI === "function"
+      ) {
+        window.__KeinoPresets.populatePresetsUI();
+      } else {
+        populatePresetsUI();
+      }
       nameInput.value = "";
     });
 
     loadBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to load.");
-      // If the selected option is a built-in preset, prefer the built-in
-      // payload even if a same-named preset exists in localStorage.
+      // If the selected option is a built-in preset, prefer the built-in payload even if a same-named preset exists in localStorage.
       const opt = sel.options[sel.selectedIndex];
       let state = null;
       if (opt && opt.dataset && opt.dataset.builtin === "1") {
-        state = BUILTIN_PRESETS[name] ? BUILTIN_PRESETS[name].state : null;
+        state =
+          window.__KeinoPresets && window.__KeinoPresets.getPresetState
+            ? window.__KeinoPresets.getPresetState(name)
+            : BUILTIN_PRESETS[name]
+              ? BUILTIN_PRESETS[name].state
+              : null;
       } else {
-        state = getPresetState(name);
+        state =
+          window.__KeinoPresets && window.__KeinoPresets.getPresetState
+            ? window.__KeinoPresets.getPresetState(name)
+            : getPresetState(name);
       }
       if (!state) return alert("Preset not found.");
       // set the current preset name (shows on canvas)
       currentPresetName = name;
       applyStateObject(state);
-      // Safety: some UI handlers may run after `applyStateObject` and re-collapse sections.
-      // Ensure Small Liner is expanded when the preset contains Small Liner data (race-condition fix).
-      setTimeout(() => {
-        try {
-          const smallKeys = [
-            "small_liner_size",
-            "small_liner_size_id",
-            "depth_small_top",
-            "depth_small",
-          ];
-          const hasSmallData = smallKeys.some((k) =>
-            state && state[k] && state[k].value !== undefined && String(state[k].value).trim() !== ""
-          );
-          const smallUse = state && state["use_small_liner"] && state["use_small_liner"].value;
-          if (hasSmallData || smallUse) {
-            const cb = el("use_small_liner");
-            if (cb) {
-              cb.checked = true;
-              cb.dispatchEvent(new Event("change", { bubbles: true }));
-              const section = cb.closest(".casing-input");
-              if (section) {
-                section.classList.remove("collapsed");
-                const header = section.querySelector(".casing-header");
-                if (header) header.setAttribute("aria-expanded", "true");
-              }
-            }
-          }
-        } catch (e) {
-          /* ignore */
-        }
-      }, 120);
     });
-
     // disable delete for built-in presets and clear the Preset name field on selection
     sel.addEventListener("change", () => {
       const opt = sel.selectedOptions && sel.selectedOptions[0];
@@ -636,7 +620,7 @@ const VolumeCalc = (() => {
 
     const maxDepth = Math.max(
       opts && !isNaN(opts.waterDepth) ? opts.waterDepth : 0,
-      casings.length ? Math.max(...casings.map((c) => c.depth)) : 0
+      casings.length ? Math.max(...casings.map((c) => c.depth)) : 0,
     );
     const maxOD = casings.length
       ? Math.max(...casings.map((c) => c.od))
@@ -684,7 +668,7 @@ const VolumeCalc = (() => {
         ctx.fillText(
           "Plug @ " + pd.toFixed(1) + " m",
           centerX + rect.width * 0.46,
-          y
+          y,
         );
         ctx.restore();
       }
@@ -737,7 +721,7 @@ const VolumeCalc = (() => {
       .slice()
       .sort(
         (a, b) =>
-          (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od
+          (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od,
       )
       .forEach((casing) => {
         const idx = casing.index % colors.length;
@@ -798,7 +782,7 @@ const VolumeCalc = (() => {
           centerX - width / 2,
           startDepth,
           width,
-          endDepth - startDepth
+          endDepth - startDepth,
         );
 
         const innerWidth = (casing.id / maxOD) * 80;
@@ -807,7 +791,7 @@ const VolumeCalc = (() => {
           centerX - innerWidth / 2,
           startDepth,
           innerWidth,
-          endDepth - startDepth
+          endDepth - startDepth,
         );
 
         ctx.strokeStyle = "#000";
@@ -824,7 +808,7 @@ const VolumeCalc = (() => {
         ctx.fillText(
           casing.depth.toFixed(0) + "m",
           centerX + width / 2 + 10,
-          endDepth
+          endDepth,
         );
       });
   }
@@ -835,7 +819,7 @@ const VolumeCalc = (() => {
     const riserTypeVal = el("riser_type")?.value;
     const riserID = sizeIdValue(
       "riser_type",
-      clampNumber(Number(riserTypeVal))
+      clampNumber(Number(riserTypeVal)),
     );
     const riserOD = riserTypeVal === "none" ? 0 : OD.riser[riserTypeVal] || 20;
 
@@ -852,45 +836,45 @@ const VolumeCalc = (() => {
     // prefer explicit ID input values if provided
     const conductorID = sizeIdValue(
       "conductor_size",
-      clampNumber(Number(el("conductor_size")?.value))
+      clampNumber(Number(el("conductor_size")?.value)),
     );
     const conductorOD = OD.conductor[conductorID] || 30;
     const conductorTopInputVal = clampNumber(Number(el("depth_18_top")?.value));
 
     const surfaceID = sizeIdValue(
       "surface_size",
-      clampNumber(Number(el("surface_size")?.value))
+      clampNumber(Number(el("surface_size")?.value)),
     );
     const surfaceOD = OD.surface[surfaceID] || 20;
 
     const intermediateID = sizeIdValue(
       "intermediate_size",
-      clampNumber(Number(el("intermediate_size")?.value))
+      clampNumber(Number(el("intermediate_size")?.value)),
     );
     const intermediateOD = OD.intermediate[intermediateID] || 13.375;
 
     const productionID = sizeIdValue(
       "production_size",
-      clampNumber(Number(el("production_size")?.value))
+      clampNumber(Number(el("production_size")?.value)),
     );
     const productionOD = OD.production[productionID] || 9.625;
 
     const reservoirID = sizeIdValue(
       "reservoir_size",
-      clampNumber(Number(el("reservoir_size")?.value))
+      clampNumber(Number(el("reservoir_size")?.value)),
     );
     const reservoirOD = OD.reservoir[reservoirID] || 5.5;
 
     const smallLinerID = sizeIdValue(
       "small_liner_size",
-      clampNumber(Number(el("small_liner_size")?.value))
+      clampNumber(Number(el("small_liner_size")?.value)),
     );
     const smallLinerOD = OD.small_liner[smallLinerID] || 5;
 
     // Open Hole: treat select value as the nominal drilled diameter (in inches)
     const openHoleID = sizeIdValue(
       "open_hole_size",
-      clampNumber(Number(el("open_hole_size")?.value))
+      clampNumber(Number(el("open_hole_size")?.value)),
     );
     // Use the same numeric value (inches) as the OD for drawing and calculations
     const openHoleOD =
@@ -898,7 +882,7 @@ const VolumeCalc = (() => {
 
     const tiebackID = sizeIdValue(
       "tieback_size",
-      clampNumber(Number(el("tieback_size")?.value))
+      clampNumber(Number(el("tieback_size")?.value)),
     );
     const tiebackOD = OD.tieback[tiebackID] || productionOD;
 
@@ -926,7 +910,7 @@ const VolumeCalc = (() => {
     let intermediateTopFinal;
     let intermediateTopAuto = false;
     const intermediateTopInputVal = clampNumber(
-      Number(el("depth_9_top")?.value)
+      Number(el("depth_9_top")?.value),
     );
     if (!isNaN(intermediateTopInputVal))
       intermediateTopFinal = intermediateTopInputVal;
@@ -946,7 +930,7 @@ const VolumeCalc = (() => {
     let openTopAuto = false;
     // collect candidate shoe depths
     const conductorBottomVal = clampNumber(
-      Number(el("depth_18_bottom")?.value)
+      Number(el("depth_18_bottom")?.value),
     );
     const productionBottomVal = clampNumber(Number(el("depth_7")?.value));
     const reservoirBottomVal = clampNumber(Number(el("depth_5")?.value));
@@ -1112,16 +1096,16 @@ const VolumeCalc = (() => {
             c.role === "conductor"
               ? -1
               : c.role === "small_liner"
-              ? 5
-              : c.role === "reservoir"
-              ? 4
-              : c.role === "production" || c.role === "tieback"
-              ? 3
-              : c.role === "intermediate"
-              ? 2
-              : c.role === "surface"
-              ? 1
-              : 0,
+                ? 5
+                : c.role === "reservoir"
+                  ? 4
+                  : c.role === "production" || c.role === "tieback"
+                    ? 3
+                    : c.role === "intermediate"
+                      ? 2
+                      : c.role === "surface"
+                        ? 1
+                        : 0,
         });
       }
     });
@@ -1427,7 +1411,7 @@ const VolumeCalc = (() => {
         input.value = well.value;
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     qs(".default-top-btn").forEach((btn) =>
@@ -1472,7 +1456,7 @@ const VolumeCalc = (() => {
         if (tb) tb.value = input.value;
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     // Liner default button (use Intermediate Bottom - 50, fallback to wellhead)
@@ -1492,7 +1476,7 @@ const VolumeCalc = (() => {
         if (tb) tb.value = target.value;
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     // Reservoir Liner button: use Production Bottom - 50
@@ -1509,7 +1493,7 @@ const VolumeCalc = (() => {
         }
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     // Small liner default button: use Reservoir Shoe - 50
@@ -1526,7 +1510,7 @@ const VolumeCalc = (() => {
         }
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
   }
 
@@ -1680,7 +1664,7 @@ const VolumeCalc = (() => {
           tb.removeAttribute("readonly");
           tb.classList.remove("readonly-input");
           tb.value = Number(
-            (Number((wellEl && wellEl.value) || 0) + 75).toFixed(1)
+            (Number((wellEl && wellEl.value) || 0) + 75).toFixed(1),
           );
           delete tb.dataset.userEdited;
         } else {
@@ -1791,7 +1775,7 @@ const VolumeCalc = (() => {
               tieBottom.classList.remove("readonly-input");
               if (!userEdited) {
                 tieBottom.value = Number(
-                  (Number(well.value || 0) + 75).toFixed(1)
+                  (Number(well.value || 0) + 75).toFixed(1),
                 );
                 scheduleSave();
                 calculateVolume();
@@ -1799,7 +1783,7 @@ const VolumeCalc = (() => {
                 setTimeout(() => {
                   if (useTie && useTie.checked && !userEdited) {
                     tieBottom.value = Number(
-                      (Number(well.value || 0) + 75).toFixed(1)
+                      (Number(well.value || 0) + 75).toFixed(1),
                     );
                     scheduleSave();
                     calculateVolume();
@@ -1855,7 +1839,7 @@ const VolumeCalc = (() => {
             if (dummy && dummy.checked) {
               tbTop.value = el("wellhead_depth")?.value || "";
               tb.value = Number(
-                (Number(el("wellhead_depth")?.value || 0) + 75).toFixed(1)
+                (Number(el("wellhead_depth")?.value || 0) + 75).toFixed(1),
               );
               delete tb.dataset.userEdited;
               userEdited = false;
@@ -2000,7 +1984,7 @@ const VolumeCalc = (() => {
       if (b)
         b.setAttribute(
           "aria-pressed",
-          b.classList.contains("active") ? "true" : "false"
+          b.classList.contains("active") ? "true" : "false",
         );
     });
 
@@ -2202,7 +2186,7 @@ const VolumeCalc = (() => {
         }
         console.log(
           "DBG theme after change attr=",
-          document.documentElement.getAttribute("data-theme")
+          document.documentElement.getAttribute("data-theme"),
         );
       });
     }
@@ -2214,7 +2198,7 @@ const VolumeCalc = (() => {
           try {
             localStorage.setItem(
               "keino_theme",
-              mode === "dark" ? "dark" : "light"
+              mode === "dark" ? "dark" : "light",
             );
           } catch (e) {
             /* ignore */
