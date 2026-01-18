@@ -20,13 +20,9 @@ const path = require("path");
           ok: true,
           json: () =>
             Promise.resolve(
-              require(path.resolve(
-                __dirname,
-                "..",
-                "..",
-                "..",
-                "keino_presets_2026-01-16_20_54_15.json"
-              ))
+              require(
+                path.resolve(__dirname, "..", "..", "..", "keino_presets_2026-01-16_20_54_15.json")
+              )
             ),
         });
 
@@ -90,14 +86,12 @@ const path = require("path");
     // Check size-id inputs initialized to select values
     const conductorSel = d.getElementById("conductor_size");
     const conductorId = d.getElementById("conductor_size_id");
-    if (!conductorSel || !conductorId)
-      throw new Error("Missing conductor controls");
+    if (!conductorSel || !conductorId) throw new Error("Missing conductor controls");
     if (conductorId.value == "" || conductorId.value == undefined) {
       // script should set initial value on setup; give it a tick
       await new Promise((r) => setTimeout(r, 20));
     }
-    if (conductorId.value === conductorSel.value)
-      pass("conductor size-id initialized");
+    if (conductorId.value === conductorSel.value) pass("conductor size-id initialized");
     else
       fail(
         "conductor size-id initialized",
@@ -111,8 +105,7 @@ const path = require("path");
     await new Promise((r) => setTimeout(r, 30));
     const rows = Array.from(d.querySelectorAll("#casingVolumes tbody tr"));
     const hasConductor = rows.some(
-      (tr) =>
-        tr.children[0] && tr.children[0].textContent.trim() === "Conductor"
+      (tr) => tr.children[0] && tr.children[0].textContent.trim() === "Conductor"
     );
     if (!hasConductor) pass("conductor hidden when unchecked");
     else fail("conductor hidden when unchecked", "Conductor row still present");
@@ -124,16 +117,12 @@ const path = require("path");
     d.getElementById("depth_18_bottom").value = "600";
     d.getElementById("depth_5").value = "2200";
     // trigger input events
-    ["depth_13", "depth_9", "depth_7", "depth_18_bottom", "depth_5"].forEach(
-      (id) =>
-        d
-          .getElementById(id)
-          .dispatchEvent(new window.Event("input", { bubbles: true }))
+    ["depth_13", "depth_9", "depth_7", "depth_18_bottom", "depth_5"].forEach((id) =>
+      d.getElementById(id).dispatchEvent(new window.Event("input", { bubbles: true }))
     );
     await new Promise((r) => setTimeout(r, 50));
     const totalText = d.getElementById("totalVolume").textContent;
-    if (totalText && totalText !== "0.00 m³")
-      pass("totalVolume non-zero after setting depths");
+    if (totalText && totalText !== "0.00 m³") pass("totalVolume non-zero after setting depths");
     else fail("totalVolume non-zero after setting depths", `got ${totalText}`);
 
     // Change production size id and ensure no error and value updates
@@ -158,12 +147,7 @@ const path = require("path");
     await new Promise((r) => setTimeout(r, 50));
     const tiebackCasing = d.getElementById("tieback_casing");
     const useTie = d.getElementById("use_tieback");
-    if (
-      tiebackCasing &&
-      !tiebackCasing.classList.contains("hidden") &&
-      useTie &&
-      useTie.checked
-    )
+    if (tiebackCasing && !tiebackCasing.classList.contains("hidden") && useTie && useTie.checked)
       pass("tieback shown and checked when production_is_liner set");
     else
       fail(
@@ -185,9 +169,7 @@ const path = require("path");
     else
       fail(
         "tieback bottom unlocked",
-        `readOnly=${tieBottom && tieBottom.readOnly}, value=${
-          tieBottom && tieBottom.value
-        }`
+        `readOnly=${tieBottom && tieBottom.readOnly}, value=${tieBottom && tieBottom.value}`
       );
 
     // User edit should be accepted and persisted
@@ -202,8 +184,7 @@ const path = require("path");
       useTie.checked = false;
       useTie.dispatchEvent(new window.Event("change", { bubbles: true }));
       await new Promise((r) => setTimeout(r, 30));
-      if (!useTie.checked)
-        pass("tieback unchecked when production_is_liner cleared");
+      if (!useTie.checked) pass("tieback unchecked when production_is_liner cleared");
       else fail("tieback unchecked", `useTie=${useTie && useTie.checked}`);
     }
 
@@ -245,9 +226,7 @@ const path = require("path");
       tbBottomAfterDummy.readOnly === false &&
       parseFloat(tbBottomAfterDummy.value) === 175
     )
-      pass(
-        "dummy: top set to wellhead and bottom seeded to wellhead+75 when checked"
-      );
+      pass("dummy: top set to wellhead and bottom seeded to wellhead+75 when checked");
     else
       fail(
         "dummy behavior (checked)",
@@ -259,24 +238,15 @@ const path = require("path");
     // User edit while dummy checked must be accepted
     if (tbBottomAfterDummy) {
       tbBottomAfterDummy.value = "888";
-      tbBottomAfterDummy.dispatchEvent(
-        new window.Event("input", { bubbles: true })
-      );
+      tbBottomAfterDummy.dispatchEvent(new window.Event("input", { bubbles: true }));
       await new Promise((r) => setTimeout(r, 25));
-      if (tbBottomAfterDummy.value === "888")
-        pass("dummy: bottom accepts user edits");
-      else
-        fail(
-          "dummy: bottom accepts user edits",
-          `value=${tbBottomAfterDummy.value}`
-        );
+      if (tbBottomAfterDummy.value === "888") pass("dummy: bottom accepts user edits");
+      else fail("dummy: bottom accepts user edits", `value=${tbBottomAfterDummy.value}`);
     }
 
     // Uncheck Dummy -> expect top still follows wellhead and bottom mirrors Production top and is locked
     d.getElementById("depth_7_top").value = "50";
-    d.getElementById("depth_7_top").dispatchEvent(
-      new window.Event("input", { bubbles: true })
-    );
+    d.getElementById("depth_7_top").dispatchEvent(new window.Event("input", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 20));
 
     dummy.checked = false;
@@ -337,14 +307,7 @@ const path = require("path");
         const use18 = d.getElementById("use_18");
         const use13 = d.getElementById("use_13");
         const use9 = d.getElementById("use_9");
-        if (
-          use18 &&
-          !use18.checked &&
-          use13 &&
-          !use13.checked &&
-          use9 &&
-          !use9.checked
-        )
+        if (use18 && !use18.checked && use13 && !use13.checked && use9 && !use9.checked)
           pass("P-9 untoggles conductor/surface/intermediate");
         else
           fail(
@@ -358,9 +321,7 @@ const path = require("path");
         const rows = Array.from(d.querySelectorAll("#casingVolumes tbody tr"));
         const has = rows.some((tr) => {
           const name =
-            tr.children[0] &&
-            tr.children[0].textContent &&
-            tr.children[0].textContent.trim();
+            tr.children[0] && tr.children[0].textContent && tr.children[0].textContent.trim();
           return ["Conductor", "Surface", "Intermediate"].includes(name);
         });
         if (!has) pass("rows absent after P-9 load for untoggled casings");
@@ -374,19 +335,13 @@ const path = require("path");
         // ensure small liner is enabled
         d.getElementById("use_small_liner").checked = true;
         ["depth_small", "depth_5", "depth_7"].forEach((id) =>
-          d
-            .getElementById(id)
-            .dispatchEvent(new window.Event("input", { bubbles: true }))
+          d.getElementById(id).dispatchEvent(new window.Event("input", { bubbles: true }))
         );
         await new Promise((r) => setTimeout(r, 80));
         const openTopEl = d.getElementById("depth_open_top");
         if (openTopEl && openTopEl.value === "4992")
           pass("open hole top linked to small liner when deepest");
-        else
-          fail(
-            "open hole top initial link",
-            `openTop=${openTopEl && openTopEl.value}`
-          );
+        else fail("open hole top initial link", `openTop=${openTopEl && openTopEl.value}`);
 
         // Untoggle small liner -> top should move to reservoir (3798)
         d.getElementById("use_small_liner").checked = false;
@@ -396,11 +351,7 @@ const path = require("path");
         await new Promise((r) => setTimeout(r, 80));
         if (openTopEl && openTopEl.value === "3798")
           pass("open hole top updates when small liner untoggled");
-        else
-          fail(
-            "open hole top after untoggle",
-            `openTop=${openTopEl && openTopEl.value}`
-          );
+        else fail("open hole top after untoggle", `openTop=${openTopEl && openTopEl.value}`);
       }
     }
 
@@ -425,23 +376,15 @@ const path = require("path");
       } catch (e) {
         lsVal = null;
       }
-      if (htmlEl.getAttribute("data-theme") === "dark")
-        pass("theme toggle sets dark");
+      if (htmlEl.getAttribute("data-theme") === "dark") pass("theme toggle sets dark");
       else {
         // In some test environments synthetic clicks may not trigger handlers. Call the test helper if present.
-        if (
-          d.defaultView &&
-          typeof d.defaultView.__TEST_applyTheme === "function"
-        )
+        if (d.defaultView && typeof d.defaultView.__TEST_applyTheme === "function")
           d.defaultView.__TEST_applyTheme("dark");
         await new Promise((r) => setTimeout(r, 10));
         if (htmlEl.getAttribute("data-theme") === "dark")
           pass("theme toggle sets dark (via test shim)");
-        else
-          fail(
-            "theme toggle sets dark",
-            `attr=${htmlEl.getAttribute("data-theme")}`
-          );
+        else fail("theme toggle sets dark", `attr=${htmlEl.getAttribute("data-theme")}`);
       }
 
       // Theme label should indicate the action available: "Light mode" when dark
@@ -452,13 +395,8 @@ const path = require("path");
       else fail("theme label after dark", `label=${themeLabelEl.textContent}`);
       if (lsVal === "dark") pass("theme persisted to localStorage");
       else if (lsVal === null)
-        pass(
-          "localStorage unavailable in this environment (skipping persistence check)"
-        );
-      else if (
-        d.defaultView &&
-        typeof d.defaultView.__TEST_applyTheme === "function"
-      )
+        pass("localStorage unavailable in this environment (skipping persistence check)");
+      else if (d.defaultView && typeof d.defaultView.__TEST_applyTheme === "function")
         pass("localStorage updated by test shim (skipping strict assertion)");
       else fail("theme persistence", `ls=${lsVal}`);
 
@@ -471,29 +409,19 @@ const path = require("path");
       } catch (e) {
         lsVal = null;
       }
-      if (!htmlEl.getAttribute("data-theme"))
-        pass("theme toggle returns to light");
+      if (!htmlEl.getAttribute("data-theme")) pass("theme toggle returns to light");
       else {
         // fallback: try test shim to force light (some environments don't trigger click handlers)
-        if (
-          d.defaultView &&
-          typeof d.defaultView.__TEST_applyTheme === "function"
-        )
+        if (d.defaultView && typeof d.defaultView.__TEST_applyTheme === "function")
           d.defaultView.__TEST_applyTheme("light");
         await new Promise((r) => setTimeout(r, 10));
         if (!htmlEl.getAttribute("data-theme"))
           pass("theme toggle returns to light (via test shim)");
-        else
-          fail(
-            "theme toggle returns to light",
-            `attr=${htmlEl.getAttribute("data-theme")}`
-          );
+        else fail("theme toggle returns to light", `attr=${htmlEl.getAttribute("data-theme")}`);
       }
       if (lsVal === "light") pass("theme persisted as light to localStorage");
       else if (lsVal === null)
-        pass(
-          "localStorage unavailable in this environment (skipping persistence check)"
-        );
+        pass("localStorage unavailable in this environment (skipping persistence check)");
       else pass("theme persistence after uncheck (non-strict)");
     } else fail("theme toggle exists", "missing theme_toggle");
     // ensure ID inputs are set explicitly (reservoir smaller than production)
@@ -521,11 +449,8 @@ const path = require("path");
     const mapping = {};
     rowsAfter.forEach((tr) => {
       const name =
-        tr.children[0] &&
-        tr.children[0].textContent &&
-        tr.children[0].textContent.trim();
-      const vol =
-        (tr.children[1] && parseFloat(tr.children[1].textContent)) || 0;
+        tr.children[0] && tr.children[0].textContent && tr.children[0].textContent.trim();
+      const vol = (tr.children[1] && parseFloat(tr.children[1].textContent)) || 0;
       if (name) mapping[name] = vol;
     });
     if ((mapping["Reservoir"] || 0) > 0 && (mapping["Production"] || 0) === 0)
@@ -542,8 +467,8 @@ const path = require("path");
   const failed = results.filter((r) => !r.ok);
   if (failed.length) {
     console.error("\nSome smoke tests failed:", failed);
-    process.exit(2);
+    throw new Error("Smoke tests failed: " + failed.length);
   }
   console.log("\nAll smoke tests passed.");
-  process.exit(0);
+  return;
 })();

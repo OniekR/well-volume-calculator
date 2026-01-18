@@ -3,10 +3,14 @@
     "jsdom": "^20.0.3"
   },
   "devDependencies": {
+    "esbuild": "^0.19.0",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-node": "^11.1.0",
     "prettier": "^3.8.0"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "lint": "eslint . --ext .js --ignore-pattern node_modules --color",
@@ -14,6 +18,8 @@
     "format": "prettier --write \"**/*.{js,json,css,md,html}\"",
     "format:check": "prettier --check \"**/*.{js,json,css,md,html}\"",
     "unit-test": "node test/run-tests.js",
-    "test": "npm run unit-test && node _volume_sync_tmp/tools/qa/smoke_test.js"
+    "test": "npm run build && npm run unit-test && node _volume_sync_tmp/tools/qa/smoke_test.js",
+    "build": "node scripts/build.js",
+    "build:watch": "node scripts/build.js --watch"
   }
 }

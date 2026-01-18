@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -9,6 +9,7 @@
     <link rel="shortcut icon" href="KR_fav.jpg" />
     <link rel="apple-touch-icon" href="KR_fav.jpg" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="src/css/style.css" />
   </head>
   <body>
     <header>
@@ -21,30 +22,18 @@
         <nav>
           <div class="linker">
             <a class="nav-link" href="https://oniekr.github.io/">Home</a>
-            <a class="nav-link" href="https://oniekr.github.io/FV.github.io/"
-              >Flow velocity</a
-            >
-            <a
-              class="nav-link"
-              href="https://oniekr.github.io/pressurevolume.github.io/"
+            <a class="nav-link" href="https://oniekr.github.io/FV.github.io/">Flow velocity</a>
+            <a class="nav-link" href="https://oniekr.github.io/pressurevolume.github.io/"
               >Volume / pressure</a
             >
-            <a
-              class="nav-link"
-              href="https://oniekr.github.io/stringlift.github.io/"
+            <a class="nav-link" href="https://oniekr.github.io/stringlift.github.io/"
               >String lift calculator</a
             >
           </div>
           <div class="header-controls">
-            <span id="theme_label" class="theme-label" aria-live="polite"
-              >Dark mode</span
-            >
+            <span id="theme_label" class="theme-label" aria-live="polite">Dark mode</span>
             <label class="switch" title="Toggle dark mode">
-              <input
-                id="theme_toggle"
-                type="checkbox"
-                aria-label="Toggle dark mode"
-              />
+              <input id="theme_toggle" type="checkbox" aria-label="Toggle dark mode" />
               <span class="slider" aria-hidden="true"></span>
             </label>
           </div>
@@ -71,9 +60,7 @@
                   />
                   <span class="slider round"></span>
                 </label>
-                <span id="riser_position_label" class="small-note-inline"
-                  >Subsea -</span
-                >
+                <span id="riser_position_label" class="small-note-inline">Subsea -</span>
               </div>
             </div>
 
@@ -96,12 +83,7 @@
 
           <div class="casing-input">
             <div class="casing-header">
-              <input
-                type="checkbox"
-                class="use-checkbox"
-                id="use_riser"
-                checked
-              />
+              <input type="checkbox" class="use-checkbox" id="use_riser" checked />
               <h3>Riser</h3>
             </div>
             <div class="casing-body">
@@ -124,18 +106,11 @@
                     />
                   </div>
                 </div>
-                <div
-                  class="input-inline input-inline--narrow"
-                  id="depth_riser_container"
-                >
+                <div class="input-inline input-inline--narrow" id="depth_riser_container">
                   <label>Depth (m):</label>
                   <input type="number" id="depth_riser" step="1.0" value="0" />
                   <div style="margin-top: 8px">
-                    <button
-                      type="button"
-                      class="wellhead-btn"
-                      data-target="depth_riser"
-                    >
+                    <button type="button" class="wellhead-btn" data-target="depth_riser">
                       Wellhead
                     </button>
                   </div>
@@ -178,11 +153,7 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button
-                      type="button"
-                      class="wellhead-btn"
-                      data-target="depth_18_top"
-                    >
+                    <button type="button" class="wellhead-btn" data-target="depth_18_top">
                       Wellhead
                     </button>
                   </div>
@@ -197,11 +168,7 @@
                     value="0"
                     min="0"
                   />
-                  <div
-                    id="conductor_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <div id="conductor_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -242,30 +209,15 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button
-                      type="button"
-                      class="wellhead-btn"
-                      data-target="depth_13_top"
-                    >
+                    <button type="button" class="wellhead-btn" data-target="depth_13_top">
                       Wellhead
                     </button>
                   </div>
                 </div>
                 <div class="input-inline">
                   <label for="depth_13">Shoe (m):</label>
-                  <input
-                    type="number"
-                    id="depth_13"
-                    name="depth_13"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
-                  <div
-                    id="surface_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <input type="number" id="depth_13" name="depth_13" step="1.0" value="0" min="0" />
+                  <div id="surface_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -306,30 +258,15 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button
-                      type="button"
-                      class="wellhead-btn"
-                      data-target="depth_9_top"
-                    >
+                    <button type="button" class="wellhead-btn" data-target="depth_9_top">
                       Wellhead
                     </button>
                   </div>
                 </div>
                 <div class="input-inline">
                   <label for="depth_9">Shoe (m):</label>
-                  <input
-                    type="number"
-                    id="depth_9"
-                    name="depth_9"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
-                  <div
-                    id="intermediate_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <input type="number" id="depth_9" name="depth_9" step="1.0" value="0" min="0" />
+                  <div id="intermediate_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -339,10 +276,7 @@
             <div class="casing-header">
               <input type="checkbox" class="use-checkbox" id="use_7" checked />
               <h3>Production Casing/liner</h3>
-              <label
-                class="header-inline inline-checkbox"
-                style="margin-left: auto"
-              >
+              <label class="header-inline inline-checkbox" style="margin-left: auto">
                 <input type="checkbox" id="production_is_liner" />
                 Tie-back
               </label>
@@ -367,9 +301,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label id="production_top_label" for="depth_7_top"
-                    >Top (m):</label
-                  >
+                  <label id="production_top_label" for="depth_7_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_7_top"
@@ -434,48 +366,21 @@
                 </div>
                 <div class="input-inline">
                   <label for="depth_7">Shoe (m):</label>
-                  <input
-                    type="number"
-                    id="depth_7"
-                    name="depth_7"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
-                  <div
-                    id="production_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <input type="number" id="depth_7" name="depth_7" step="1.0" value="0" min="0" />
+                  <div id="production_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Tie-back Casing: shown when Production 'Liner?' is checked -->
-          <div
-            class="casing-input hidden"
-            id="tieback_casing"
-            aria-hidden="true"
-          >
+          <div class="casing-input hidden" id="tieback_casing" aria-hidden="true">
             <div class="casing-header">
-              <input
-                type="checkbox"
-                class="use-checkbox"
-                id="use_tieback"
-                checked
-              />
+              <input type="checkbox" class="use-checkbox" id="use_tieback" checked />
               <h3>Tie-back Casing</h3>
               <!-- New control: Dummy hanger (toggle only, functionality to be added later) -->
-              <label
-                class="header-inline inline-checkbox"
-                style="margin-left: auto"
-              >
-                <input
-                  type="checkbox"
-                  id="dummy_hanger"
-                  aria-label="Dummy hanger"
-                />
+              <label class="header-inline inline-checkbox" style="margin-left: auto">
+                <input type="checkbox" id="dummy_hanger" aria-label="Dummy hanger" />
                 Dummy hanger
               </label>
             </div>
@@ -508,11 +413,7 @@
                     min="0"
                   />
                   <div style="margin-top: 8px; display: flex; gap: 8px">
-                    <button
-                      type="button"
-                      class="wellhead-btn"
-                      data-target="depth_tb_top"
-                    >
+                    <button type="button" class="wellhead-btn" data-target="depth_tb_top">
                       Wellhead
                     </button>
                   </div>
@@ -528,11 +429,7 @@
                     value="0"
                     readonly
                   />
-                  <div
-                    id="tieback_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <div id="tieback_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -610,19 +507,8 @@
                 </div>
                 <div class="input-inline">
                   <label for="depth_5">Shoe (m):</label>
-                  <input
-                    type="number"
-                    id="depth_5"
-                    name="depth_5"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
-                  <div
-                    id="reservoir_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <input type="number" id="depth_5" name="depth_5" step="1.0" value="0" min="0" />
+                  <div id="reservoir_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -630,12 +516,7 @@
 
           <div class="casing-input">
             <div class="casing-header">
-              <input
-                type="checkbox"
-                class="use-checkbox"
-                id="use_small_liner"
-                checked
-              />
+              <input type="checkbox" class="use-checkbox" id="use_small_liner" checked />
               <h3>Small liner</h3>
             </div>
             <div class="casing-body">
@@ -666,14 +547,7 @@
                     placeholder="Optional"
                     min="0"
                   />
-                  <div
-                    style="
-                      margin-top: 8px;
-                      display: flex;
-                      gap: 8px;
-                      align-items: center;
-                    "
-                  >
+                  <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center">
                     <button
                       type="button"
                       class="default-top-btn small-liner-default-btn"
@@ -694,11 +568,7 @@
                     value="0"
                     min="0"
                   />
-                  <div
-                    id="small_liner_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <div id="small_liner_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -707,12 +577,7 @@
           <!-- Open Hole -->
           <div class="casing-input">
             <div class="casing-header">
-              <input
-                type="checkbox"
-                class="use-checkbox"
-                id="use_open_hole"
-                checked
-              />
+              <input type="checkbox" class="use-checkbox" id="use_open_hole" checked />
               <h3>Open Hole</h3>
             </div>
             <div class="casing-body">
@@ -746,14 +611,7 @@
                     placeholder="Optional"
                     min="0"
                   />
-                  <div
-                    style="
-                      margin-top: 8px;
-                      display: flex;
-                      gap: 8px;
-                      align-items: center;
-                    "
-                  >
+                  <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center">
                     <!-- placeholder for potential defaults -->
                   </div>
                 </div>
@@ -767,11 +625,7 @@
                     value="0"
                     min="0"
                   />
-                  <div
-                    id="open_hole_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
+                  <div id="open_hole_length_note" class="small-note" aria-live="polite"></div>
                 </div>
               </div>
             </div>
@@ -784,20 +638,13 @@
 
           <div class="plug-toggle" aria-hidden="false">
             <label class="inline-checkbox">
-              <input
-                type="checkbox"
-                id="use_plug"
-                checked
-                aria-controls="plug-panel"
-              />
+              <input type="checkbox" id="use_plug" checked aria-controls="plug-panel" />
               Plug
             </label>
           </div>
 
           <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
-            <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
-              Plug
-            </h3>
+            <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">Plug</h3>
 
             <div class="plug-control">
               <label for="plug_depth">depth (m):</label>
@@ -812,12 +659,8 @@
             </div>
 
             <div class="plug-volumes">
-              <div>
-                Volume above plug: <span id="plugAboveVolume">— m³</span>
-              </div>
-              <div>
-                Volume below plug: <span id="plugBelowVolume">— m³</span>
-              </div>
+              <div>Volume above plug: <span id="plugAboveVolume">— m³</span></div>
+              <div>Volume below plug: <span id="plugBelowVolume">— m³</span></div>
             </div>
           </div>
         </form>
@@ -870,18 +713,10 @@
               <input type="text" id="preset_name" placeholder="Preset name" />
               <div style="display: flex; gap: 8px; align-items: center">
                 <button type="button" id="save_preset_btn">Save</button>
-                <button
-                  type="button"
-                  id="export_presets_btn"
-                  title="Download presets as JSON"
-                >
+                <button type="button" id="export_presets_btn" title="Download presets as JSON">
                   Export
                 </button>
-                <button
-                  type="button"
-                  id="import_presets_btn"
-                  title="Upload presets JSON"
-                >
+                <button type="button" id="import_presets_btn" title="Upload presets JSON">
                   Import
                 </button>
                 <input
@@ -892,14 +727,7 @@
                   aria-hidden="true"
                 />
               </div>
-              <div
-                style="
-                  margin-top: 8px;
-                  display: flex;
-                  gap: 8px;
-                  align-items: center;
-                "
-              >
+              <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center">
                 <select id="preset_list" aria-label="Saved presets">
                   <option value="">— Select a preset —</option>
                 </select>
@@ -908,15 +736,51 @@
               </div>
             </div>
             <div id="presets_note" class="small-note">
-              Save and recall named input presets. Built-in presets are loaded
-              from <code>keino_presets_2026-01-16_20_54_15.json</code> and are
-              read-only.
+              Save and recall named input presets. Built-in presets are loaded from
+              <code>keino_presets_2026-01-16_20_54_15.json</code> and are read-only.
             </div>
           </div>
         </section>
       </div>
     </div>
 
+    <script>
+      (function () {
+        try {
+          // Don't attempt to load the built bundle in file:// contexts (such as test runners using jsdom).
+          if (
+            !window.location ||
+            (window.location &&
+              window.location.protocol &&
+              window.location.protocol.startsWith("http"))
+          ) {
+            var s = document.createElement("script");
+            s.src = "dist/keino.bundle.js";
+            s.async = false;
+            s.onload = function () {
+              try {
+                if (
+                  window.VolumeCalc &&
+                  typeof window.VolumeCalc.init === "function" &&
+                  !window.VolumeCalc.__keino_initialized
+                ) {
+                  window.VolumeCalc.init();
+                  window.VolumeCalc.__keino_initialized = true;
+                }
+              } catch (e) {
+                /* ignore */
+              }
+            };
+            s.onerror = function () {
+              /* bundle not present; fallback to root script */
+            };
+            document.head.appendChild(s);
+          }
+        } catch (err) {
+          /* ignore */
+        }
+      })();
+    </script>
     <script src="script.js" defer></script>
   </body>
 </html>

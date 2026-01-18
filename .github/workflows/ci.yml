@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, chore/cleanup ]
+    branches: [main, chore/cleanup]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -17,6 +17,13 @@ jobs:
           node-version: 18
       - name: Install
         run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: keino-dist
+          path: dist
       - name: Format check
         run: npm run format:check
       - name: Lint

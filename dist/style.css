@@ -1,0 +1,987 @@
+:root {
+  --equinor-red: #e31b23;
+  --equinor-accent: #ff3b4d;
+  --equinor-blue: #e9f4f8;
+  --card-bg: #ffffff;
+  --surface-bg: #ffffff; /* inner surfaces / cards */
+  --input-bg: #ffffff;
+  --input-border: #e6e6e6;
+  --text-color: #14222a;
+  --muted: #6b6b6b;
+
+  /* Table / breakdown colors */
+  --table-bg: var(--surface-bg);
+  --table-border: rgba(20, 34, 42, 0.06);
+  --table-row-border: rgba(20, 34, 42, 0.04);
+  --table-header-bg: linear-gradient(90deg, rgba(227, 27, 35, 0.04), rgba(255, 59, 77, 0.02));
+  --table-header-color: var(--text-color);
+  --table-row-hover: rgba(20, 34, 42, 0.03);
+  --table-totals-bg: linear-gradient(90deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
+}
+
+/* Dark theme overrides — toggled via `data-theme="dark"` on <html> */
+[data-theme="dark"] {
+  --equinor-blue: #071018; /* page background */
+  --card-bg: #08161b; /* slightly lighter card background for contrast */
+  --surface-bg: #0f2730; /* lighter surfaces within cards */
+  --input-bg: #0b222a; /* inputs slightly lighter for readability */
+  --input-border: rgba(255, 255, 255, 0.06);
+  --text-color: #e6eef2;
+  --muted: #90a1a8;
+  --equinor-red: #ff7b80;
+
+  /* Table color overrides for dark theme */
+  --table-bg: var(--surface-bg);
+  --table-border: rgba(255, 255, 255, 0.06);
+  --table-row-border: rgba(255, 255, 255, 0.03);
+  --table-header-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  --table-header-color: var(--text-color);
+  --table-row-hover: rgba(255, 255, 255, 0.02);
+  --table-totals-bg: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+}
+
+/* Header controls positioned top-right */
+.header-controls {
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* Theme switch (uses existing .switch styles) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+.switch input {
+  display: none;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider {
+  background-color: var(--equinor-red);
+}
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Theme label next to switch */
+.header-controls .theme-label {
+  margin-right: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.95rem;
+  align-self: center;
+}
+
+/* small visual tweak for header when dark mode applied */
+header {
+  background: var(--card-bg);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  background-color: var(--equinor-blue);
+  color: var(--text-color);
+  min-height: 100vh;
+}
+
+header {
+  background: var(--card-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.headerWrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  max-width: 1131px;
+  margin: 0 auto;
+  height: 72px;
+  padding: 0 16px;
+}
+
+.firmalogo {
+  height: 48px;
+  display: block;
+}
+
+.linker {
+  display: flex;
+  gap: 1rem;
+}
+.nav-link {
+  padding: 0.6rem 0.8rem;
+  color: var(--text-color);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  background: transparent;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.06s ease;
+}
+
+/* Hover and focus states */
+.nav-link:hover,
+.nav-link:focus {
+  background: linear-gradient(90deg, rgba(227, 27, 35, 0.08), rgba(255, 59, 77, 0.04));
+  color: var(--equinor-red);
+  transform: translateY(-1px);
+}
+
+/* Active/selected state - neutral (no special visual treatment) */
+.nav-link.active {
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Remove special hover/focus for active links so they use the regular .nav-link:hover rules */
+
+/* simple toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.switch input {
+  display: none;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.2s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+.switch input:checked + .slider {
+  background-color: var(--equinor-red);
+}
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.small-note-inline {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Main card container */
+.container {
+  /* slightly wider to accommodate the volume table without horizontal scrollbar */
+  max-width: 980px;
+  margin: 28px auto;
+  padding: 22px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  display: grid;
+  /* give more space to the right column so the table fits without scrolling */
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+h1 {
+  text-align: center;
+  color: var(--text-color);
+  margin-bottom: 6px;
+  font-size: 2rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* Left panel (form) */
+.left-panel {
+  background: transparent;
+  padding: 0;
+}
+
+.casing-input {
+  background: var(--surface-bg);
+  padding: 0; /* header and body manage padding */
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+.casing-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px; /* reduced padding for more compact headers */
+  cursor: pointer;
+  transition:
+    padding 0.12s ease,
+    gap 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.casing-header:focus {
+  outline: 3px solid rgba(20, 34, 42, 0.06);
+  border-radius: 6px;
+}
+.casing-header:focus-visible {
+  outline: 3px solid rgba(227, 27, 35, 0.12);
+}
+/* Header inline control (e.g., Liner?) */
+.casing-header .header-inline {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+.casing-header h3 {
+  margin: 0;
+  font-size: 0.95rem; /* slightly smaller heading for active state */
+  transition:
+    font-size 0.12s ease,
+    opacity 0.12s ease;
+  /* nudge down slightly so text bottom aligns with checkbox */
+  position: relative;
+  top: 6px;
+}
+.casing-header input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+.casing-body {
+  padding: 4px 8px; /* reduce body padding to compact layout */
+  border-top: 1px solid #f0f0f0;
+}
+.casing-input.collapsed .casing-body {
+  display: none;
+}
+.casing-input.collapsed .casing-header input[type="checkbox"] {
+  display: none;
+}
+/* Compact header style when collapsed: smaller padding and reduced h3 size */
+.casing-input.collapsed .casing-header {
+  padding: 4px 8px;
+  gap: 8px;
+  opacity: 0.95;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 6px;
+}
+/* hide inline header controls (e.g., Tie-back, Dummy hanger) when the casing section is collapsed */
+.casing-input.collapsed .header-inline {
+  display: none;
+}
+.casing-input.collapsed .casing-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.9;
+  position: relative;
+  top: 2px;
+}
+.casing-input h3 {
+  margin-bottom: 10px;
+  color: var(--text-color);
+}
+
+/* Even more compact collapsed state and horizontal layout */
+.casing-input.collapsed {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(50% - 12px);
+  margin-right: 12px;
+  margin-bottom: 8px;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 6px;
+}
+.casing-input.collapsed .casing-header {
+  padding: 2px 6px;
+  gap: 6px;
+  opacity: 0.95;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 6px;
+}
+.casing-input.collapsed .casing-header h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.85;
+  margin: 0;
+  position: relative;
+  top: 2px;
+}
+
+/* Ensure a responsive fallback on smaller screens */
+@media (max-width: 900px) {
+  .casing-input.collapsed {
+    width: 100%;
+    display: block;
+    margin-right: 0;
+  }
+}
+
+.input-group {
+  margin-bottom: 12px;
+}
+label {
+  display: block;
+  color: var(--text-color);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+input::placeholder,
+select::placeholder {
+  color: var(--muted);
+  opacity: 0.9;
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--equinor-red);
+}
+
+/* right panel (schematic) */
+.right-panel {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.small-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* Default button for Top fields */
+.default-top-btn {
+  background: #f5f5f5;
+  border: 1px solid #e6e6e6;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-color);
+}
+.default-top-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+.default-top-btn:active {
+  transform: translateY(1px);
+}
+.default-top-btn:focus,
+.liner-default-btn:focus,
+.wellhead-btn:focus,
+.info-btn:focus {
+  outline: 3px solid rgba(227, 27, 35, 0.12);
+  outline-offset: 2px;
+}
+
+/* Liner default button visually matches the Default button */
+.liner-default-btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+/* Reservoir Liner button: use same non-active styling as wellhead / liner default */
+.reservoir-default-btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-color);
+}
+.reservoir-default-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+.reservoir-default-btn:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
+.liner-default-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+.liner-default-btn:active {
+  transform: translateY(1px);
+}
+
+/* Small Liner default button: ensure appearance is consistent and add dark-theme overrides */
+.small-liner-default-btn {
+  /* base appearance inherits from .default-top-btn; no extra rules needed for light theme */
+}
+
+/* Dark theme overrides for Small Liner Liner button */
+[data-theme="dark"] .small-liner-default-btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
+}
+[data-theme="dark"] .small-liner-default-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+[data-theme="dark"] .small-liner-default-btn:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
+
+/* Filled active state for Production buttons */
+.casing-btn.active,
+.liner-default-btn.active {
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(227, 27, 35, 0.12);
+}
+.casing-btn.active:hover,
+.liner-default-btn.active:hover {
+  filter: brightness(0.98);
+}
+
+/* Small info button shown next to Default when Liner is active */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid #e6e6e6;
+  background: var(--card-bg);
+  color: var(--muted);
+  font-weight: 700;
+  cursor: default;
+  font-size: 12px;
+}
+.info-btn:hover {
+  background: #fff;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+/* Tooltip shown next to the info button - appears immediately on hover/focus */
+.info-tooltip {
+  position: absolute;
+  top: -8px;
+  left: calc(100% + 8px);
+  transform: translateY(-50%);
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 8px 10px;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  color: var(--text-color);
+  font-size: 0.85rem;
+  min-width: 200px;
+  z-index: 30;
+  /* visibility controlled by .hidden utility */
+  pointer-events: auto; /* allow hover to keep it visible */
+}
+.info-tooltip::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent #e6e6e6 transparent transparent;
+}
+.info-tooltip p {
+  margin: 0;
+}
+
+/* Wellhead button styling — match the non-active Liner button for improved readability */
+.wellhead-btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-color);
+}
+.wellhead-btn:not(.active):hover {
+  background: var(--card-bg);
+}
+.wellhead-btn:active {
+  transform: translateY(1px);
+}
+.wellhead-btn:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
+
+/* Presets panel styling */
+.presets {
+  margin-top: 18px;
+}
+.presets-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.presets-controls input#preset_name {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+.presets-controls select#preset_list {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+  min-width: 160px;
+}
+.presets-controls button {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--surface-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: 700;
+}
+/* Primary save button */
+.presets-controls button#save_preset_btn {
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(227, 27, 35, 0.12);
+}
+.presets-controls button#save_preset_btn:hover {
+  filter: brightness(0.98);
+}
+/* Secondary actions */
+.presets-controls button#load_preset_btn,
+.presets-controls button#delete_preset_btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+}
+.presets-controls button#delete_preset_btn {
+  color: var(--equinor-red);
+  border-color: rgba(227, 27, 35, 0.12);
+}
+/* Export / Import buttons (inline, small) */
+#export_presets_btn,
+#import_presets_btn {
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: var(--text-color);
+}
+#export_presets_btn:hover,
+#import_presets_btn:hover {
+  background: var(--card-bg);
+}
+.presets-controls button:focus {
+  outline: 3px solid rgba(45, 132, 255, 0.14);
+  outline-offset: 2px;
+}
+@media (min-width: 640px) {
+  .presets-controls {
+    flex-direction: column;
+  }
+}
+
+/* Inline checkbox label styling (e.g., Liner?) */
+.inline-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color);
+  font-weight: 600;
+}
+.inline-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* Volume breakdown table */
+.volume-breakdown {
+  margin-top: 18px;
+}
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.volume-table {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; /* ensure borders/padding don't cause overflow */
+  border-collapse: collapse;
+  margin-top: 8px;
+  background: var(--table-bg);
+  border: 1px solid var(--table-border);
+  table-layout: fixed; /* prevent the browser from forcing a wide layout */
+  color: var(--text-color);
+}
+.volume-table th,
+.volume-table td {
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 0.92rem;
+  border-bottom: 1px solid var(--table-row-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-color);
+}
+/* Allow header labels to wrap so they don't force table wider */
+.volume-table thead th {
+  white-space: normal;
+  line-height: 1.1;
+  padding: 8px 8px;
+  background: var(--table-header-bg);
+  font-weight: 700;
+  color: var(--table-header-color);
+}
+.volume-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Totals row styling */
+.volume-table .totals-row {
+  font-weight: 700;
+  background: var(--table-totals-bg);
+  color: var(--text-color);
+}
+
+.volume-table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+.small-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+/* Horizontal container for Size select + inline controls */
+.size-with-ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.size-with-ctrl select {
+  width: auto; /* do not stretch full width */
+  min-width: 120px;
+}
+
+/* Vertical wrapper for select and small editable ID input */
+.size-with-id {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.size-id-input {
+  width: 100px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent; /* subtle, non-boxed look */
+  border-radius: 6px;
+  text-align: center;
+}
+.size-id-input:focus {
+  outline: none;
+  border-color: rgba(20, 34, 42, 0.06);
+}
+.size-id-input[aria-label] {
+  /* ensure small text is slightly muted */
+  color: var(--muted);
+}
+
+.well-schematic {
+  width: 100%;
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#wellSchematic {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #87ceeb 0%, #e6d5b8 15%, #b8a684 100%);
+  box-shadow: inset 0 -30px 60px rgba(0, 0, 0, 0.04);
+}
+
+.result {
+  margin-top: 8px;
+  padding: 18px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
+  color: #fff;
+  text-align: center;
+  position: relative;
+}
+.result h2,
+.result p {
+  margin: 0;
+}
+.result p {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Plug panel (moved below Total Volume) */
+.plug-panel {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-bg);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+.plug-toggle {
+  /* moved down to sit visually below the Total Volume card */
+  margin-top: 3rem;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 600;
+}
+/* responsive fallback: smaller spacing on narrow viewports */
+@media (max-width: 600px) {
+  .plug-toggle {
+    margin-top: 1rem;
+  }
+}
+.plug-panel .plug-control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plug-panel input {
+  width: 140px;
+  max-width: 40%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+}
+.plug-volumes {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* small utilities */
+
+/* Utility to hide elements (used instead of inline style="display:none") */
+.hidden {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: -1px;
+}
+
+.input-inline {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+} /* Narrow variant for specific inline inputs (e.g., Riser depth) */
+.input-inline.input-inline--narrow {
+  flex: 0 0 auto; /* don't grow to fill available space */
+  align-self: flex-end; /* align bottom with neighbouring controls */
+}
+.input-inline.input-inline--narrow input {
+  width: 100px; /* Reduced width */
+  max-width: 120px;
+  height: 28px; /* compact height to align with slider */
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
+.input-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+.input-row.three-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+.input-row.three-cols .input-inline {
+  /* make column contents stack vertically (label, control, button/note) */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure controls fill their column */
+.input-row.three-cols .input-inline input,
+.input-row.three-cols .input-inline select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 44px; /* uniform control height */
+}
+
+/* Align the Default button left under the control */
+.input-row.three-cols .input-inline > div {
+  align-self: flex-start;
+}
+
+/* Slightly larger spacing between label and control for visual alignment */
+.input-row.three-cols .input-inline label {
+  margin-bottom: 10px;
+}
+.input-row .input-inline label {
+  display: block;
+  margin-bottom: 6px;
+}
+@media (max-width: 720px) {
+  .input-row.three-cols {
+    grid-template-columns: 1fr;
+  }
+}
+.no-spin {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+  #wellSchematic {
+    height: 360px;
+  }
+}
+
+/* Ensure Wellhead Depth input is styled properly */
+#wellhead-depth-container {
+  margin-top: 0; /* sits in the same row as the slider */
+  display: flex;
+  gap: 8px;
+  align-items: center; /* center so label lines up with Subsea text */
+}
+#wellhead-depth-container label {
+  display: inline-block;
+  margin-bottom: 0;
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--muted); /* match Subsea small-note styling */
+  font-size: 0.95rem;
+}
+#wellhead-depth-container input {
+  width: 100px;
+  max-width: 120px;
+  height: 28px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  align-self: flex-end; /* keep input bottom aligned with slider */
+}
+
+/* Visual cue for read-only inputs (e.g., when No riser is selected) */
+.readonly-input {
+  background: #f5f5f5 !important;
+  color: var(--muted) !important;
+  border-color: #e6e6e6 !important;
+  cursor: not-allowed !important;
+}

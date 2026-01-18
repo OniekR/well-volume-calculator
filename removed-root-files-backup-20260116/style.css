@@ -20,7 +20,7 @@
 }
 
 /* Dark theme overrides — toggled via `data-theme="dark"` on <html> */
-[data-theme='dark'] {
+[data-theme="dark"] {
   --equinor-blue: #071018; /* page background */
   --card-bg: #08161b; /* slightly lighter card background for contrast */
   --surface-bg: #0f2730; /* lighter surfaces within cards */
@@ -72,7 +72,7 @@
 }
 .slider:before {
   position: absolute;
-  content: '';
+  content: "";
   height: 22px;
   width: 22px;
   left: 3px;
@@ -109,7 +109,14 @@ header {
 }
 
 body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   background-color: var(--equinor-blue);
   color: var(--text-color);
   min-height: 100vh;
@@ -146,7 +153,10 @@ header {
   text-decoration: none;
   border-radius: 6px;
   background: transparent;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.06s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.06s ease;
 }
 
 /* Hover and focus states */
@@ -190,7 +200,7 @@ header {
 }
 .slider:before {
   position: absolute;
-  content: '';
+  content: "";
   height: 18px;
   width: 18px;
   left: 3px;
@@ -285,7 +295,7 @@ h1 {
   margin: 0;
   font-size: 1.05rem;
 }
-.casing-header input[type='checkbox'] {
+.casing-header input[type="checkbox"] {
   width: 18px;
   height: 18px;
 }
@@ -296,7 +306,7 @@ h1 {
 .casing-input.collapsed .casing-body {
   display: none;
 }
-.casing-input.collapsed .casing-header input[type='checkbox'] {
+.casing-input.collapsed .casing-header input[type="checkbox"] {
   display: none;
 }
 .casing-input h3 {
@@ -460,7 +470,7 @@ select:focus {
   pointer-events: auto; /* allow hover to keep it visible */
 }
 .info-tooltip::after {
-  content: '';
+  content: "";
   position: absolute;
   left: -6px;
   top: 50%;
@@ -502,7 +512,7 @@ select:focus {
   color: var(--text-color);
   font-weight: 600;
 }
-.inline-checkbox input[type='checkbox'] {
+.inline-checkbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
 }

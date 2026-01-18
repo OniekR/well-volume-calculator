@@ -1,19 +1,27 @@
-module.exports = {
-  env: {
-    browser: true,
-    node: true,
-    es2021: true,
+module.exports = [
+  {
+    files: ["**/*.js"],
+    extends: ["eslint:recommended", "plugin:node/recommended", "prettier"],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: "module",
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        module: "readonly",
+        require: "readonly",
+        process: "readonly",
+        console: "readonly",
+      },
+    },
+    linterOptions: { reportUnusedDisableDirectives: true },
+    plugins: { node: require("eslint-plugin-node") },
+    rules: {
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-console": "off",
+      indent: ["error", 2],
+      quotes: ["error", "double"],
+      semi: ["error", "always"],
+    },
   },
-  extends: ["eslint:recommended", "plugin:node/recommended", "prettier"],
-  parserOptions: {
-    ecmaVersion: 12,
-    sourceType: "module",
-  },
-  rules: {
-    "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
-    "no-console": "off",
-    indent: ["error", 2],
-    quotes: ["error", "double"],
-    semi: ["error", "always"],
-  },
-};
+];

@@ -1,0 +1,8 @@
+feat(open-hole): add Open Hole input, auto-linking and jagged schematic rendering; fix preset loading + UI sync
+
+- Add Open Hole casing input, auto-link top to deepest casing shoe, and dark jagged rendering on the canvas.
+- Ensure renderer respects "open_hole" role; fix data handoff from calculator to drawing.
+- Update built-in preset P-9 to set Small Liner / Open Hole flags appropriately and auto-enable casing when preset provides sizes/depths.
+- Prefer built-in preset payload when loading built-in entries; force casing UI sync (collapse/expand) after loading.
+- Add smoke tests asserting Open Hole behavior and preset/panel behavior to prevent regressions.
+- Update changelog.
