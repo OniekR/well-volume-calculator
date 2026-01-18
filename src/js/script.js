@@ -342,7 +342,6 @@ const VolumeCalc = (() => {
   }
 
   function setupPresetsUI() {
-    try { window.__presetsUIBound = true; } catch(e) {}
     const saveBtn = el("save_preset_btn");
     const loadBtn = el("load_preset_btn");
     const delBtn = el("delete_preset_btn");
@@ -434,38 +433,12 @@ const VolumeCalc = (() => {
       if (!state && window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function") {
         state = window.__KeinoPresets.getPresetState(name);
       }
-      // Log for debugging if something (test harness) captures page logs
-      console.log && console.log("Load preset:", name, {
-        moduleFound: !!(window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function"),
-        usedFallback,
-        stateFound: !!state,
-        depth_small: state && state.depth_small && state.depth_small.value,
-      });
-
       if (!state) return alert("Preset not found.");
 
-      // expose diagnostic info for test harness
-      try {
-        window.__lastPresetName = name;
-        window.__lastPresetApplied = state;
-      } catch (e) {
-        /* ignore */
-      }
-      console.log && console.log("Applying preset state (depth_small before apply):", document.getElementById("depth_small")?.value);
       applyStateObject(state);
-      try {
-        window.__lastPresetAfterApply = {
-          depth_small: document.getElementById("depth_small")?.value,
-          depth_small_top: document.getElementById("depth_small_top")?.value,
-        };
-      } catch (e) {
-        /* ignore */
-      }
-      console.log && console.log("After applyStateObject (depth_small now):", document.getElementById("depth_small")?.value);
 
-      // set the current preset name (shows on canvas)
+      // set the current preset name (shows on the canvas)
       currentPresetName = name;
-      applyStateObject(state);
 
       // Ensure production button reflects newly loaded preset immediately (defensive)
       try {
@@ -2069,7 +2042,6 @@ const VolumeCalc = (() => {
   }
 
   function init() {
-    try { window.__initCalled = true; } catch (e) {}
     // load state before initial calc
     loadState();
     // initial canvas sizing
@@ -2081,12 +2053,7 @@ const VolumeCalc = (() => {
     setupButtons();
     setupTooltips();
     setupSizeIdInputs();
-    try {
-      setupPresetsUI();
-      try { window.__presetsUISetupCalled = true; } catch(e) {}
-    } catch (err) {
-      try { window.__presetsUIError = (err && err.message) || String(err); } catch (e) {}
-    }
+    setupPresetsUI();
     setupWellheadSync();
     setupTiebackBehavior();
     setupProductionToggleButtons();
