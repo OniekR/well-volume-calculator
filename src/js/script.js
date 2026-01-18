@@ -1824,8 +1824,8 @@ const VolumeCalc = (() => {
           prodInfoBtn.classList.remove("hidden");
           prodInfoBtn.setAttribute("aria-hidden", "false");
         }
-+        // When production_is_liner is cleared, prefer Casing as the active toggle if Production Top is present
-+        if (casingBtn) setActive(casingBtn);
+        // When production_is_liner is cleared, prefer Casing as the active toggle if Production Top is present
+        if (casingBtn) setActive(casingBtn);
       }
       scheduleSave();
       calculateVolume();
