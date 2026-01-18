@@ -27,6 +27,11 @@
               href="https://oniekr.github.io/pressurevolume.github.io/"
               >Volume / pressure</a
             >
+            <a
+              class="nav-link"
+              href="https://oniekr.github.io/stringlift.github.io/"
+              >String lift calculator</a
+            >
           </div>
           <div class="header-controls">
             <span id="theme_label" class="theme-label" aria-live="polite"
@@ -621,197 +626,9 @@
             </div>
           </div>
 
-          <div class="casing-input">
-            <div class="casing-header">
-              <input
-                type="checkbox"
-                class="use-checkbox"
-                id="use_small_liner"
-                checked
-              />
-              <h3>Small liner</h3>
-            </div>
-            <div class="casing-body">
-              <div class="input-row three-cols">
-                <div class="input-inline">
-                  <label for="small_liner_size">Size:</label>
-                  <div class="size-with-id">
-                    <select id="small_liner_size" name="small_liner_size">
-                      <option value="4.276">5" 18#</option>
-                      <option value="3.958">4 1/2" 12.6#</option>
-                    </select>
-                    <input
-                      id="small_liner_size_id"
-                      class="size-id-input"
-                      type="number"
-                      step="0.001"
-                      aria-label="Small liner size id"
-                    />
-                  </div>
-                </div>
-                <div class="input-inline">
-                  <label for="depth_small_top">Top (m):</label>
-                  <input
-                    type="number"
-                    id="depth_small_top"
-                    name="depth_small_top"
-                    step="0.1"
-                    placeholder="Optional"
-                    min="0"
-                  />
-                  <div
-                    style="
-                      margin-top: 8px;
-                      display: flex;
-                      gap: 8px;
-                      align-items: center;
-                    "
-                  >
-                    <button
-                      type="button"
-                      class="default-top-btn small-liner-default-btn"
-                      aria-label="Liner: set Small Liner Top to Reservoir shoe - 50"
-                      title="Liner: set Small Liner Top to Reservoir shoe - 50"
-                    >
-                      Liner
-                    </button>
-                  </div>
-                </div>
-                <div class="input-inline">
-                  <label for="depth_small">Shoe (m):</label>
-                  <input
-                    type="number"
-                    id="depth_small"
-                    name="depth_small"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
-                  <div
-                    id="small_liner_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Open Hole -->
-          <div class="casing-input">
-            <div class="casing-header">
-              <input
-                type="checkbox"
-                class="use-checkbox"
-                id="use_open_hole"
-                checked
-              />
-              <h3>Open Hole</h3>
-            </div>
-            <div class="casing-body">
-              <div class="input-row three-cols">
-                <div class="input-inline">
-                  <label for="open_hole_size">Size:</label>
-                  <div class="size-with-id">
-                    <select id="open_hole_size" name="open_hole_size">
-                      <option value="17.5">17 1/2"</option>
-                      <option value="16">16"</option>
-                      <option value="12.25">12 1/4"</option>
-                      <option value="8.5">8 1/2"</option>
-                      <option value="6">6"</option>
-                    </select>
-                    <input
-                      id="open_hole_size_id"
-                      class="size-id-input"
-                      type="number"
-                      step="0.01"
-                      aria-label="Open hole size id"
-                    />
-                  </div>
-                </div>
-                <div class="input-inline">
-                  <label for="depth_open_top">Top (m):</label>
-                  <input
-                    type="number"
-                    id="depth_open_top"
-                    name="depth_open_top"
-                    step="0.1"
-                    placeholder="Optional"
-                    min="0"
-                  />
-                  <div
-                    style="
-                      margin-top: 8px;
-                      display: flex;
-                      gap: 8px;
-                      align-items: center;
-                    "
-                  >
-                    <!-- placeholder for potential defaults -->
-                  </div>
-                </div>
-                <div class="input-inline">
-                  <label for="depth_open">TD (m):</label>
-                  <input
-                    type="number"
-                    id="depth_open"
-                    name="depth_open"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
-                  <div
-                    id="open_hole_length_note"
-                    class="small-note"
-                    aria-live="polite"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div class="result">
             <h2>Total Volume</h2>
             <p id="totalVolume">0.00 m³</p>
-          </div>
-
-          <div class="plug-toggle" aria-hidden="false">
-            <label class="inline-checkbox">
-              <input
-                type="checkbox"
-                id="use_plug"
-                checked
-                aria-controls="plug-panel"
-              />
-              Plug
-            </label>
-          </div>
-
-          <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
-            <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
-              Plug
-            </h3>
-
-            <div class="plug-control">
-              <label for="plug_depth">depth (m):</label>
-              <input
-                type="number"
-                id="plug_depth"
-                name="plug_depth"
-                step="1"
-                placeholder="Optional"
-                min="0"
-              />
-            </div>
-
-            <div class="plug-volumes">
-              <div>
-                Volume above plug: <span id="plugAboveVolume">— m³</span>
-              </div>
-              <div>
-                Volume below plug: <span id="plugBelowVolume">— m³</span>
-              </div>
-            </div>
           </div>
         </form>
       </main>
@@ -852,58 +669,6 @@
             </table>
             <div id="volume-breakdown-note" class="small-note">
               Values update automatically when inputs change.
-            </div>
-          </div>
-        </section>
-
-        <section id="presets" class="presets" aria-labelledby="presets-title">
-          <h2 id="presets-title">Presets</h2>
-          <div class="table-wrap">
-            <div class="presets-controls">
-              <input type="text" id="preset_name" placeholder="Preset name" />
-              <div style="display: flex; gap: 8px; align-items: center">
-                <button type="button" id="save_preset_btn">Save</button>
-                <button
-                  type="button"
-                  id="export_presets_btn"
-                  title="Download presets as JSON"
-                >
-                  Export
-                </button>
-                <button
-                  type="button"
-                  id="import_presets_btn"
-                  title="Upload presets JSON"
-                >
-                  Import
-                </button>
-                <input
-                  id="import_presets_input"
-                  type="file"
-                  accept=".json,application/json"
-                  style="display: none"
-                  aria-hidden="true"
-                />
-              </div>
-              <div
-                style="
-                  margin-top: 8px;
-                  display: flex;
-                  gap: 8px;
-                  align-items: center;
-                "
-              >
-                <select id="preset_list" aria-label="Saved presets">
-                  <option value="">— Select a preset —</option>
-                </select>
-                <button type="button" id="load_preset_btn">Load</button>
-                <button type="button" id="delete_preset_btn">Delete</button>
-              </div>
-            </div>
-            <div id="presets_note" class="small-note">
-              Save and recall named input presets. Built-in presets are loaded
-              from <code>keino_presets_2026-01-16_20_54_15.json</code> and are
-              read-only.
             </div>
           </div>
         </section>
