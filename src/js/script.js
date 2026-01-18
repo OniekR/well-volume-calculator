@@ -542,6 +542,37 @@ const VolumeCalc = (() => {
       // set the current preset name (shows on canvas)
       currentPresetName = name;
       applyStateObject(state);
+      // Safety: some UI handlers may run after `applyStateObject` and re-collapse sections.
+      // Ensure Small Liner is expanded when the preset contains Small Liner data (race-condition fix).
+      setTimeout(() => {
+        try {
+          const smallKeys = [
+            "small_liner_size",
+            "small_liner_size_id",
+            "depth_small_top",
+            "depth_small",
+          ];
+          const hasSmallData = smallKeys.some((k) =>
+            state && state[k] && state[k].value !== undefined && String(state[k].value).trim() !== ""
+          );
+          const smallUse = state && state["use_small_liner"] && state["use_small_liner"].value;
+          if (hasSmallData || smallUse) {
+            const cb = el("use_small_liner");
+            if (cb) {
+              cb.checked = true;
+              cb.dispatchEvent(new Event("change", { bubbles: true }));
+              const section = cb.closest(".casing-input");
+              if (section) {
+                section.classList.remove("collapsed");
+                const header = section.querySelector(".casing-header");
+                if (header) header.setAttribute("aria-expanded", "true");
+              }
+            }
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }, 120);
     });
 
     // disable delete for built-in presets and clear the Preset name field on selection
