@@ -286,7 +286,8 @@ const VolumeCalc = (() => {
     // Ensure production liner toggle handlers run so production buttons reflect loaded preset
     try {
       const prodLinerEl = el("production_is_liner");
-      if (prodLinerEl) prodLinerEl.dispatchEvent(new Event("change", { bubbles: true }));
+      if (prodLinerEl)
+        prodLinerEl.dispatchEvent(new Event("change", { bubbles: true }));
     } catch (e) {
       /* ignore */
     }
@@ -590,12 +591,17 @@ const VolumeCalc = (() => {
         const raw = localStorage.getItem(PRESETS_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && parsed[name] && parsed[name].state) state = parsed[name].state;
+          if (parsed && parsed[name] && parsed[name].state)
+            state = parsed[name].state;
         }
       } catch (e) {
         /* ignore */
       }
-      if (!state && window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function") {
+      if (
+        !state &&
+        window.__KeinoPresets &&
+        typeof window.__KeinoPresets.getPresetState === "function"
+      ) {
         state = window.__KeinoPresets.getPresetState(name) || state;
       }
       if (!state) {
@@ -1825,7 +1831,15 @@ const VolumeCalc = (() => {
           prodInfoBtn.setAttribute("aria-hidden", "false");
         }
         // When production_is_liner is cleared, prefer Casing as the active toggle if Production Top is present
-        if (casingBtn) setActive(casingBtn);
+        if (casingBtn) {
+          const linerBtn = qs(".liner-default-btn")[0];
+          casingBtn.classList.add("active");
+          casingBtn.setAttribute("aria-pressed", "true");
+          if (linerBtn) {
+            linerBtn.classList.remove("active");
+            linerBtn.setAttribute("aria-pressed", "false");
+          }
+        }
       }
       scheduleSave();
       calculateVolume();
