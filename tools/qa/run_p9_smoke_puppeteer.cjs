@@ -2,7 +2,9 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   const url = 'http://localhost:5173/';
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   try {

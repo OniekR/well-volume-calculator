@@ -45,6 +45,8 @@ jobs:
           done
       - name: Run Puppeteer P-9 smoke test
         run: node tools/qa/run_p9_smoke_puppeteer.cjs
+      - name: Run hide-casings smoke test
+        run: node tools/qa/run_hide_casings_smoke.cjs
       - name: Stop server
         if: always()
         run: |

@@ -386,6 +386,11 @@ h1 {
   }
 }
 
+/* UI-only: hide all casing sections when the form has .casings-hidden */
+#well-form.casings-hidden .casing-input {
+  display: none !important;
+}
+
 .input-group {
   margin-bottom: 12px;
 }

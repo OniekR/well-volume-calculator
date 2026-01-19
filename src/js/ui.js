@@ -307,6 +307,32 @@ export function setupTooltips() {
   setup('reservoir_default_info_btn', 'reservoir_default_info_tooltip');
 }
 
+export function setupHideCasingsToggle() {
+  const btn = el('toggle_hide_casings_btn');
+  const form = document.getElementById('well-form');
+  if (!btn || !form) return;
+
+  const setState = (hidden) => {
+    form.classList.toggle('casings-hidden', hidden);
+    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    btn.textContent = hidden ? 'Show casings' : 'Hide casings';
+  };
+
+  btn.addEventListener('click', () => {
+    const hidden = form.classList.toggle('casings-hidden');
+    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    btn.textContent = hidden ? 'Show casings' : 'Hide casings';
+  });
+
+  // Keyboard accessibility
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+}
+
 export function setupSizeIdInputs(deps) {
   const { scheduleSave, calculateVolume } = deps;
   const pairs = [
@@ -823,6 +849,7 @@ export function initUI(deps) {
   setupCasingToggles(deps);
   setupButtons(deps);
   setupTooltips(deps);
+  setupHideCasingsToggle();
   setupSizeIdInputs(deps);
   setupWellheadSync(deps);
   setupTiebackBehavior(deps);
