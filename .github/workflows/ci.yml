@@ -22,20 +22,18 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm test
-      - name: Verify QA smoke scripts are present in synced folder
+      - name: Verify QA smoke scripts are present in repo tools/qa
         run: |
-          echo 'Checking _volume_sync_tmp/tools/qa for smoke scripts'
-          if [ ! -f _volume_sync_tmp/tools/qa/simple_static_server.cjs ] || [ ! -f _volume_sync_tmp/tools/qa/run_p9_smoke_puppeteer.cjs ]; then
-            echo '❌ QA smoke test files missing in _volume_sync_tmp. Listing tree:'
-            ls -R _volume_sync_tmp || true
-            echo 'Also listing repo tools/qa:'
-            ls -la tools/qa || true
+          echo 'Checking tools/qa for smoke scripts'
+          if [ ! -f tools/qa/simple_static_server.cjs ] || [ ! -f tools/qa/run_p9_smoke_puppeteer.cjs ]; then
+            echo '❌ QA smoke test files missing in tools/qa. Listing tree:'
+            ls -R tools/qa || true
             exit 1
           fi
           echo '✅ QA files present'
       - name: Start simple static server (background)
         run: |
-          nohup node _volume_sync_tmp/tools/qa/simple_static_server.cjs &> server.log & echo $! > server.pid
+          nohup node tools/qa/simple_static_server.cjs &> server.log & echo $! > server.pid
       - name: Wait for server
         run: |
           for i in {1..15}; do
