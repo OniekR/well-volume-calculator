@@ -44,7 +44,7 @@ jobs:
             sleep 1;
           done
       - name: Run Puppeteer P-9 smoke test
-        run: node _volume_sync_tmp/tools/qa/run_p9_smoke_puppeteer.cjs
+        run: node tools/qa/run_p9_smoke_puppeteer.cjs
       - name: Stop server
         if: always()
         run: |
