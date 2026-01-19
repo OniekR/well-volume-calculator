@@ -24,7 +24,9 @@ describe('gatherInputs', () => {
     const openTop = document.getElementById('depth_open_top');
     expect(openTop.value).toBe('100');
     const note = document.getElementById('open_hole_length_note');
-    expect(note.textContent).toContain('Top linked to deepest casing shoe: 100');
+    expect(note.textContent).toContain(
+      'Top linked to deepest casing shoe: 100'
+    );
   });
 
   it('prefers explicit _id input over select value', () => {
