@@ -80,7 +80,9 @@ export function drawSchematic(casings, opts = {}) {
   // However, always allow rendering of a provided preset label (a UI overlay)
   // even when maxDepth is zero so tests and user overlays still appear.
   if (maxDepth === 0) {
-    const hasLabel = typeof opts.currentPresetName === 'string' && opts.currentPresetName.trim() !== '';
+    const hasLabel =
+      typeof opts.currentPresetName === 'string' &&
+      opts.currentPresetName.trim() !== '';
     if (!hasLabel) return;
   }
 
