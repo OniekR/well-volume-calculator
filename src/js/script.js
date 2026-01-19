@@ -35,7 +35,7 @@ const VolumeCalc = (() => {
         try {
           localStorage.setItem(
             "keino_theme",
-            mode === "dark" ? "dark" : "light"
+            mode === "dark" ? "dark" : "light",
           );
         } catch (e) {
           /* ignore */
@@ -125,37 +125,9 @@ const VolumeCalc = (() => {
   }
 
   // Presets
-  const PRESETS_KEY = "keino_presets_v1";
-
-  // Built-in presets loaded from an external JSON file (read-only)
-  // Update `keino_presets_2026-01-16_20_54_15.json` to change these
-  let BUILTIN_PRESETS = {};
-  const BUILTIN_PRESETS_URL = "./keino_presets_2026-01-16_20_54_15.json";
-
-  async function loadBuiltinPresets() {
-    try {
-      const res = await fetch(BUILTIN_PRESETS_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const payload = await res.json();
-      if (payload && payload.presets && typeof payload.presets === "object") {
-        BUILTIN_PRESETS = payload.presets;
-      } else if (payload && typeof payload === "object") {
-        BUILTIN_PRESETS = payload;
-      }
-      // refresh UI if already initialized
-      try {
-        populatePresetsUI();
-      } catch (e) {
-        /* ignore */
-      }
-    } catch (err) {
-      console.warn(
-        "Failed to load built-in presets from " + BUILTIN_PRESETS_URL + ":",
-        err && err.message ? err.message : err
-      );
-      BUILTIN_PRESETS = BUILTIN_PRESETS || {};
-    }
-  }
+  // Preset management has been delegated to the module `src/js/presets.js`.
+  // The module attaches helpers to `window.__KeinoPresets` for compatibility.
+  // Keep `captureStateObject()` (used when saving a preset) in this file.
 
   function captureStateObject() {
     const state = {};
@@ -171,7 +143,6 @@ const VolumeCalc = (() => {
     });
     return state;
   }
-
   // IDs we should not populate when loading a preset
   // IDs we should not populate when loading a preset (UI-only controls)
   const _SKIP_POPULATE_ON_LOAD = new Set([
@@ -280,8 +251,17 @@ const VolumeCalc = (() => {
     // logic. Dispatch a 'change' event on each `.use-checkbox` so the UI and
     // calculated volumes stay in sync with the loaded preset.
     qs(".use-checkbox").forEach((cb) =>
-      cb.dispatchEvent(new Event("change", { bubbles: true }))
+      cb.dispatchEvent(new Event("change", { bubbles: true })),
     );
+
+    // Ensure production liner toggle handlers run so production buttons reflect loaded preset
+    try {
+      const prodLinerEl = el("production_is_liner");
+      if (prodLinerEl)
+        prodLinerEl.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (e) {
+      /* ignore */
+    }
 
     // Ensure each casing section collapsed/expanded state matches its checkbox
     // (some environments may not run checkbox change handlers reliably, so
@@ -305,158 +285,60 @@ const VolumeCalc = (() => {
     // we call once to ensure state is consistent)
     calculateVolume();
     scheduleSave();
-  }
 
-  function loadPresetsFromStorage() {
+    // Ensure production toggle buttons reflect the newly loaded preset values.
     try {
-      const raw = localStorage.getItem(PRESETS_KEY);
-      if (!raw) return {};
-      return JSON.parse(raw);
-    } catch (e) {
-      return {};
-    }
-  }
-
-  function savePresetsToStorage(obj) {
-    try {
-      localStorage.setItem(PRESETS_KEY, JSON.stringify(obj));
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  function savePreset(name) {
-    if (!name) return false;
-    // prevent clashing with built-in preset names
-    if (BUILTIN_PRESETS[name]) {
-      return false;
-    }
-    const presets = loadPresetsFromStorage();
-    presets[name] = { savedAt: Date.now(), state: captureStateObject() };
-    savePresetsToStorage(presets);
-    // show the saved name on the canvas
-    currentPresetName = name;
-    // trigger redraw
-    calculateVolume();
-    return true;
-  }
-
-  function deletePreset(name) {
-    if (!name) return false;
-    // do not allow deleting built-in presets
-    if (BUILTIN_PRESETS[name]) return false;
-    const presets = loadPresetsFromStorage();
-    if (presets[name]) {
-      delete presets[name];
-      savePresetsToStorage(presets);
-      return true;
-    }
-    return false;
-  }
-
-  function getPresetNames() {
-    const stored = loadPresetsFromStorage();
-    const builtInNames = Object.keys(BUILTIN_PRESETS || {}).sort();
-    const storedNames = Object.keys(stored || {}).sort((a, b) =>
-      stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0
-    );
-    return [
-      ...builtInNames,
-      ...storedNames.filter((n) => !builtInNames.includes(n)),
-    ];
-  }
-
-  function getPresetState(name) {
-    const stored = loadPresetsFromStorage();
-    if (stored[name]) return stored[name].state;
-    if (BUILTIN_PRESETS[name]) return BUILTIN_PRESETS[name].state;
-    return null;
-  }
-
-  function populatePresetsUI() {
-    const sel = el("preset_list");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">— Select a preset —</option>';
-    const names = getPresetNames();
-    names.forEach((n) => {
-      const opt = document.createElement("option");
-      opt.value = n;
-      opt.textContent = n;
-      if (BUILTIN_PRESETS[n]) opt.dataset.builtin = "1";
-      sel.appendChild(opt);
-    });
-  }
-
-  // Export presets as JSON file for sharing
-  function exportPresets() {
-    try {
-      const raw = localStorage.getItem(PRESETS_KEY) || "{}";
-      const payload = {
-        exported_at: new Date().toISOString(),
-        presets: JSON.parse(raw),
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `keino_presets_${new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace(/[:T]/g, "_")}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      alert(
-        "Export failed: " + (err && err.message ? err.message : String(err))
-      );
-    }
-  }
-
-  // Import presets from a JSON File object
-  function importPresetsFile(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        let incoming = null;
-        if (parsed && typeof parsed === "object") {
-          incoming =
-            parsed.presets && typeof parsed.presets === "object"
-              ? parsed.presets
-              : parsed;
+      const prodLinerEl = el("production_is_liner");
+      const casingBtn = el("production_casing_btn");
+      const linerBtn = document.querySelector(".liner-default-btn");
+      const prodTopEl = el("depth_7_top");
+      if (prodLinerEl && prodLinerEl.checked) {
+        if (linerBtn) {
+          linerBtn.classList.add("active");
+          linerBtn.setAttribute("aria-pressed", "true");
         }
-        if (!incoming || typeof incoming !== "object") {
-          return alert("Invalid presets file.");
+        if (casingBtn) {
+          casingBtn.classList.remove("active");
+          casingBtn.setAttribute("aria-pressed", "false");
         }
-        const existing = loadPresetsFromStorage() || {};
-        const conflicts = Object.keys(incoming).filter((n) => existing[n]);
-        if (conflicts.length > 0) {
-          const ok = confirm(
-            `Import will overwrite ${
-              conflicts.length
-            } existing preset(s):\n${conflicts.join(
-              ", "
-            )}\n\nContinue and overwrite?`
-          );
-          if (!ok) return;
+      } else if (prodTopEl && prodTopEl.value !== "") {
+        if (casingBtn) {
+          casingBtn.classList.add("active");
+          casingBtn.setAttribute("aria-pressed", "true");
         }
-        const merged = Object.assign({}, existing, incoming);
-        savePresetsToStorage(merged);
-        populatePresetsUI();
-        alert(`Imported ${Object.keys(incoming).length} preset(s).`);
-      } catch (err) {
-        alert(
-          "Error importing presets: " +
-            (err && err.message ? err.message : String(err))
-        );
+        if (linerBtn) {
+          linerBtn.classList.remove("active");
+          linerBtn.setAttribute("aria-pressed", "false");
+        }
+      } else {
+        if (linerBtn) {
+          linerBtn.classList.add("active");
+          linerBtn.setAttribute("aria-pressed", "true");
+        }
+        if (casingBtn) {
+          casingBtn.classList.remove("active");
+          casingBtn.setAttribute("aria-pressed", "false");
+        }
       }
-    };
-    reader.onerror = () => alert("Error reading file.");
-    reader.readAsText(file);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  // Preset helpers are provided by the external module `src/js/presets.js`.
+  // We rely on `window.__KeinoPresets` for all preset storage and built-in preset
+  // handling. Keeping these functions here introduced duplication and bugs,
+  // so they are intentionally removed. Use the module APIs instead.
+
+  // Export/import/save/delete/preset-name utilities are provided by the module.
+  // (Delegated to `src/js/presets.js` via `window.__KeinoPresets`).
+
+  // Import presets: delegate to the presets module
+  function importPresetsFile(file) {
+    if (window.__KeinoPresets && typeof window.__KeinoPresets.importPresetsFile === "function") {
+      return window.__KeinoPresets.importPresetsFile(file);
+    }
+    alert("Preset module unavailable.");
   }
 
   function setupPresetsUI() {
@@ -472,18 +354,36 @@ const VolumeCalc = (() => {
     const importBtn = el("import_presets_btn");
     const importInput = el("import_presets_input");
 
-    if (exportBtn) exportBtn.addEventListener("click", exportPresets);
+    if (exportBtn) {
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.exportPresets === "function")
+        exportBtn.addEventListener("click", () => window.__KeinoPresets.exportPresets());
+      else
+        exportBtn.addEventListener("click", () => alert("Preset module unavailable."));
+    }
     if (importBtn && importInput) {
       importBtn.addEventListener("click", () => importInput.click());
       importInput.addEventListener("change", (e) => {
         const file = e.target.files && e.target.files[0];
-        if (file) importPresetsFile(file);
+        if (file) {
+          if (window.__KeinoPresets && typeof window.__KeinoPresets.importPresetsFile === "function")
+            window.__KeinoPresets.importPresetsFile(file);
+          else
+            alert("Preset module unavailable.");
+        }
         e.target.value = "";
       });
     }
 
-    // Load built-in presets (async) from external JSON file
-    loadBuiltinPresets();
+    // Load built-in presets (async) from external JSON file (prefer module impl if present)
+    if (
+      window.__KeinoPresets &&
+      typeof window.__KeinoPresets.loadBuiltinPresets === "function"
+    ) {
+      window.__KeinoPresets.loadBuiltinPresets();
+    } else {
+      // No module available (e.g., file:// CORS); builtin loading is a no-op here.
+      console.warn && console.warn("Presets module unavailable; built-in presets not loaded.");
+    }
 
     saveBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
@@ -491,36 +391,93 @@ const VolumeCalc = (() => {
         nameInput.focus();
         return alert("Enter a name for the preset.");
       }
-      if (BUILTIN_PRESETS[name])
+      // builtin detection uses dataset on the select option (module populates this)
+      const opt = sel.querySelector(`option[value="${name}"]`);
+      const builtinExists = opt && opt.dataset && opt.dataset.builtin === "1";
+      if (builtinExists)
         return alert(
-          "That name is reserved for a built-in preset. Please choose another name."
+          "That name is reserved for a built-in preset. Please choose another name.",
         );
-      const presets = loadPresetsFromStorage();
-      if (presets[name] && !confirm(`Preset "${name}" exists. Overwrite?`))
-        return;
-      savePreset(name);
-      populatePresetsUI();
+      if (!window.__KeinoPresets || typeof window.__KeinoPresets.savePreset !== "function")
+        return alert("Preset module unavailable.");
+      const state = captureStateObject();
+      const ok = window.__KeinoPresets.savePreset(name, state);
+      if (!ok) return alert("Failed to save preset.");
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+        window.__KeinoPresets.populatePresetsUI();
       nameInput.value = "";
     });
 
     loadBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to load.");
-      // If the selected option is a built-in preset, prefer the built-in
-      // payload even if a same-named preset exists in localStorage.
-      const opt = sel.options[sel.selectedIndex];
+
+      // Prefer module lookup, but fall back to direct localStorage read if the
+      // module doesn't report the preset (helps file:// and race conditions).
+      // Try localStorage first (preserve previous file:// behavior), then module
       let state = null;
-      if (opt && opt.dataset && opt.dataset.builtin === "1") {
-        state = BUILTIN_PRESETS[name] ? BUILTIN_PRESETS[name].state : null;
-      } else {
-        state = getPresetState(name);
+      let usedLocal = false;
+      try {
+        const raw = localStorage.getItem("well_presets_v1");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed[name] && parsed[name].state) {
+            state = parsed[name].state;
+            usedLocal = true;
+          }
+        }
+      } catch (e) {
+        /* ignore */
+      }
+
+      if (!state && window.__KeinoPresets && typeof window.__KeinoPresets.getPresetState === "function") {
+        state = window.__KeinoPresets.getPresetState(name);
       }
       if (!state) return alert("Preset not found.");
-      // set the current preset name (shows on canvas)
-      currentPresetName = name;
-      applyStateObject(state);
-    });
 
+      applyStateObject(state);
+
+      // set the current preset name (shows on the canvas)
+      currentPresetName = name;
+
+      // Ensure production button reflects newly loaded preset immediately (defensive)
+      try {
+        const prodLinerEl = el("production_is_liner");
+        const casingBtn = el("production_casing_btn");
+        const linerBtn = document.querySelector(".liner-default-btn");
+        const prodTopEl = el("depth_7_top");
+        if (prodLinerEl && prodLinerEl.checked) {
+          if (linerBtn) {
+            linerBtn.classList.add("active");
+            linerBtn.setAttribute("aria-pressed", "true");
+          }
+          if (casingBtn) {
+            casingBtn.classList.remove("active");
+            casingBtn.setAttribute("aria-pressed", "false");
+          }
+        } else if (prodTopEl && prodTopEl.value !== "") {
+          if (casingBtn) {
+            casingBtn.classList.add("active");
+            casingBtn.setAttribute("aria-pressed", "true");
+          }
+          if (linerBtn) {
+            linerBtn.classList.remove("active");
+            linerBtn.setAttribute("aria-pressed", "false");
+          }
+        } else {
+          if (linerBtn) {
+            linerBtn.classList.add("active");
+            linerBtn.setAttribute("aria-pressed", "true");
+          }
+          if (casingBtn) {
+            casingBtn.classList.remove("active");
+            casingBtn.setAttribute("aria-pressed", "false");
+          }
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    });
     // disable delete for built-in presets and clear the Preset name field on selection
     sel.addEventListener("change", () => {
       const opt = sel.selectedOptions && sel.selectedOptions[0];
@@ -534,21 +491,31 @@ const VolumeCalc = (() => {
     delBtn.addEventListener("click", () => {
       const name = sel.value;
       if (!name) return alert("Choose a preset to delete.");
-      if (BUILTIN_PRESETS[name])
-        return alert("Built-in presets cannot be deleted.");
+      const opt = sel.selectedOptions && sel.selectedOptions[0];
+      const isBuiltin = opt && opt.dataset && opt.dataset.builtin === "1";
+      if (isBuiltin) return alert("Built-in presets cannot be deleted.");
       if (!confirm(`Delete preset "${name}"?`)) return;
-      deletePreset(name);
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.deletePreset === "function") {
+        window.__KeinoPresets.deletePreset(name);
+      } else {
+        alert("Preset module unavailable.");
+      }
       // Clear canvas label if it was the deleted preset
       if (currentPresetName === name) {
         currentPresetName = "";
         calculateVolume();
       }
-      populatePresetsUI();
+      if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+        window.__KeinoPresets.populatePresetsUI();
     });
 
-    populatePresetsUI();
+    if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+      window.__KeinoPresets.populatePresetsUI();
     window.addEventListener("storage", (e) => {
-      if (e.key === PRESETS_KEY) populatePresetsUI();
+      if (e.key === "well_presets_v1") {
+        if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === "function")
+          window.__KeinoPresets.populatePresetsUI();
+      }
     });
   }
 
@@ -582,7 +549,7 @@ const VolumeCalc = (() => {
 
     const maxDepth = Math.max(
       opts && !isNaN(opts.waterDepth) ? opts.waterDepth : 0,
-      casings.length ? Math.max(...casings.map((c) => c.depth)) : 0
+      casings.length ? Math.max(...casings.map((c) => c.depth)) : 0,
     );
     const maxOD = casings.length
       ? Math.max(...casings.map((c) => c.od))
@@ -630,7 +597,7 @@ const VolumeCalc = (() => {
         ctx.fillText(
           "Plug @ " + pd.toFixed(1) + " m",
           centerX + rect.width * 0.46,
-          y
+          y,
         );
         ctx.restore();
       }
@@ -683,7 +650,7 @@ const VolumeCalc = (() => {
       .slice()
       .sort(
         (a, b) =>
-          (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od
+          (a.z || 0) - (b.z || 0) || a.prevDepth - b.prevDepth || b.od - a.od,
       )
       .forEach((casing) => {
         const idx = casing.index % colors.length;
@@ -744,7 +711,7 @@ const VolumeCalc = (() => {
           centerX - width / 2,
           startDepth,
           width,
-          endDepth - startDepth
+          endDepth - startDepth,
         );
 
         const innerWidth = (casing.id / maxOD) * 80;
@@ -753,7 +720,7 @@ const VolumeCalc = (() => {
           centerX - innerWidth / 2,
           startDepth,
           innerWidth,
-          endDepth - startDepth
+          endDepth - startDepth,
         );
 
         ctx.strokeStyle = "#000";
@@ -770,7 +737,7 @@ const VolumeCalc = (() => {
         ctx.fillText(
           casing.depth.toFixed(0) + "m",
           centerX + width / 2 + 10,
-          endDepth
+          endDepth,
         );
       });
   }
@@ -781,7 +748,7 @@ const VolumeCalc = (() => {
     const riserTypeVal = el("riser_type")?.value;
     const riserID = sizeIdValue(
       "riser_type",
-      clampNumber(Number(riserTypeVal))
+      clampNumber(Number(riserTypeVal)),
     );
     const riserOD = riserTypeVal === "none" ? 0 : OD.riser[riserTypeVal] || 20;
 
@@ -798,45 +765,45 @@ const VolumeCalc = (() => {
     // prefer explicit ID input values if provided
     const conductorID = sizeIdValue(
       "conductor_size",
-      clampNumber(Number(el("conductor_size")?.value))
+      clampNumber(Number(el("conductor_size")?.value)),
     );
     const conductorOD = OD.conductor[conductorID] || 30;
     const conductorTopInputVal = clampNumber(Number(el("depth_18_top")?.value));
 
     const surfaceID = sizeIdValue(
       "surface_size",
-      clampNumber(Number(el("surface_size")?.value))
+      clampNumber(Number(el("surface_size")?.value)),
     );
     const surfaceOD = OD.surface[surfaceID] || 20;
 
     const intermediateID = sizeIdValue(
       "intermediate_size",
-      clampNumber(Number(el("intermediate_size")?.value))
+      clampNumber(Number(el("intermediate_size")?.value)),
     );
     const intermediateOD = OD.intermediate[intermediateID] || 13.375;
 
     const productionID = sizeIdValue(
       "production_size",
-      clampNumber(Number(el("production_size")?.value))
+      clampNumber(Number(el("production_size")?.value)),
     );
     const productionOD = OD.production[productionID] || 9.625;
 
     const reservoirID = sizeIdValue(
       "reservoir_size",
-      clampNumber(Number(el("reservoir_size")?.value))
+      clampNumber(Number(el("reservoir_size")?.value)),
     );
     const reservoirOD = OD.reservoir[reservoirID] || 5.5;
 
     const smallLinerID = sizeIdValue(
       "small_liner_size",
-      clampNumber(Number(el("small_liner_size")?.value))
+      clampNumber(Number(el("small_liner_size")?.value)),
     );
     const smallLinerOD = OD.small_liner[smallLinerID] || 5;
 
     // Open Hole: treat select value as the nominal drilled diameter (in inches)
     const openHoleID = sizeIdValue(
       "open_hole_size",
-      clampNumber(Number(el("open_hole_size")?.value))
+      clampNumber(Number(el("open_hole_size")?.value)),
     );
     // Use the same numeric value (inches) as the OD for drawing and calculations
     const openHoleOD =
@@ -844,7 +811,7 @@ const VolumeCalc = (() => {
 
     const tiebackID = sizeIdValue(
       "tieback_size",
-      clampNumber(Number(el("tieback_size")?.value))
+      clampNumber(Number(el("tieback_size")?.value)),
     );
     const tiebackOD = OD.tieback[tiebackID] || productionOD;
 
@@ -872,7 +839,7 @@ const VolumeCalc = (() => {
     let intermediateTopFinal;
     let intermediateTopAuto = false;
     const intermediateTopInputVal = clampNumber(
-      Number(el("depth_9_top")?.value)
+      Number(el("depth_9_top")?.value),
     );
     if (!isNaN(intermediateTopInputVal))
       intermediateTopFinal = intermediateTopInputVal;
@@ -892,7 +859,7 @@ const VolumeCalc = (() => {
     let openTopAuto = false;
     // collect candidate shoe depths
     const conductorBottomVal = clampNumber(
-      Number(el("depth_18_bottom")?.value)
+      Number(el("depth_18_bottom")?.value),
     );
     const productionBottomVal = clampNumber(Number(el("depth_7")?.value));
     const reservoirBottomVal = clampNumber(Number(el("depth_5")?.value));
@@ -1058,16 +1025,16 @@ const VolumeCalc = (() => {
             c.role === "conductor"
               ? -1
               : c.role === "small_liner"
-              ? 5
-              : c.role === "reservoir"
-              ? 4
-              : c.role === "production" || c.role === "tieback"
-              ? 3
-              : c.role === "intermediate"
-              ? 2
-              : c.role === "surface"
-              ? 1
-              : 0,
+                ? 5
+                : c.role === "reservoir"
+                  ? 4
+                  : c.role === "production" || c.role === "tieback"
+                    ? 3
+                    : c.role === "intermediate"
+                      ? 2
+                      : c.role === "surface"
+                        ? 1
+                        : 0,
         });
       }
     });
@@ -1373,7 +1340,7 @@ const VolumeCalc = (() => {
         input.value = well.value;
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     qs(".default-top-btn").forEach((btn) =>
@@ -1418,7 +1385,7 @@ const VolumeCalc = (() => {
         if (tb) tb.value = input.value;
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     // Liner default button (use Intermediate Bottom - 50, fallback to wellhead)
@@ -1438,7 +1405,7 @@ const VolumeCalc = (() => {
         if (tb) tb.value = target.value;
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     // Reservoir Liner button: use Production Bottom - 50
@@ -1455,7 +1422,7 @@ const VolumeCalc = (() => {
         }
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
 
     // Small liner default button: use Reservoir Shoe - 50
@@ -1472,7 +1439,7 @@ const VolumeCalc = (() => {
         }
         scheduleSave();
         calculateVolume();
-      })
+      }),
     );
   }
 
@@ -1626,7 +1593,7 @@ const VolumeCalc = (() => {
           tb.removeAttribute("readonly");
           tb.classList.remove("readonly-input");
           tb.value = Number(
-            (Number((wellEl && wellEl.value) || 0) + 75).toFixed(1)
+            (Number((wellEl && wellEl.value) || 0) + 75).toFixed(1),
           );
           delete tb.dataset.userEdited;
         } else {
@@ -1702,6 +1669,16 @@ const VolumeCalc = (() => {
           prodInfoBtn.classList.remove("hidden");
           prodInfoBtn.setAttribute("aria-hidden", "false");
         }
+        // When production_is_liner is cleared, prefer Casing as the active toggle if Production Top is present
+        if (casingBtn) {
+          const linerBtn = qs(".liner-default-btn")[0];
+          casingBtn.classList.add("active");
+          casingBtn.setAttribute("aria-pressed", "true");
+          if (linerBtn) {
+            linerBtn.classList.remove("active");
+            linerBtn.setAttribute("aria-pressed", "false");
+          }
+        }
       }
       scheduleSave();
       calculateVolume();
@@ -1737,7 +1714,7 @@ const VolumeCalc = (() => {
               tieBottom.classList.remove("readonly-input");
               if (!userEdited) {
                 tieBottom.value = Number(
-                  (Number(well.value || 0) + 75).toFixed(1)
+                  (Number(well.value || 0) + 75).toFixed(1),
                 );
                 scheduleSave();
                 calculateVolume();
@@ -1745,7 +1722,7 @@ const VolumeCalc = (() => {
                 setTimeout(() => {
                   if (useTie && useTie.checked && !userEdited) {
                     tieBottom.value = Number(
-                      (Number(well.value || 0) + 75).toFixed(1)
+                      (Number(well.value || 0) + 75).toFixed(1),
                     );
                     scheduleSave();
                     calculateVolume();
@@ -1801,7 +1778,7 @@ const VolumeCalc = (() => {
             if (dummy && dummy.checked) {
               tbTop.value = el("wellhead_depth")?.value || "";
               tb.value = Number(
-                (Number(el("wellhead_depth")?.value || 0) + 75).toFixed(1)
+                (Number(el("wellhead_depth")?.value || 0) + 75).toFixed(1),
               );
               delete tb.dataset.userEdited;
               userEdited = false;
@@ -1946,7 +1923,7 @@ const VolumeCalc = (() => {
       if (b)
         b.setAttribute(
           "aria-pressed",
-          b.classList.contains("active") ? "true" : "false"
+          b.classList.contains("active") ? "true" : "false",
         );
     });
 
@@ -1989,13 +1966,22 @@ const VolumeCalc = (() => {
     if (prodLinerChk) prodLinerChk.addEventListener("change", updateTieback);
     updateTieback();
 
-    // Default: if no button is active and tie-back is not forcing Liner, make Liner active
+    // Default: choose an appropriate active button based on preset/field values.
+    // - If production_is_liner is checked, choose Liner.
+    // - Else if Production Top has a value, choose Casing (reflects 'Casing' mode).
+    // - Otherwise, fall back to Liner.
     const anyActive =
       (casingBtn && casingBtn.classList.contains("active")) ||
       (linerBtn && linerBtn.classList.contains("active"));
     if (!anyActive) {
-      if (!(prodLinerChk && prodLinerChk.checked) && linerBtn)
-        setActive(linerBtn);
+      const prodTopEl = el("depth_7_top");
+      if (prodLinerChk && prodLinerChk.checked) {
+        if (linerBtn) setActive(linerBtn);
+      } else if (prodTopEl && prodTopEl.value !== "") {
+        if (casingBtn) setActive(casingBtn);
+      } else {
+        if (linerBtn) setActive(linerBtn);
+      }
     }
   }
 
@@ -2148,7 +2134,7 @@ const VolumeCalc = (() => {
         }
         console.log(
           "DBG theme after change attr=",
-          document.documentElement.getAttribute("data-theme")
+          document.documentElement.getAttribute("data-theme"),
         );
       });
     }
@@ -2160,7 +2146,7 @@ const VolumeCalc = (() => {
           try {
             localStorage.setItem(
               "keino_theme",
-              mode === "dark" ? "dark" : "light"
+              mode === "dark" ? "dark" : "light",
             );
           } catch (e) {
             /* ignore */
