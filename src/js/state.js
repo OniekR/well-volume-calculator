@@ -102,6 +102,15 @@ export function applyStateObject(state, callbacks = {}) {
         'depth_18_top',
         'depth_18_bottom'
       ]
+    },
+    {
+      useId: 'use_upper_completion',
+      keys: [
+        'upper_completion_size',
+        'upper_completion_size_id',
+        'depth_uc_top',
+        'depth_uc'
+      ]
     }
   ];
 

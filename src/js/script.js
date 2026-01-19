@@ -13,6 +13,7 @@ import {
 import { initUI } from './ui.js';
 import { OD } from './constants.js';
 import { gatherInputs } from './inputs.js';
+import { validateUpperCompletionFit } from './validation.js';
 import { renderResults } from './render.js';
 import { setupPresetsUI } from './presets-ui.js';
 import { createPersistence } from './persistence.js';
@@ -249,6 +250,27 @@ const VolumeCalc = (() => {
           ? plugDepthVal
           : undefined
     });
+
+    // Validate Upper completion fit and show/hide a warning if needed
+    try {
+      const failures = validateUpperCompletionFit(casingsInput);
+      const warnEl = el('upper_completion_warning');
+      if (warnEl) {
+        if (failures && failures.length) {
+          warnEl.classList.remove('hidden');
+          warnEl.textContent = `WARNING: Upper completion TJ (${
+            failures[0].tj
+          } in) does not fit inside casing(s): ${failures
+            .map((f) => `${f.role} (drift ${f.drift} in)`)
+            .join(', ')}`;
+        } else {
+          warnEl.classList.add('hidden');
+          warnEl.textContent = '';
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
   }
 
   // UI helper functions were removed and moved into `src/js/ui.js`.
@@ -290,7 +312,25 @@ const VolumeCalc = (() => {
       // pass the helper wrappers so the presets module can apply state with callbacks
       setupPresetsUI({
         captureStateObject,
-        applyStateObject: applyStateObjectFn
+        applyStateObject: applyStateObjectFn,
+        onPresetApplied: (name) => {
+          try {
+            currentPresetName = name || '';
+            // trigger a recalculation/draw so the canvas shows the preset name
+            calculateVolume();
+          } catch (e) {
+            /* ignore */
+          }
+        },
+        onPresetSaved: (name) => {
+          try {
+            // reflect saved preset name on canvas
+            currentPresetName = name || '';
+            calculateVolume();
+          } catch (e) {
+            /* ignore */
+          }
+        }
       });
     } catch (e) {
       /* ignore: preset UI will be unavailable in some test environments */

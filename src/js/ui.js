@@ -1,4 +1,6 @@
 import { el, qs } from './dom.js';
+import { getUpperCompletionTJ } from './validation.js';
+import { DRIFT } from './constants.js';
 
 export function setupEventDelegation(deps) {
   const { calculateVolume, scheduleSave } = deps;
@@ -312,16 +314,55 @@ export function setupHideCasingsToggle() {
   const form = document.getElementById('well-form');
   if (!btn || !form) return;
 
+  const updateSectionsVisibility = (hidden) => {
+    const sections = Array.from(document.querySelectorAll('.casing-input'));
+    sections.forEach((s) => {
+      if (s.classList.contains('no-hide')) return; // opt-out
+      s.classList.toggle('hidden-by-casings-toggle', hidden);
+    });
+  };
+
   const setState = (hidden) => {
     form.classList.toggle('casings-hidden', hidden);
+    updateSectionsVisibility(hidden);
     btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
     btn.textContent = hidden ? 'Show casings' : 'Hide casings';
   };
 
+  // initialize state based on existing class
+  setState(form.classList.contains('casings-hidden'));
+
   btn.addEventListener('click', () => {
     const hidden = form.classList.toggle('casings-hidden');
+    updateSectionsVisibility(hidden);
     btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
     btn.textContent = hidden ? 'Show casings' : 'Hide casings';
+  });
+
+  // Keyboard accessibility
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+}
+
+export function setupHideTotalToggle() {
+  const btn = el('toggle_hide_total_btn');
+  const form = document.getElementById('well-form');
+  if (!btn || !form) return;
+
+  const setState = (hidden) => {
+    form.classList.toggle('total-hidden', hidden);
+    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    btn.textContent = hidden ? 'Show total' : 'Hide total';
+  };
+
+  btn.addEventListener('click', () => {
+    const hidden = form.classList.toggle('total-hidden');
+    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    btn.textContent = hidden ? 'Show total' : 'Hide total';
   });
 
   // Keyboard accessibility
@@ -344,7 +385,8 @@ export function setupSizeIdInputs(deps) {
     ['reservoir_size', 'reservoir_size_id'],
     ['small_liner_size', 'small_liner_size_id'],
     ['open_hole_size', 'open_hole_size_id'],
-    ['riser_type', 'riser_type_id']
+    ['riser_type', 'riser_type_id'],
+    ['upper_completion_size', 'upper_completion_size_id']
   ];
 
   pairs.forEach(([selId, idInputId]) => {
@@ -354,14 +396,89 @@ export function setupSizeIdInputs(deps) {
 
     if (!idInput.value) idInput.value = sel.value;
 
+    const updateSmallNote = () => {
+      // 1. Check for new inline Nom ID layout (presence of .nom-id-inline)
+      const sizeInline = sel.closest('.size-with-id');
+      const nomInline =
+        sizeInline && sizeInline.querySelector('.nom-id-inline');
+
+      if (nomInline) {
+        // Set label text
+        if (selId === 'upper_completion_size') {
+          nomInline.textContent = 'TJ:';
+          // Upper completion might show TJ value in a note?
+          // Currently the input itself holds the Size ID (4.892).
+          // The "TJ" value is derived.
+          // If we want "TJ: [value]", then the Input shows Size ID, but where is TJ shown?
+          // In legacy UC, `note.textContent = 'TJ: ' + tjValue`.
+          // If we switch UC to this layout:
+          // Label="TJ:", Input="4.892" (Size ID).
+          // The user might want the TJ value visible.
+          // Let's stick to "Nom ID:" for casing sections for now.
+          // If UC is updated, we might need a separate field or logic.
+          // Let's keep logic simple: If nomInline exists, set to 'Nom ID:' generally.
+          // But for UC it's special. Let's Handle UC separately if needed, or just skip it for now.
+          // For now, let's assume 'Nom ID:' for standard casings.
+        } else {
+          nomInline.textContent = 'Nom ID:';
+        }
+
+        // Handle Drift Note (if present in footer)
+        const container = sel.closest('.casing-body');
+        const driftNote = container && container.querySelector('.drift-note');
+        if (driftNote) {
+          const idNum = Number(idInput.value);
+          const driftMap =
+            DRIFT && DRIFT[selId.replace('_size', '')]
+              ? DRIFT[selId.replace('_size', '')]
+              : selId === 'conductor_size' && DRIFT.conductor
+              ? DRIFT.conductor
+              : {};
+          // Currently only conductor has drift map
+          const driftVal = driftMap[idNum];
+          driftNote.textContent =
+            typeof driftVal !== 'undefined'
+              ? `Drift: ${String(driftVal)} in`
+              : '';
+        }
+        return;
+      }
+
+      // 2. Legacy/Fallback for sections not yet updated or UC special case
+      const inline = sel.closest('.input-inline');
+      const note = inline && inline.querySelector('.small-note');
+      if (!note) return;
+      if (selId === 'conductor_size') {
+        // Should be covered by block above if HTML updated, but keep safe
+        // ... existing conductor logic reduced ...
+      }
+
+      if (selId === 'upper_completion_size') {
+        const tj = getUpperCompletionTJ(Number(idInput.value));
+        note.textContent =
+          typeof tj !== 'undefined'
+            ? `TJ: ${String(tj)}`
+            : idInput.value
+            ? `TJ: ${idInput.value}`
+            : '';
+      } else {
+        note.textContent = idInput.value || '';
+      }
+    };
+
+    // initial note update
+    updateSmallNote();
+
     sel.addEventListener('change', () => {
       if (!idInput.dataset.userEdited) idInput.value = sel.value;
+      updateSmallNote();
       scheduleSave();
       calculateVolume();
     });
 
     idInput.addEventListener('input', () => {
       idInput.dataset.userEdited = 'true';
+      updateSmallNote();
       scheduleSave();
       calculateVolume();
     });
@@ -850,6 +967,7 @@ export function initUI(deps) {
   setupButtons(deps);
   setupTooltips(deps);
   setupHideCasingsToggle();
+  setupHideTotalToggle();
   setupSizeIdInputs(deps);
   setupWellheadSync(deps);
   setupTiebackBehavior(deps);

@@ -82,6 +82,14 @@ export function setupPresetsUI(deps = {}) {
     )
       window.__KeinoPresets.populatePresetsUI();
     nameInput.value = '';
+    // notify host that a preset was saved so UI (e.g., canvas label) can update
+    if (deps && typeof deps.onPresetSaved === 'function') {
+      try {
+        deps.onPresetSaved(name);
+      } catch (e) {
+        /* ignore */
+      }
+    }
   });
 
   loadBtn.addEventListener('click', () => {
@@ -96,6 +104,14 @@ export function setupPresetsUI(deps = {}) {
     if (!state) return alert('Preset not found.');
     applyStateObject(state);
     // set the current preset name (handled by caller if desired)
+    if (deps && typeof deps.onPresetApplied === 'function') {
+      try {
+        deps.onPresetApplied(name);
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
     // Ensure production button reflects newly loaded preset immediately (defensive)
     try {
       const prodLinerEl = el('production_is_liner');

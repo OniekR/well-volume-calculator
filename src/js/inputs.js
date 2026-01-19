@@ -1,5 +1,5 @@
 import { el, qs } from './dom.js';
-import { OD } from './constants.js';
+import { OD, DRIFT } from './constants.js';
 
 const clampNumber = (v) => (isNaN(v) ? undefined : Number(v));
 
@@ -62,6 +62,12 @@ export function gatherInputs() {
     clampNumber(Number(el('small_liner_size')?.value))
   );
   const smallLinerOD = OD.small_liner[smallLinerID] || 5;
+
+  const upperCompletionID = sizeIdValue(
+    'upper_completion_size',
+    clampNumber(Number(el('upper_completion_size')?.value))
+  );
+  const upperCompletionOD = OD.upper_completion[upperCompletionID] || 5.5;
 
   const openHoleID = sizeIdValue(
     'open_hole_size',
@@ -231,6 +237,16 @@ export function gatherInputs() {
       od: smallLinerOD
     },
     {
+      role: 'upper_completion',
+      id: upperCompletionID,
+      top: !isNaN(clampNumber(Number(el('depth_uc_top')?.value)))
+        ? clampNumber(Number(el('depth_uc_top')?.value))
+        : undefined,
+      depth: clampNumber(Number(el('depth_uc')?.value)),
+      use: !!el('use_upper_completion')?.checked,
+      od: upperCompletionOD
+    },
+    {
       role: 'open_hole',
       id: openHoleID,
       top: !isNaN(clampNumber(Number(el('depth_open_top')?.value)))
@@ -242,6 +258,24 @@ export function gatherInputs() {
       z: -1
     }
   ];
+
+  // attach optional drift values if inputs exist (e.g., 'production_drift')
+  casingsInput.forEach((c) => {
+    const driftEl = el(`${c.role}_drift`);
+    if (driftEl) {
+      const v = clampNumber(Number(driftEl.value));
+      if (!isNaN(v)) c.drift = v;
+    }
+  });
+
+  // default drift from constants if not provided explicitly
+  casingsInput.forEach((c) => {
+    if (typeof c.drift === 'undefined') {
+      const roleMap = DRIFT && DRIFT[c.role];
+      if (roleMap && typeof roleMap[c.id] !== 'undefined')
+        c.drift = roleMap[c.id];
+    }
+  });
 
   return {
     casingsInput,

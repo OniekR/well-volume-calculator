@@ -47,6 +47,10 @@ jobs:
         run: node tools/qa/run_p9_smoke_puppeteer.cjs
       - name: Run hide-casings smoke test
         run: node tools/qa/run_hide_casings_smoke.cjs
+      - name: Run hide-total smoke test
+        run: node tools/qa/run_hide_total_smoke.cjs
+      - name: Run Upper completion smoke test
+        run: node tools/qa/run_upper_completion_smoke.cjs
       - name: Stop server
         if: always()
         run: |

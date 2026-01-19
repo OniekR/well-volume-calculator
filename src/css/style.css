@@ -387,10 +387,31 @@ h1 {
 }
 
 /* UI-only: hide all casing sections when the form has .casings-hidden */
-#well-form.casings-hidden .casing-input {
+/* Prefer explicit per-element class so some sections (e.g., upper completion)
+   can opt out by using .no-hide */
+#well-form.casings-hidden .casing-input:not(.no-hide) {
   display: none !important;
 }
 
+/* Failsafe: hide elements explicitly marked as hidden-by-casings-toggle */
+.casing-input.hidden-by-casings-toggle {
+  display: none !important;
+}
+
+/* Warning note style */
+.warning-note {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  color: #7a0a0a;
+  background: rgba(227, 27, 35, 0.06);
+  font-weight: 700;
+}
+
+/* UI-only: hide total volume display when form has .total-hidden */
+#well-form.total-hidden .result {
+  display: none !important;
+}
 .input-group {
   margin-bottom: 12px;
 }
@@ -430,7 +451,7 @@ select:focus {
 }
 
 .small-note {
-  font-size: 0.85rem;
+  font-size: 0.75rem; /* force consistent size */
   color: var(--muted);
   margin-top: 6px;
 }
@@ -767,6 +788,54 @@ select:focus {
   flex-direction: column;
   gap: 6px;
 }
+/* Inline variant for when select and ID should sit on one row */
+.size-with-id--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.size-id-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 0; /* Relies on parent .size-with-id gap: 6px */
+  flex-wrap: wrap; /* allow items to wrap responsively */
+}
+.casing-footer-row {
+  margin-top: 6px !important; /* ensure consistent top spacing */
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 24px;
+}
+.casing-footer-row button:not(.info-btn),
+.casing-footer-row .wellhead-btn {
+  font-size: 0.75rem; /* Match small note text */
+  padding: 2px 6px; /* Reduced padding for footer button */
+  min-height: auto; /* Allow height to be determined by padding */
+}
+.nom-input-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap; /* keep Nom ID + input on same line */
+}
+.drift-input-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+.nom-id-inline {
+  font-size: 0.75rem; /* slightly smaller */
+  color: var(--muted);
+  margin-top: 0; /* Remove inherited small-note margin for alignment */
+}
+.drift-note {
+  font-size: 0.75rem; /* slightly smaller */
+  color: var(--muted);
+  margin-top: 0; /* Remove inherited small-note margin for alignment */
+}
 .size-id-input {
   width: 100px;
   padding: 6px 8px;
@@ -777,6 +846,12 @@ select:focus {
   border-radius: 6px;
   text-align: center;
 }
+.size-id-input--narrow {
+  width: 36px;
+  font-size: 0.75rem; /* force match */
+  padding: 4px;
+}
+
 .size-id-input:focus {
   outline: none;
   border-color: rgba(20, 34, 42, 0.06);

@@ -18,11 +18,13 @@ describe('setupPresetsUI', () => {
     };
   });
 
-  it('calls savePreset with captured state', () => {
+  it('calls savePreset with captured state and notifies host', () => {
     const captureState = () => ({ a: 1 });
+    const onSaved = vi.fn();
     setupPresetsUI({
       captureStateObject: captureState,
-      applyStateObject: () => {}
+      applyStateObject: () => {},
+      onPresetSaved: onSaved
     });
     const saveBtn = document.getElementById('save_preset_btn');
     const name = document.getElementById('preset_name');
@@ -31,19 +33,23 @@ describe('setupPresetsUI', () => {
     expect(window.__KeinoPresets.savePreset).toHaveBeenCalledWith('my-preset', {
       a: 1
     });
+    expect(onSaved).toHaveBeenCalledWith('my-preset');
   });
 
-  it('loads preset and calls applyStateObject', () => {
+  it('loads preset and calls applyStateObject and notifies host', () => {
     const applySpy = vi.fn();
+    const onApplied = vi.fn();
     const sel = document.getElementById('preset_list');
     sel.innerHTML = '<option value="p1" selected>p1</option>';
     setupPresetsUI({
       captureStateObject: () => {},
-      applyStateObject: applySpy
+      applyStateObject: applySpy,
+      onPresetApplied: onApplied
     });
     const loadBtn = document.getElementById('load_preset_btn');
     loadBtn.click();
     expect(window.__KeinoPresets.getPresetState).toHaveBeenCalledWith('p1');
     expect(applySpy).toHaveBeenCalled();
+    expect(onApplied).toHaveBeenCalledWith('p1');
   });
 });

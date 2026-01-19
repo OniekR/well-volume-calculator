@@ -23,10 +23,30 @@ const puppeteer = require('puppeteer');
       process.exit(2);
     }
 
+    // capture canvas image before loading preset
+    const beforeCanvas = await page.evaluate(() => {
+      const c = document.getElementById('wellSchematic');
+      return c ? c.toDataURL() : null;
+    });
+
     await page.select('#preset_list', 'P-9');
     await page.click('#load_preset_btn');
 
     await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
+
+    // capture canvas after loading preset to ensure name overlay is drawn
+    const afterCanvas = await page.evaluate(() => {
+      const c = document.getElementById('wellSchematic');
+      return c ? c.toDataURL() : null;
+    });
+
+    if (beforeCanvas && afterCanvas && beforeCanvas === afterCanvas) {
+      console.error(
+        'FAIL: Canvas did not change after loading preset (preset label may be missing)'
+      );
+      await browser.close();
+      process.exit(5);
+    }
 
     const result = await page.evaluate(() => {
       const cb = document.getElementById('use_small_liner');

@@ -39,6 +39,8 @@ export function computeVolumes(casingsInput, opts = {}) {
             ? -1
             : c.role === 'small_liner'
             ? 5
+            : c.role === 'upper_completion'
+            ? 6
             : c.role === 'reservoir'
             ? 4
             : c.role === 'production' || c.role === 'tieback'

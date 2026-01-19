@@ -8,7 +8,8 @@ const roleLabel = {
   production: 'Production',
   tieback: 'Tie-back',
   reservoir: 'Reservoir',
-  small_liner: 'Small liner'
+  small_liner: 'Small liner',
+  upper_completion: 'Upper completion'
 };
 
 export function renderResults(result) {
