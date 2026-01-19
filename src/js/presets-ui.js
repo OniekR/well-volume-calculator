@@ -16,9 +16,17 @@ export function setupPresetsUI(deps = {}) {
   const importInput = el('import_presets_input');
 
   if (exportBtn) {
-    if (window.__KeinoPresets && typeof window.__KeinoPresets.exportPresets === 'function')
-      exportBtn.addEventListener('click', () => window.__KeinoPresets.exportPresets());
-    else exportBtn.addEventListener('click', () => alert('Preset module unavailable.'));
+    if (
+      window.__KeinoPresets &&
+      typeof window.__KeinoPresets.exportPresets === 'function'
+    )
+      exportBtn.addEventListener('click', () =>
+        window.__KeinoPresets.exportPresets()
+      );
+    else
+      exportBtn.addEventListener('click', () =>
+        alert('Preset module unavailable.')
+      );
   }
 
   if (importBtn && importInput) {
@@ -26,7 +34,10 @@ export function setupPresetsUI(deps = {}) {
     importInput.addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
       if (file) {
-        if (window.__KeinoPresets && typeof window.__KeinoPresets.importPresetsFile === 'function')
+        if (
+          window.__KeinoPresets &&
+          typeof window.__KeinoPresets.importPresetsFile === 'function'
+        )
           window.__KeinoPresets.importPresetsFile(file);
         else alert('Preset module unavailable.');
       }
@@ -35,10 +46,14 @@ export function setupPresetsUI(deps = {}) {
   }
 
   // Load built-in presets (async) from external JSON file (prefer module impl if present)
-  if (window.__KeinoPresets && typeof window.__KeinoPresets.loadBuiltinPresets === 'function') {
+  if (
+    window.__KeinoPresets &&
+    typeof window.__KeinoPresets.loadBuiltinPresets === 'function'
+  ) {
     window.__KeinoPresets.loadBuiltinPresets();
   } else {
-    console.warn && console.warn('Presets module unavailable; built-in presets not loaded.');
+    console.warn &&
+      console.warn('Presets module unavailable; built-in presets not loaded.');
   }
 
   saveBtn.addEventListener('click', () => {
@@ -49,19 +64,34 @@ export function setupPresetsUI(deps = {}) {
     }
     const opt = sel.querySelector(`option[value="${name}"]`);
     const builtinExists = opt && opt.dataset && opt.dataset.builtin === '1';
-    if (builtinExists) return alert('That name is reserved for a built-in preset. Please choose another name.');
-    if (!window.__KeinoPresets || typeof window.__KeinoPresets.savePreset !== 'function') return alert('Preset module unavailable.');
+    if (builtinExists)
+      return alert(
+        'That name is reserved for a built-in preset. Please choose another name.'
+      );
+    if (
+      !window.__KeinoPresets ||
+      typeof window.__KeinoPresets.savePreset !== 'function'
+    )
+      return alert('Preset module unavailable.');
     const state = captureStateObject();
     const ok = window.__KeinoPresets.savePreset(name, state);
     if (!ok) return alert('Failed to save preset.');
-    if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === 'function') window.__KeinoPresets.populatePresetsUI();
+    if (
+      window.__KeinoPresets &&
+      typeof window.__KeinoPresets.populatePresetsUI === 'function'
+    )
+      window.__KeinoPresets.populatePresetsUI();
     nameInput.value = '';
   });
 
   loadBtn.addEventListener('click', () => {
     const name = sel.value;
     if (!name) return alert('Choose a preset to load.');
-    if (!window.__KeinoPresets || typeof window.__KeinoPresets.getPresetState !== 'function') return alert('Preset module unavailable.');
+    if (
+      !window.__KeinoPresets ||
+      typeof window.__KeinoPresets.getPresetState !== 'function'
+    )
+      return alert('Preset module unavailable.');
     const state = window.__KeinoPresets.getPresetState(name);
     if (!state) return alert('Preset not found.');
     applyStateObject(state);
@@ -120,18 +150,33 @@ export function setupPresetsUI(deps = {}) {
     const isBuiltin = opt && opt.dataset && opt.dataset.builtin === '1';
     if (isBuiltin) return alert('Built-in presets cannot be deleted.');
     if (!confirm(`Delete preset "${name}"?`)) return;
-    if (window.__KeinoPresets && typeof window.__KeinoPresets.deletePreset === 'function') {
+    if (
+      window.__KeinoPresets &&
+      typeof window.__KeinoPresets.deletePreset === 'function'
+    ) {
       window.__KeinoPresets.deletePreset(name);
     } else {
       alert('Preset module unavailable.');
     }
-    if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === 'function') window.__KeinoPresets.populatePresetsUI();
+    if (
+      window.__KeinoPresets &&
+      typeof window.__KeinoPresets.populatePresetsUI === 'function'
+    )
+      window.__KeinoPresets.populatePresetsUI();
   });
 
-  if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === 'function') window.__KeinoPresets.populatePresetsUI();
+  if (
+    window.__KeinoPresets &&
+    typeof window.__KeinoPresets.populatePresetsUI === 'function'
+  )
+    window.__KeinoPresets.populatePresetsUI();
   window.addEventListener('storage', (e) => {
     if (e.key === 'well_presets_v1') {
-      if (window.__KeinoPresets && typeof window.__KeinoPresets.populatePresetsUI === 'function') window.__KeinoPresets.populatePresetsUI();
+      if (
+        window.__KeinoPresets &&
+        typeof window.__KeinoPresets.populatePresetsUI === 'function'
+      )
+        window.__KeinoPresets.populatePresetsUI();
     }
   });
 }

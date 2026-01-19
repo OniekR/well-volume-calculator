@@ -12,19 +12,25 @@ const roleLabel = {
 };
 
 export function renderResults(result) {
-  const { totalVolume, perCasingVolumes, plugAboveVolume, plugBelowVolume } = result;
+  const { totalVolume, perCasingVolumes, plugAboveVolume, plugBelowVolume } =
+    result;
 
   const totalVolumeEl = el('totalVolume');
-  if (totalVolumeEl) totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + ' m³';
+  if (totalVolumeEl)
+    totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + ' m³';
 
   const plugAboveEl = el('plugAboveVolume');
   const plugBelowEl = el('plugBelowVolume');
   if (plugAboveEl)
     plugAboveEl.textContent =
-      typeof plugAboveVolume === 'undefined' ? '— m³' : (plugAboveVolume || 0).toFixed(2) + ' m³';
+      typeof plugAboveVolume === 'undefined'
+        ? '— m³'
+        : (plugAboveVolume || 0).toFixed(2) + ' m³';
   if (plugBelowEl)
     plugBelowEl.textContent =
-      typeof plugBelowVolume === 'undefined' ? '— m³' : (plugBelowVolume || 0).toFixed(2) + ' m³';
+      typeof plugBelowVolume === 'undefined'
+        ? '— m³'
+        : (plugBelowVolume || 0).toFixed(2) + ' m³';
 
   // Render per-casing volume table
   const casingVolumesTable = el('casingVolumes');
@@ -96,7 +102,10 @@ export function renderResults(result) {
   totalsTr.appendChild(totalsLenTd);
   const totalsPerMTd = document.createElement('td');
   if (totals.includedLength > 0) {
-    totalsPerMTd.textContent = ((totals.volume / totals.includedLength) * 1000).toFixed(1);
+    totalsPerMTd.textContent = (
+      (totals.volume / totals.includedLength) *
+      1000
+    ).toFixed(1);
   } else {
     totalsPerMTd.textContent = '0.0';
   }

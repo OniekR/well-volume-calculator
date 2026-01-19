@@ -20,19 +20,27 @@ describe('setupPresetsUI', () => {
 
   it('calls savePreset with captured state', () => {
     const captureState = () => ({ a: 1 });
-    setupPresetsUI({ captureStateObject: captureState, applyStateObject: () => {} });
+    setupPresetsUI({
+      captureStateObject: captureState,
+      applyStateObject: () => {}
+    });
     const saveBtn = document.getElementById('save_preset_btn');
     const name = document.getElementById('preset_name');
     name.value = 'my-preset';
     saveBtn.click();
-    expect(window.__KeinoPresets.savePreset).toHaveBeenCalledWith('my-preset', { a: 1 });
+    expect(window.__KeinoPresets.savePreset).toHaveBeenCalledWith('my-preset', {
+      a: 1
+    });
   });
 
   it('loads preset and calls applyStateObject', () => {
     const applySpy = vi.fn();
     const sel = document.getElementById('preset_list');
     sel.innerHTML = '<option value="p1" selected>p1</option>';
-    setupPresetsUI({ captureStateObject: () => {}, applyStateObject: applySpy });
+    setupPresetsUI({
+      captureStateObject: () => {},
+      applyStateObject: applySpy
+    });
     const loadBtn = document.getElementById('load_preset_btn');
     loadBtn.click();
     expect(window.__KeinoPresets.getPresetState).toHaveBeenCalledWith('p1');
