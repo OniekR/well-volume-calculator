@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oil Well Volume Calculator</title>
+    <!-- Favicons -->
+    <link rel="icon" type="image/jpeg" href="src/assets/KR_fav.jpg" />
+    <link rel="shortcut icon" href="src/assets/KR_fav.jpg" />
+    <link rel="apple-touch-icon" href="src/assets/KR_fav.jpg" />
+    <link rel="stylesheet" href="src/css/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="headerWrapper">
+        <div>
+          <a href="https://oniekr.github.io/"
+            ><img
+              class="firmalogo"
+              src="src/assets/KR_fav.jpg"
+              alt="Keino logo"
+            />
+          </a>
+        </div>
+        <nav>
+          <div class="linker">
+            <a class="nav-link" href="https://oniekr.github.io/">Home</a>
+
+            <a
+              class="nav-link"
+              href="https://oniekr.github.io/pressurevolume.github.io/"
+              >Volume / pressure</a
+            >
+            <a
+              class="nav-link"
+              href="https://oniekr.github.io/stringlift.github.io/"
+              >String lift calculator</a
+            >
+          </div>
+          <div class="header-controls">
+            <span id="theme_label" class="theme-label" aria-live="polite"
+              >Dark mode</span
+            >
+            <label class="switch" title="Toggle dark mode">
+              <input
+                id="theme_toggle"
+                type="checkbox"
+                aria-label="Toggle dark mode"
+              />
+              <span class="slider" aria-hidden="true"></span>
+            </label>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+      <main class="left-panel" id="main" aria-labelledby="main-title">
+        <h1 id="main-title">Well Volume Calculator</h1>
+        <form id="well-form" novalidate>
+          <div class="input-row">
+            <div class="input-inline">
+              <label for="riser_subsea">Well type:</label>
+              <div class="toggle-inline">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="riser_subsea"
+                    checked
+                    role="switch"
+                    aria-checked="true"
+                    aria-controls="wellhead-depth-container"
+                  />
+                  <span class="slider round"></span>
+                </label>
+                <span id="riser_position_label" class="small-note-inline"
+                  >Subsea -</span
+                >
+              </div>
+            </div>
+
+            <div
+              class="input-inline input-inline--narrow"
+              id="wellhead-depth-container"
+              aria-hidden="false"
+            >
+              <label for="wellhead_depth">Wellhead Depth (m):</label>
+              <input
+                type="number"
+                id="wellhead_depth"
+                name="wellhead_depth"
+                step="1.0"
+                value="0"
+                min="0"
+              />
+            </div>
+          </div>
+
+          <div class="casing-input">
+            <div class="casing-header">
+              <input
+                type="checkbox"
+                class="use-checkbox"
+                id="use_riser"
+                checked
+              />
+              <h3>Riser</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row">
+                <div class="input-inline">
+                  <label for="riser_type">Riser type:</label>
+                  <div class="size-with-id">
+                    <select id="riser_type" name="riser_type">
+                      <option value="17.5">Drilling riser</option>
+                      <option value="8.5">Production riser</option>
+                      <option value="20">Marine riser</option>
+                      <option value="none">No riser</option>
+                    </select>
+                    <input
+                      id="riser_type_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Riser type id"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="input-inline input-inline--narrow"
+                  id="depth_riser_container"
+                >
+                  <label>Depth (m):</label>
+                  <input type="number" id="depth_riser" step="1.0" value="0" />
+                  <div style="margin-top: 8px">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_riser"
+                    >
+                      Wellhead
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="casing-input">
+            <div class="casing-header">
+              <input type="checkbox" class="use-checkbox" id="use_18" checked />
+              <h3>Conductor</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="conductor_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="conductor_size" name="conductor_size">
+                      <option value="28">30" 309.7#</option>
+                      <option value="27">30" 457#</option>
+                    </select>
+                    <input
+                      id="conductor_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Conductor size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_18_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_18_top"
+                    name="depth_18_top"
+                    step="1.0"
+                    placeholder="Optional"
+                    title="Double-click to copy Wellhead depth"
+                    min="0"
+                  />
+                  <div style="margin-top: 8px; display: flex; gap: 8px">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_18_top"
+                    >
+                      Wellhead
+                    </button>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_18_bottom">Shoe (m):</label>
+                  <input
+                    type="number"
+                    id="depth_18_bottom"
+                    name="depth_18_bottom"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="conductor_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="casing-input">
+            <div class="casing-header">
+              <input type="checkbox" class="use-checkbox" id="use_13" checked />
+              <h3>Surface Casing</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="surface_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="surface_size" name="surface_size">
+                      <option value="17.8" selected>18 5/8" 84.5#</option>
+                      <option value="18.73">20" 133#</option>
+                    </select>
+                    <input
+                      id="surface_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Surface size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_13_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_13_top"
+                    name="depth_13_top"
+                    step="1.0"
+                    placeholder="Optional"
+                    title="Double-click to copy Wellhead depth"
+                    min="0"
+                  />
+                  <div style="margin-top: 8px; display: flex; gap: 8px">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_13_top"
+                    >
+                      Wellhead
+                    </button>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_13">Shoe (m):</label>
+                  <input
+                    type="number"
+                    id="depth_13"
+                    name="depth_13"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="surface_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="casing-input">
+            <div class="casing-header">
+              <input type="checkbox" class="use-checkbox" id="use_9" checked />
+              <h3>Intermediate Casing</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="intermediate_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="intermediate_size" name="intermediate_size">
+                      <option value="12.347">13 3/8" 72#</option>
+                      <option value="12.375">13 5/8" 88.2#</option>
+                    </select>
+                    <input
+                      id="intermediate_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Intermediate size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_9_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_9_top"
+                    name="depth_9_top"
+                    step="1.0"
+                    placeholder="Optional"
+                    title="Double-click to copy Wellhead depth"
+                    min="0"
+                  />
+                  <div style="margin-top: 8px; display: flex; gap: 8px">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_9_top"
+                    >
+                      Wellhead
+                    </button>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_9">Shoe (m):</label>
+                  <input
+                    type="number"
+                    id="depth_9"
+                    name="depth_9"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="intermediate_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="casing-input">
+            <div class="casing-header">
+              <input type="checkbox" class="use-checkbox" id="use_7" checked />
+              <h3>Production Casing/liner</h3>
+              <label
+                class="header-inline inline-checkbox"
+                style="margin-left: auto"
+              >
+                <input type="checkbox" id="production_is_liner" />
+                Tie-back
+              </label>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="production_size">Size:</label>
+                  <div class="size-with-ctrl">
+                    <div class="size-with-id">
+                      <select id="production_size" name="production_size">
+                        <option value="8.535">9 5/8" 53.5#</option>
+                      </select>
+                      <input
+                        id="production_size_id"
+                        class="size-id-input"
+                        type="number"
+                        step="0.001"
+                        aria-label="Production size id"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label id="production_top_label" for="depth_7_top"
+                    >Top (m):</label
+                  >
+                  <input
+                    type="number"
+                    id="depth_7_top"
+                    name="depth_7_top"
+                    step="0.1"
+                    placeholder="Optional"
+                    min="0"
+                  />
+                  <div
+                    style="
+                      margin-top: 8px;
+                      display: flex;
+                      gap: 8px;
+                      align-items: center;
+                      position: relative;
+                    "
+                  >
+                    <!-- Casing: copy wellhead depth to Production Top -->
+                    <button
+                      id="production_casing_btn"
+                      type="button"
+                      class="wellhead-btn casing-btn"
+                      data-target="depth_7_top"
+                      aria-label="Copy Wellhead depth to Production top"
+                      aria-pressed="false"
+                    >
+                      Casing
+                    </button>
+
+                    <!-- Liner: use Intermediate Bottom - 50m (falls back to wellhead if missing) -->
+                    <button
+                      type="button"
+                      id="production_liner_btn"
+                      class="liner-default-btn"
+                      aria-label="Default for Liner (uses Intermediate bottom minus 50 m)"
+                      title="Default for Liner: uses Intermediate casing bottom minus 50 m"
+                      aria-pressed="false"
+                    >
+                      Liner
+                    </button>
+
+                    <!-- Small info button for Liner default -->
+                    <button
+                      type="button"
+                      id="production_liner_info_btn"
+                      class="info-btn"
+                      style="margin-left: 6px"
+                      aria-label="Liner: PBR depth is intermediate casing shoe - 50"
+                      title="Liner: PBR depth is intermediate casing shoe - 50"
+                    >
+                      i
+                    </button>
+                    <div
+                      id="production_liner_info_tooltip"
+                      class="info-tooltip hidden"
+                      role="tooltip"
+                      aria-hidden="true"
+                    >
+                      Liner: PBR depth is intermediate casing shoe - 50
+                    </div>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_7">Shoe (m):</label>
+                  <input
+                    type="number"
+                    id="depth_7"
+                    name="depth_7"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="production_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tie-back Casing: shown when Production 'Liner?' is checked -->
+          <div
+            class="casing-input hidden"
+            id="tieback_casing"
+            aria-hidden="true"
+          >
+            <div class="casing-header">
+              <input
+                type="checkbox"
+                class="use-checkbox"
+                id="use_tieback"
+                checked
+              />
+              <h3>Tie-back Casing</h3>
+              <!-- New control: Dummy hanger (toggle only, functionality to be added later) -->
+              <label
+                class="header-inline inline-checkbox"
+                style="margin-left: auto"
+              >
+                <input
+                  type="checkbox"
+                  id="dummy_hanger"
+                  aria-label="Dummy hanger"
+                />
+                Dummy hanger
+              </label>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="tieback_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="tieback_size" name="tieback_size">
+                      <option value="8.535" selected>9 5/8" 53.5#</option>
+                      <option value="9.66">10 3/4" 60.7#</option>
+                    </select>
+                    <input
+                      id="tieback_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Tieback size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_tb_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_tb_top"
+                    name="depth_tb_top"
+                    step="0.1"
+                    placeholder="Optional"
+                    min="0"
+                  />
+                  <div style="margin-top: 8px; display: flex; gap: 8px">
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_tb_top"
+                    >
+                      Wellhead
+                    </button>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_tb">Bottom (m):</label>
+                  <input
+                    class="readonly-input"
+                    type="number"
+                    id="depth_tb"
+                    name="depth_tb"
+                    step="1.0"
+                    value="0"
+                    readonly
+                  />
+                  <div
+                    id="tieback_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="casing-input">
+            <div class="casing-header">
+              <input type="checkbox" class="use-checkbox" id="use_5" checked />
+              <h3>Reservoir Liner</h3>
+            </div>
+            <div class="casing-body">
+              <div class="input-row three-cols">
+                <div class="input-inline">
+                  <label for="reservoir_size">Size:</label>
+                  <div class="size-with-id">
+                    <select id="reservoir_size" name="reservoir_size">
+                      <option value="6.184">7" 29#</option>
+                      <option value="4.778">5 1/2" 20#</option>
+                    </select>
+                    <input
+                      id="reservoir_size_id"
+                      class="size-id-input"
+                      type="number"
+                      step="0.001"
+                      aria-label="Reservoir size id"
+                    />
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_5_top">Top (m):</label>
+                  <input
+                    type="number"
+                    id="depth_5_top"
+                    name="depth_5_top"
+                    step="0.1"
+                    placeholder="Optional"
+                    min="0"
+                  />
+                  <div
+                    style="
+                      margin-top: 8px;
+                      display: flex;
+                      gap: 8px;
+                      align-items: center;
+                      position: relative;
+                    "
+                  >
+                    <button
+                      type="button"
+                      class="default-top-btn reservoir-default-btn"
+                      aria-label="Liner: set Reservoir Top to Production bottom"
+                      title="Liner: set Reservoir Top to Production bottom"
+                    >
+                      Liner
+                    </button>
+                    <button
+                      type="button"
+                      id="reservoir_default_info_btn"
+                      class="info-btn"
+                      style="margin-left: 6px"
+                      aria-label="Liner: PBR depth is production casing shoe - 50"
+                      title="Liner: PBR depth is production casing shoe - 50"
+                    >
+                      i
+                    </button>
+                    <div
+                      id="reservoir_default_info_tooltip"
+                      class="info-tooltip hidden"
+                      role="tooltip"
+                      aria-hidden="true"
+                    >
+                      Liner: PBR depth is production casing shoe - 50
+                    </div>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="depth_5">Shoe (m):</label>
+                  <input
+                    type="number"
+                    id="depth_5"
+                    name="depth_5"
+                    step="1.0"
+                    value="0"
+                    min="0"
+                  />
+                  <div
+                    id="reservoir_length_note"
+                    class="small-note"
+                    aria-live="polite"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="result">
+            <h2>Total Volume</h2>
+            <p id="totalVolume">0.00 m³</p>
+          </div>
+        </form>
+      </main>
+
+      <div class="right-panel">
+        <h1>Well Schematic</h1>
+        <canvas
+          id="wellSchematic"
+          role="img"
+          aria-label="Well schematic showing casings and water column"
+        ></canvas>
+
+        <!-- Volume breakdown table -->
+        <section
+          id="volume-breakdown"
+          class="volume-breakdown"
+          aria-labelledby="volume-breakdown-title"
+        >
+          <h2 id="volume-breakdown-title">Volume breakdown</h2>
+          <div class="table-wrap">
+            <table
+              id="casingVolumes"
+              class="volume-table"
+              aria-live="polite"
+              aria-describedby="volume-breakdown-note"
+            >
+              <thead>
+                <tr>
+                  <th scope="col">Casing</th>
+                  <th scope="col">Volume (m³)</th>
+                  <th scope="col">Included length (m)</th>
+                  <th scope="col">Volume per m (L/m)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rows populated by script -->
+              </tbody>
+            </table>
+            <div id="volume-breakdown-note" class="small-note">
+              Values update automatically when inputs change.
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="src/js/script.js" defer></script>
+  </body>
+</html>
