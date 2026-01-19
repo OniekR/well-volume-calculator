@@ -24,7 +24,7 @@ jobs:
       - run: npm test
       - name: Start simple static server (background)
         run: |
-          nohup node _volume_sync_tmp/tools/qa/simple_static_server.js &> server.log & echo $! > server.pid
+          nohup node _volume_sync_tmp/tools/qa/simple_static_server.cjs &> server.log & echo $! > server.pid
       - name: Wait for server
         run: |
           for i in {1..15}; do
@@ -35,7 +35,7 @@ jobs:
             sleep 1;
           done
       - name: Run Puppeteer P-9 smoke test
-        run: node _volume_sync_tmp/tools/qa/run_p9_smoke_puppeteer.js
+        run: node _volume_sync_tmp/tools/qa/run_p9_smoke_puppeteer.cjs
       - name: Stop server
         if: always()
         run: |
