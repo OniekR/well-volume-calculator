@@ -38,16 +38,16 @@ export function computeVolumes(casingsInput, opts = {}) {
           c.role === 'conductor'
             ? -1
             : c.role === 'small_liner'
-              ? 5
-              : c.role === 'reservoir'
-                ? 4
-                : c.role === 'production' || c.role === 'tieback'
-                  ? 3
-                  : c.role === 'intermediate'
-                    ? 2
-                    : c.role === 'surface'
-                      ? 1
-                      : 0
+            ? 5
+            : c.role === 'reservoir'
+            ? 4
+            : c.role === 'production' || c.role === 'tieback'
+            ? 3
+            : c.role === 'intermediate'
+            ? 2
+            : c.role === 'surface'
+            ? 1
+            : 0
       });
     }
   });

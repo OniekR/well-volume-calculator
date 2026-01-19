@@ -1,7 +1,7 @@
 // Presets module (ES module)
 // Exposes preset management functions and attaches to window.__KeinoPresets for legacy compatibility.
-const PRESETS_KEY = "well_presets_v1";
-const BUILTIN_PRESETS_URL = "./well-presets.json"; // served from project root (public/)
+const PRESETS_KEY = 'well_presets_v1';
+const BUILTIN_PRESETS_URL = './well-presets.json'; // served from project root (public/)
 
 let BUILTIN_PRESETS = {};
 
@@ -26,13 +26,13 @@ function savePresetsToStorage(obj) {
 async function loadBuiltinPresets() {
   // Try a few sensible locations so the module works under different local servers
   const candidates = [
-    "./public/well-presets.json",
-    "./well-presets.json",
-    "./src/data/well-presets.json",
+    './public/well-presets.json',
+    './well-presets.json',
+    './src/data/well-presets.json'
   ];
   for (const url of candidates) {
     try {
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) {
         // try next candidate
         console.debug &&
@@ -40,17 +40,17 @@ async function loadBuiltinPresets() {
         continue;
       }
       const payload = await res.json();
-      if (payload && payload.presets && typeof payload.presets === "object") {
+      if (payload && payload.presets && typeof payload.presets === 'object') {
         BUILTIN_PRESETS = payload.presets;
-      } else if (payload && typeof payload === "object") {
+      } else if (payload && typeof payload === 'object') {
         BUILTIN_PRESETS = payload.presets || payload;
       }
-      console.info && console.info("Loaded built-in presets from", url);
+      console.info && console.info('Loaded built-in presets from', url);
       try {
         if (
           window &&
           window.__KeinoPresets &&
-          typeof window.__KeinoPresets.populatePresetsUI === "function"
+          typeof window.__KeinoPresets.populatePresetsUI === 'function'
         )
           window.__KeinoPresets.populatePresetsUI();
       } catch (e) {
@@ -61,13 +61,13 @@ async function loadBuiltinPresets() {
       console.debug &&
         console.debug(
           `Presets: failed to fetch ${url}:`,
-          err && err.message ? err.message : err,
+          err && err.message ? err.message : err
         );
     }
   }
   console.warn(
-    "Failed to load built-in presets from any known location:",
-    candidates,
+    'Failed to load built-in presets from any known location:',
+    candidates
   );
   BUILTIN_PRESETS = BUILTIN_PRESETS || {};
 }
@@ -76,11 +76,11 @@ function getPresetNames() {
   const stored = loadPresetsFromStorage();
   const builtInNames = Object.keys(BUILTIN_PRESETS || {}).sort();
   const storedNames = Object.keys(stored || {}).sort((a, b) =>
-    stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0,
+    stored[a] && stored[b] ? stored[a].savedAt - stored[b].savedAt : 0
   );
   return [
     ...builtInNames,
-    ...storedNames.filter((n) => !builtInNames.includes(n)),
+    ...storedNames.filter((n) => !builtInNames.includes(n))
   ];
 }
 
@@ -92,40 +92,40 @@ function getPresetState(name) {
 }
 
 function populatePresetsUI() {
-  const sel = document.getElementById("preset_list");
+  const sel = document.getElementById('preset_list');
   if (!sel) return;
   sel.innerHTML = '<option value="">— Select a preset —</option>';
   const names = getPresetNames();
   names.forEach((n) => {
-    const opt = document.createElement("option");
+    const opt = document.createElement('option');
     opt.value = n;
     opt.textContent = n;
-    if (BUILTIN_PRESETS[n]) opt.dataset.builtin = "1";
+    if (BUILTIN_PRESETS[n]) opt.dataset.builtin = '1';
     sel.appendChild(opt);
   });
 }
 
 function exportPresets() {
   try {
-    const raw = localStorage.getItem(PRESETS_KEY) || "{}";
+    const raw = localStorage.getItem(PRESETS_KEY) || '{}';
     const payload = {
       exported_at: new Date().toISOString(),
-      presets: JSON.parse(raw),
+      presets: JSON.parse(raw)
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: "application/json",
+      type: 'application/json'
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = "well-presets_export.json";
+    a.download = 'well-presets_export.json';
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
   } catch (e) {
     alert(
-      "Error exporting presets: " + (e && e.message ? e.message : String(e)),
+      'Error exporting presets: ' + (e && e.message ? e.message : String(e))
     );
   }
 }
@@ -141,7 +141,11 @@ function importPresetsFile(file) {
         const conflicts = Object.keys(incoming).filter((n) => existing[n]);
         if (conflicts.length > 0) {
           const ok = confirm(
-            `Import will overwrite ${conflicts.length} existing preset(s):\n${conflicts.join(", ")}\n\nContinue and overwrite?`,
+            `Import will overwrite ${
+              conflicts.length
+            } existing preset(s):\n${conflicts.join(
+              ', '
+            )}\n\nContinue and overwrite?`
           );
           if (!ok) return;
         }
@@ -151,17 +155,17 @@ function importPresetsFile(file) {
         alert(`Imported ${Object.keys(incoming).length} preset(s).`);
       } catch (err) {
         alert(
-          "Error importing presets: " +
-            (err && err.message ? err.message : String(err)),
+          'Error importing presets: ' +
+            (err && err.message ? err.message : String(err))
         );
       }
     };
-    reader.onerror = () => alert("Error reading file.");
+    reader.onerror = () => alert('Error reading file.');
     reader.readAsText(file);
   } catch (err) {
     alert(
-      "Error importing presets: " +
-        (err && err.message ? err.message : String(err)),
+      'Error importing presets: ' +
+        (err && err.message ? err.message : String(err))
     );
   }
 }
@@ -188,7 +192,7 @@ function deletePreset(name) {
 }
 
 // Attach to window for backward compatibility
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   window.__KeinoPresets = {
     loadBuiltinPresets,
     loadPresetsFromStorage,
@@ -199,7 +203,7 @@ if (typeof window !== "undefined") {
     exportPresets,
     importPresetsFile,
     savePreset,
-    deletePreset,
+    deletePreset
   };
 }
 
@@ -213,5 +217,5 @@ export {
   exportPresets,
   importPresetsFile,
   savePreset,
-  deletePreset,
+  deletePreset
 };

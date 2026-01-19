@@ -84,12 +84,19 @@ const VolumeCalc = (() => {
   function applyStateObject(state) {
     // Delegate to `state.js` implementation and provide local callbacks
     const scheduleSaveSafe = (...args) => {
-      if (typeof persistence !== 'undefined' && persistence && typeof persistence.scheduleSave === 'function') {
+      if (
+        typeof persistence !== 'undefined' &&
+        persistence &&
+        typeof persistence.scheduleSave === 'function'
+      ) {
         return persistence.scheduleSave(...args);
       }
       // noop if persistence unavailable (e.g., called before init)
     };
-    return applyStateObjectFn(state, { calculateVolume, scheduleSave: scheduleSaveSafe });
+    return applyStateObjectFn(state, {
+      calculateVolume,
+      scheduleSave: scheduleSaveSafe
+    });
   }
 
   // Ensure each casing section collapsed/expanded state matches its checkbox
