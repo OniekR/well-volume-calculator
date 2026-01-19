@@ -423,23 +423,54 @@ export function setupSizeIdInputs(deps) {
           nomInline.textContent = 'Nom ID:';
         }
 
-        // Handle Drift Note (if present in footer)
-        const container = sel.closest('.casing-body');
-        const driftNote = container && container.querySelector('.drift-note');
-        if (driftNote) {
-          const idNum = Number(idInput.value);
+        // Handle Drift (if present below the Nom ID)
+        const sizeIdInline =
+          sizeInline && sizeInline.querySelector('.size-id-inline');
+        const driftLabel =
+          sizeIdInline && sizeIdInline.querySelector('.drift-label');
+        const driftInput =
+          sizeIdInline && sizeIdInline.querySelector('input[id$="_drift"]');
+
+        if (driftLabel && driftInput) {
+          const idNum = Number(sel.value);
           const driftMap =
             DRIFT && DRIFT[selId.replace('_size', '')]
               ? DRIFT[selId.replace('_size', '')]
               : selId === 'conductor_size' && DRIFT.conductor
               ? DRIFT.conductor
               : {};
-          // Currently only conductor has drift map
           const driftVal = driftMap[idNum];
-          driftNote.textContent =
-            typeof driftVal !== 'undefined'
-              ? `Drift: ${String(driftVal)} in`
-              : '';
+          driftLabel.textContent = 'Drift:';
+          if (
+            typeof driftVal !== 'undefined' &&
+            !driftInput.dataset.userEdited
+          ) {
+            driftInput.value = driftVal;
+          }
+        } else {
+          // Fallback: check for drift-label in footer (conductor, surface, intermediate)
+          const container = sel.closest('.casing-body');
+          const driftLabel =
+            container && container.querySelector('.drift-label');
+          const driftInput =
+            container && container.querySelector('input[id$="_drift"]');
+          if (driftLabel && driftInput) {
+            const idNum = Number(sel.value);
+            const driftMap =
+              DRIFT && DRIFT[selId.replace('_size', '')]
+                ? DRIFT[selId.replace('_size', '')]
+                : selId === 'conductor_size' && DRIFT.conductor
+                ? DRIFT.conductor
+                : {};
+            const driftVal = driftMap[idNum];
+            driftLabel.textContent = 'Drift:';
+            if (
+              typeof driftVal !== 'undefined' &&
+              !driftInput.dataset.userEdited
+            ) {
+              driftInput.value = driftVal;
+            }
+          }
         }
         return;
       }
@@ -482,6 +513,25 @@ export function setupSizeIdInputs(deps) {
       scheduleSave();
       calculateVolume();
     });
+
+    // Attach listener to drift input (if present) so user edits are preserved
+    const sizeIdInlineEl =
+      sel.closest('.size-with-id') &&
+      sel.closest('.size-with-id').querySelector('.size-id-inline');
+    const driftInline =
+      sizeIdInlineEl && sizeIdInlineEl.querySelector('input[id$="_drift"]');
+    const driftFooter =
+      sel.closest('.casing-body') &&
+      sel.closest('.casing-body').querySelector('input[id$="_drift"]');
+    const driftField = driftInline || driftFooter;
+    if (driftField) {
+      driftField.addEventListener('input', () => {
+        driftField.dataset.userEdited = 'true';
+        updateSmallNote();
+        scheduleSave();
+        calculateVolume();
+      });
+    }
   });
 }
 

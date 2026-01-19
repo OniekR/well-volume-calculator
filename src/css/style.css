@@ -796,10 +796,10 @@ select:focus {
 }
 .size-id-inline {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
   margin-top: 0; /* Relies on parent .size-with-id gap: 6px */
-  flex-wrap: wrap; /* allow items to wrap responsively */
 }
 .casing-footer-row {
   margin-top: 6px !important; /* ensure consistent top spacing */
@@ -835,6 +835,11 @@ select:focus {
   font-size: 0.75rem; /* slightly smaller */
   color: var(--muted);
   margin-top: 0; /* Remove inherited small-note margin for alignment */
+}
+.drift-label {
+  font-size: 0.75rem; /* match Nom ID */
+  color: var(--muted);
+  margin-top: 0; /* align with input */
 }
 .size-id-input {
   width: 100px;
@@ -1017,6 +1022,13 @@ select:focus {
 /* Slightly larger spacing between label and control for visual alignment */
 .input-row.three-cols .input-inline label {
   margin-bottom: 10px;
+}
+/* Reduce spacing specifically for Size, Top and Shoe labels */
+.input-row.three-cols .input-inline label[for$='_size'],
+.input-row.three-cols .input-inline label[for$='_top'],
+.input-row.three-cols .input-inline label.top-label,
+.input-row.three-cols .input-inline label.shoe-label {
+  margin-bottom: 0;
 }
 .input-row .input-inline label {
   display: block;

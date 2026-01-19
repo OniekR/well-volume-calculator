@@ -193,11 +193,24 @@
                           aria-label="Conductor size id"
                         />
                       </div>
+                      <div class="nom-input-group">
+                        <div
+                          class="small-note drift-label"
+                          aria-live="polite"
+                        ></div>
+                        <input
+                          id="conductor_drift"
+                          class="size-id-input size-id-input--narrow"
+                          type="number"
+                          step="0.001"
+                          aria-label="Conductor drift"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_18_top">Top (m):</label>
+                  <label class="top-label" for="depth_18_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_18_top"
@@ -208,23 +221,19 @@
                     min="0"
                   />
                   <div class="casing-footer-row">
-                    <div class="drift-input-group">
-                      <div
-                        class="small-note drift-note"
-                        aria-live="polite"
-                      ></div>
-                      <button
-                        type="button"
-                        class="wellhead-btn"
-                        data-target="depth_18_top"
-                      >
-                        Wellhead
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_18_top"
+                    >
+                      Wellhead
+                    </button>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_18_bottom">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_18_bottom"
+                    >Shoe (m):</label
+                  >
                   <input
                     type="number"
                     id="depth_18_bottom"
@@ -271,11 +280,24 @@
                           aria-label="Surface size id"
                         />
                       </div>
+                      <div class="nom-input-group">
+                        <div
+                          class="small-note drift-label"
+                          aria-live="polite"
+                        ></div>
+                        <input
+                          id="surface_drift"
+                          class="size-id-input size-id-input--narrow"
+                          type="number"
+                          step="0.001"
+                          aria-label="Surface drift"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_13_top">Top (m):</label>
+                  <label class="top-label" for="depth_13_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_13_top"
@@ -286,23 +308,17 @@
                     min="0"
                   />
                   <div class="casing-footer-row">
-                    <div class="drift-input-group">
-                      <div
-                        class="small-note drift-note"
-                        aria-live="polite"
-                      ></div>
-                      <button
-                        type="button"
-                        class="wellhead-btn"
-                        data-target="depth_13_top"
-                      >
-                        Wellhead
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_13_top"
+                    >
+                      Wellhead
+                    </button>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_13">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_13">Shoe (m):</label>
                   <input
                     type="number"
                     id="depth_13"
@@ -349,11 +365,24 @@
                           aria-label="Intermediate size id"
                         />
                       </div>
+                      <div class="nom-input-group">
+                        <div
+                          class="small-note drift-label"
+                          aria-live="polite"
+                        ></div>
+                        <input
+                          id="intermediate_drift"
+                          class="size-id-input size-id-input--narrow"
+                          type="number"
+                          step="0.001"
+                          aria-label="Intermediate drift"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_9_top">Top (m):</label>
+                  <label class="top-label" for="depth_9_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_9_top"
@@ -364,23 +393,17 @@
                     min="0"
                   />
                   <div class="casing-footer-row">
-                    <div class="drift-input-group">
-                      <div
-                        class="small-note drift-note"
-                        aria-live="polite"
-                      ></div>
-                      <button
-                        type="button"
-                        class="wellhead-btn"
-                        data-target="depth_9_top"
-                      >
-                        Wellhead
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      class="wellhead-btn"
+                      data-target="depth_9_top"
+                    >
+                      Wellhead
+                    </button>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_9">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_9">Shoe (m):</label>
                   <input
                     type="number"
                     id="depth_9"
@@ -418,7 +441,7 @@
                   <div class="size-with-ctrl">
                     <div class="size-with-id">
                       <select id="production_size" name="production_size">
-                        <option value="8.535">9 5/8" 53.5#</option>
+                        <option value="8.535">9 5/8" 53.5# L-80</option>
                       </select>
                       <div class="size-id-inline">
                         <div class="nom-input-group">
@@ -434,12 +457,28 @@
                             aria-label="Production size id"
                           />
                         </div>
+                        <div class="nom-input-group">
+                          <div
+                            class="small-note drift-label"
+                            aria-live="polite"
+                          ></div>
+                          <input
+                            id="production_drift"
+                            class="size-id-input size-id-input--narrow"
+                            type="number"
+                            step="0.001"
+                            aria-label="Production drift"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label id="production_top_label" for="depth_7_top"
+                  <label
+                    id="production_top_label"
+                    class="top-label"
+                    for="depth_7_top"
                     >Top (m):</label
                   >
                   <input
@@ -497,7 +536,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_7">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_7">Shoe (m):</label>
                   <input
                     type="number"
                     id="depth_7"
@@ -570,7 +609,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_tb_top">Top (m):</label>
+                  <label class="top-label" for="depth_tb_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_tb_top"
@@ -642,7 +681,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_5_top">Top (m):</label>
+                  <label class="top-label" for="depth_5_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_5_top"
@@ -681,7 +720,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_5">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_5">Shoe (m):</label>
                   <input
                     type="number"
                     id="depth_5"
@@ -737,7 +776,9 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_small_top">Top (m):</label>
+                  <label class="top-label" for="depth_small_top"
+                    >Top (m):</label
+                  >
                   <input
                     type="number"
                     id="depth_small_top"
@@ -758,7 +799,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_small">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_small">Shoe (m):</label>
                   <input
                     type="number"
                     id="depth_small"
@@ -818,7 +859,7 @@
                   </div>
                 </div>
                 <div class="input-inline">
-                  <label for="depth_open_top">Top (m):</label>
+                  <label class="top-label" for="depth_open_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_open_top"
@@ -894,7 +935,7 @@
                 </div>
 
                 <div class="input-inline">
-                  <label for="depth_uc_top">Top (m):</label>
+                  <label class="top-label" for="depth_uc_top">Top (m):</label>
                   <input
                     type="number"
                     id="depth_uc_top"
@@ -906,7 +947,7 @@
                 </div>
 
                 <div class="input-inline">
-                  <label for="depth_uc">Shoe (m):</label>
+                  <label class="shoe-label" for="depth_uc">Shoe (m):</label>
                   <input
                     type="number"
                     id="depth_uc"
