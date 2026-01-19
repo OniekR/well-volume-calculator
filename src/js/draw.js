@@ -76,7 +76,13 @@ export function drawSchematic(casings, opts = {}) {
     casings.length ? Math.max(...casings.map((c) => c.depth)) : 0
   );
   const maxOD = casings.length ? Math.max(...casings.map((c) => c.od)) : 18.625;
-  if (maxDepth === 0) return;
+  // If there is no depth information, normally we can abort early.
+  // However, always allow rendering of a provided preset label (a UI overlay)
+  // even when maxDepth is zero so tests and user overlays still appear.
+  if (maxDepth === 0) {
+    const hasLabel = typeof opts.currentPresetName === 'string' && opts.currentPresetName.trim() !== '';
+    if (!hasLabel) return;
+  }
 
   const centerX = rect.width / 2;
   const startY = 50;
