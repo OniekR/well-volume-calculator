@@ -11,6 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "pretest": "node -e \"const v=process.versions.node.split('.').map(n=>parseInt(n,10)); if(v[0]<20 || (v[0]===20 && v[1]<19)){console.error('ERROR: Node >= 20.19.0 is required to run tests locally. Current version:', process.versions.node); process.exit(1);} else process.exit(0);\"",
     "smoke:http": "node tools/qa/simple_static_server.js & node tools/qa/run_p9_smoke_puppeteer.js",
     "lint": "eslint \"src/**/*.js\"",
     "lint:fix": "eslint \"src/**/*.js\" --fix",
