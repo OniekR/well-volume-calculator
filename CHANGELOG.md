@@ -13,6 +13,11 @@ All notable changes to this project are documented in this file.
 - Canvas: assigned `small_liner` a higher z-index so it always renders above `Reservoir` on the schematic.
 - Presets: updated built-in presets — default `Plug` is now **unchecked**; `Small liner` defaults set (size 5\" 18#, top 3691, shoe 4992).
 
+### Changed
+
+- Refactor: extracted presets management into `src/js/presets.js` and removed duplicate implementations from `src/js/script.js`.
+- CI: added an HTTP Puppeteer smoke test for the P-9 preset and a CI job to run it (`.github/workflows/ci.yml`).
+
 ### Notes
 
 - Recommended: review `well-presets.json` for other presets that may benefit from including `small_liner` defaults.

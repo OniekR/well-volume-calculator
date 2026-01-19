@@ -2,13 +2,34 @@
   "name": "well-volume-calculator",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "echo \"No tests configured\" && exit 0"
+    "test": "vitest",
+    "smoke:http": "node tools/qa/simple_static_server.js & node tools/qa/run_p9_smoke_puppeteer.js",
+    "lint": "eslint -c .config/eslint/.eslintrc.cjs --ignore-path .config/eslint/.eslintignore \"src/**/*.js\"",
+    "lint:fix": "eslint -c .config/eslint/.eslintrc.cjs --ignore-path .config/eslint/.eslintignore \"src/**/*.js\" --fix",
+    "format": "prettier --write \"src/**/*.{js,css,html,md}\"",
+    "test:run": "vitest run --coverage",
+    "prepare": "husky install"
   },
   "devDependencies": {
-    "vite": "^5.1.0"
+    "vite": "^5.1.0",
+    "puppeteer": "^20.9.0",
+    "vitest": "^1.0.0",
+    "eslint": "^8.44.0",
+    "prettier": "^2.8.8",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-config-prettier": "^9.1.2"
+  },
+  "lint-staged": {
+    "src/**/*.{js,css,html,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }

@@ -125,8 +125,14 @@ header {
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   background-color: var(--equinor-blue);
   color: var(--text-color);
   min-height: 100vh;
@@ -163,7 +169,10 @@ header {
   text-decoration: none;
   border-radius: 6px;
   background: transparent;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.06s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.06s ease;
 }
 
 /* Hover and focus states */
@@ -285,7 +294,10 @@ h1 {
   gap: 6px;
   padding: 4px 8px; /* reduced padding for more compact headers */
   cursor: pointer;
-  transition: padding 0.12s ease, gap 0.12s ease, background 0.12s ease,
+  transition:
+    padding 0.12s ease,
+    gap 0.12s ease,
+    background 0.12s ease,
     color 0.12s ease;
 }
 .casing-header:focus {
@@ -307,7 +319,9 @@ h1 {
 .casing-header h3 {
   margin: 0;
   font-size: 0.95rem; /* slightly smaller heading for active state */
-  transition: font-size 0.12s ease, opacity 0.12s ease;
+  transition:
+    font-size 0.12s ease,
+    opacity 0.12s ease;
   /* nudge down slightly so text bottom aligns with checkbox */
   position: relative;
   top: 6px;

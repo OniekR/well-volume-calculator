@@ -20,14 +20,16 @@ const path = require("path");
           ok: true,
           json: () =>
             Promise.resolve(
-              require(path.resolve(
-                __dirname,
-                "..",
-                "..",
-                "..",
-                "public",
-                "well-presets.json"
-              ))
+              require(
+                path.resolve(
+                  __dirname,
+                  "..",
+                  "..",
+                  "..",
+                  "public",
+                  "well-presets.json",
+                ),
+              ),
             ),
         });
 
@@ -102,7 +104,7 @@ const path = require("path");
     else
       fail(
         "conductor size-id initialized",
-        `expected ${conductorSel.value} got ${conductorId.value}`
+        `expected ${conductorSel.value} got ${conductorId.value}`,
       );
 
     // Toggle conductor use off -> should not appear in table
@@ -113,7 +115,7 @@ const path = require("path");
     const rows = Array.from(d.querySelectorAll("#casingVolumes tbody tr"));
     const hasConductor = rows.some(
       (tr) =>
-        tr.children[0] && tr.children[0].textContent.trim() === "Conductor"
+        tr.children[0] && tr.children[0].textContent.trim() === "Conductor",
     );
     if (!hasConductor) pass("conductor hidden when unchecked");
     else fail("conductor hidden when unchecked", "Conductor row still present");
@@ -129,7 +131,7 @@ const path = require("path");
       (id) =>
         d
           .getElementById(id)
-          .dispatchEvent(new window.Event("input", { bubbles: true }))
+          .dispatchEvent(new window.Event("input", { bubbles: true })),
     );
     await new Promise((r) => setTimeout(r, 50));
     const totalText = d.getElementById("totalVolume").textContent;
@@ -170,8 +172,8 @@ const path = require("path");
       fail(
         "tieback shown and checked when production_is_liner set",
         `tieback.hidden=${!!tiebackCasing.classList.contains(
-          "hidden"
-        )}, useTie=${useTie && useTie.checked}`
+          "hidden",
+        )}, useTie=${useTie && useTie.checked}`,
       );
 
     // Tie-back bottom: when enabled, bottom input should become editable and seeded to the wellhead + 75
@@ -188,7 +190,7 @@ const path = require("path");
         "tieback bottom unlocked",
         `readOnly=${tieBottom && tieBottom.readOnly}, value=${
           tieBottom && tieBottom.value
-        }`
+        }`,
       );
 
     // User edit should be accepted and persisted
@@ -228,7 +230,7 @@ const path = require("path");
     // force update in test environment
     console.log(
       "DBG test __TEST_updateDummy type",
-      typeof (d.defaultView && d.defaultView.__TEST_updateDummy)
+      typeof (d.defaultView && d.defaultView.__TEST_updateDummy),
     );
     if (d.defaultView && typeof d.defaultView.__TEST_updateDummy === "function")
       d.defaultView.__TEST_updateDummy();
@@ -247,21 +249,21 @@ const path = require("path");
       parseFloat(tbBottomAfterDummy.value) === 175
     )
       pass(
-        "dummy: top set to wellhead and bottom seeded to wellhead+75 when checked"
+        "dummy: top set to wellhead and bottom seeded to wellhead+75 when checked",
       );
     else
       fail(
         "dummy behavior (checked)",
         `top=${tbTop.value}, bottom=${
           tbBottomAfterDummy && tbBottomAfterDummy.value
-        }, readOnly=${tbBottomAfterDummy && tbBottomAfterDummy.readOnly}`
+        }, readOnly=${tbBottomAfterDummy && tbBottomAfterDummy.readOnly}`,
       );
 
     // User edit while dummy checked must be accepted
     if (tbBottomAfterDummy) {
       tbBottomAfterDummy.value = "888";
       tbBottomAfterDummy.dispatchEvent(
-        new window.Event("input", { bubbles: true })
+        new window.Event("input", { bubbles: true }),
       );
       await new Promise((r) => setTimeout(r, 25));
       if (tbBottomAfterDummy.value === "888")
@@ -269,14 +271,14 @@ const path = require("path");
       else
         fail(
           "dummy: bottom accepts user edits",
-          `value=${tbBottomAfterDummy.value}`
+          `value=${tbBottomAfterDummy.value}`,
         );
     }
 
     // Uncheck Dummy -> expect top still follows wellhead and bottom mirrors Production top and is locked
     d.getElementById("depth_7_top").value = "50";
     d.getElementById("depth_7_top").dispatchEvent(
-      new window.Event("input", { bubbles: true })
+      new window.Event("input", { bubbles: true }),
     );
     await new Promise((r) => setTimeout(r, 20));
 
@@ -297,7 +299,7 @@ const path = require("path");
         "dummy behavior (unchecked)",
         `top=${tbTop.value}, bottom=${
           tbBottomAfterUncheck && tbBottomAfterUncheck.value
-        }, readOnly=${tbBottomAfterUncheck && tbBottomAfterUncheck.readOnly}`
+        }, readOnly=${tbBottomAfterUncheck && tbBottomAfterUncheck.readOnly}`,
       );
 
     // Ensure changing select updates id input unless user-edited
@@ -311,7 +313,7 @@ const path = require("path");
     else
       fail(
         "surface id input follows select",
-        `expected ${surfaceSel.value} got ${surfaceId.value}`
+        `expected ${surfaceSel.value} got ${surfaceId.value}`,
       );
 
     // --- New test: load built-in preset P-9 and ensure Conductor, Surface and Intermediate are untoggled ---
@@ -332,7 +334,7 @@ const path = require("path");
       else {
         presetSel.value = "P-9";
         d.getElementById("load_preset_btn").dispatchEvent(
-          new window.Event("click", { bubbles: true })
+          new window.Event("click", { bubbles: true }),
         );
         await new Promise((r) => setTimeout(r, 150));
         const use18 = d.getElementById("use_18");
@@ -352,7 +354,7 @@ const path = require("path");
             "P-9 untoggled defaults",
             `use_18=${use18 && use18.checked}, use_13=${
               use13 && use13.checked
-            }, use_9=${use9 && use9.checked}`
+            }, use_9=${use9 && use9.checked}`,
           );
 
         // ensure rows are absent from volume table
@@ -377,7 +379,7 @@ const path = require("path");
         ["depth_small", "depth_5", "depth_7"].forEach((id) =>
           d
             .getElementById(id)
-            .dispatchEvent(new window.Event("input", { bubbles: true }))
+            .dispatchEvent(new window.Event("input", { bubbles: true })),
         );
         await new Promise((r) => setTimeout(r, 80));
         const openTopEl = d.getElementById("depth_open_top");
@@ -386,13 +388,13 @@ const path = require("path");
         else
           fail(
             "open hole top initial link",
-            `openTop=${openTopEl && openTopEl.value}`
+            `openTop=${openTopEl && openTopEl.value}`,
           );
 
         // Untoggle small liner -> top should move to reservoir (3798)
         d.getElementById("use_small_liner").checked = false;
         d.getElementById("use_small_liner").dispatchEvent(
-          new window.Event("change", { bubbles: true })
+          new window.Event("change", { bubbles: true }),
         );
         await new Promise((r) => setTimeout(r, 80));
         if (openTopEl && openTopEl.value === "3798")
@@ -400,7 +402,7 @@ const path = require("path");
         else
           fail(
             "open hole top after untoggle",
-            `openTop=${openTopEl && openTopEl.value}`
+            `openTop=${openTopEl && openTopEl.value}`,
           );
       }
     }
@@ -441,7 +443,7 @@ const path = require("path");
         else
           fail(
             "theme toggle sets dark",
-            `attr=${htmlEl.getAttribute("data-theme")}`
+            `attr=${htmlEl.getAttribute("data-theme")}`,
           );
       }
 
@@ -454,7 +456,7 @@ const path = require("path");
       if (lsVal === "dark") pass("theme persisted to localStorage");
       else if (lsVal === null)
         pass(
-          "localStorage unavailable in this environment (skipping persistence check)"
+          "localStorage unavailable in this environment (skipping persistence check)",
         );
       else if (
         d.defaultView &&
@@ -487,13 +489,13 @@ const path = require("path");
         else
           fail(
             "theme toggle returns to light",
-            `attr=${htmlEl.getAttribute("data-theme")}`
+            `attr=${htmlEl.getAttribute("data-theme")}`,
           );
       }
       if (lsVal === "light") pass("theme persisted as light to localStorage");
       else if (lsVal === null)
         pass(
-          "localStorage unavailable in this environment (skipping persistence check)"
+          "localStorage unavailable in this environment (skipping persistence check)",
         );
       else pass("theme persistence after uncheck (non-strict)");
     } else fail("theme toggle exists", "missing theme_toggle");
@@ -534,7 +536,7 @@ const path = require("path");
     else
       fail(
         "overlap: smaller ID wins",
-        `reservoir=${mapping["Reservoir"]}, production=${mapping["Production"]}`
+        `reservoir=${mapping["Reservoir"]}, production=${mapping["Production"]}`,
       );
   } catch (err) {
     fail("smoke tests", err);
