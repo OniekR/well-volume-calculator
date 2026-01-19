@@ -10,7 +10,6 @@ describe('draw module', () => {
       clearRect: vi.fn(),
       createLinearGradient: vi.fn(() => ({ addColorStop: () => {} })),
       fillRect: vi.fn(),
-      createLinearGradient: vi.fn(() => ({ addColorStop: () => {} })),
       save: vi.fn(),
       restore: vi.fn(),
       strokeStyle: null,

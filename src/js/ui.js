@@ -621,8 +621,7 @@ export function setupTiebackBehavior(deps) {
           tieBottom.value = Number((wellVal + 75).toFixed(1));
         }
       } else {
-        if (dummy && dummy.checked) {
-        } else {
+        if (!(dummy && dummy.checked)) {
           tieBottom.setAttribute('readonly', 'true');
           tieBottom.readOnly = true;
           tieBottom.classList.add('readonly-input');
