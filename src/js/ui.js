@@ -600,7 +600,8 @@ export function checkUpperCompletionFit() {
 
     // prefer TJ for fit-checks if available (TJ is the tool-joint dimension)
     const ucCompareValue = typeof ucTj !== 'undefined' ? ucTj : ucOd;
-    if (typeof ucCompareValue === 'undefined') return removeUpperCompletionWarning();
+    if (typeof ucCompareValue === 'undefined')
+      return removeUpperCompletionWarning();
 
     // map role -> top/shoe field ids in the form
     const topMap = {
@@ -698,7 +699,17 @@ function showUpperCompletionWarning(role, what, ucValue, driftVal) {
     wr.setAttribute('aria-live', 'polite');
     body.appendChild(wr);
   }
-  const msg = `Warning: Upper completion ${what} (${String(ucValue)}) exceeds ${role.replace(/_/g, ' ')} drift (${String(driftVal)}). May not fit.`;
+  const parts = [
+    'Warning: Upper completion',
+    what,
+    `(${String(ucValue)})`,
+    'exceeds',
+    role.replace(/_/g, ' '),
+    'drift',
+    `(${String(driftVal)}).`,
+    'May not fit.'
+  ];
+  const msg = parts.join(' ');
   wr.textContent = msg;
   // also write to legacy warning element if present so older scripts/tests can detect it
   const legacy = el('upper_completion_warning');
