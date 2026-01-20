@@ -48,6 +48,22 @@ const VolumeCalc = (() => {
           /* ignore */
         }
       };
+
+      // Debug helper: dump current inputs and computed volumes
+      window.__TEST_dumpState = () => {
+        try {
+          const state = gatherInputs();
+          const volumes = computeVolumes(state.casingsInput, {
+            plugEnabled: state.plugEnabled,
+            plugDepthVal: state.plugDepthVal,
+            surfaceInUse: state.surfaceInUse,
+            intermediateInUse: state.intermediateInUse
+          });
+          return { inputs: state, volumes };
+        } catch (e) {
+          return { error: e && e.message ? e.message : String(e) };
+        }
+      };
     }
   } catch (e) {
     /* ignore */
