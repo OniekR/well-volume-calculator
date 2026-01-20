@@ -713,7 +713,6 @@ function showUpperCompletionWarning(role, what, ucValue, driftVal) {
   ];
   const msg = parts.join(' ');
   wr.textContent = msg;
-
 }
 
 function removeUpperCompletionWarning() {

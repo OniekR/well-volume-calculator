@@ -8,7 +8,6 @@ import {
 } from './state.js';
 import { initUI } from './ui.js';
 import { gatherInputs } from './inputs.js';
-import { validateUpperCompletionFit } from './validation.js';
 import { renderResults, renderUpperCompletionBreakdown } from './render.js';
 import { setupPresetsUI } from './presets-ui.js';
 import { createPersistence } from './persistence.js';

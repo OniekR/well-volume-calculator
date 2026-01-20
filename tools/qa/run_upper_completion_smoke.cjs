@@ -15,7 +15,9 @@ let puppeteer;
 try {
   puppeteer = require('puppeteer');
 } catch (err) {
-  const msg = 'PUPPETEER_REQUIRE_ERR: ' + (err && err.message ? err.message : String(err));
+  const msg =
+    'PUPPETEER_REQUIRE_ERR: ' +
+    (err && err.message ? err.message : String(err));
   console.error(msg);
   flog(msg);
   process.exit(8);
@@ -137,20 +139,26 @@ let watchdog = setTimeout(() => {
 
     // Wait up to 2s for either the new or legacy warning element to appear with relevant text
     try {
-      await page.waitForFunction(() => {
-        const ids = ['upper_completion_fit_warning', 'upper_completion_warning'];
-        for (const id of ids) {
-          const el = document.getElementById(id);
-          if (
-            el &&
-            getComputedStyle(el).display !== 'none' &&
-            el.textContent.includes('does not fit')
-          ) {
-            return true;
+      await page.waitForFunction(
+        () => {
+          const ids = [
+            'upper_completion_fit_warning',
+            'upper_completion_warning'
+          ];
+          for (const id of ids) {
+            const el = document.getElementById(id);
+            if (
+              el &&
+              getComputedStyle(el).display !== 'none' &&
+              el.textContent.includes('does not fit')
+            ) {
+              return true;
+            }
           }
-        }
-        return false;
-      }, { timeout: 2000 });
+          return false;
+        },
+        { timeout: 2000 }
+      );
     } catch (err) {
       console.error(
         'FAIL: Upper completion warning not shown when TJ > casing drift'
