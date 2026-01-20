@@ -102,11 +102,11 @@
         },
         "production_size": {
           "type": "select",
-          "value": "8.535"
+          "value": "8.681"
         },
         "production_size_id": {
           "type": "input",
-          "value": "8.535"
+          "value": "8.681"
         },
         "depth_7_top": {
           "type": "input",
@@ -207,6 +207,10 @@
         "depth_open": {
           "type": "input",
           "value": ""
+        },
+        "use_upper_completion": {
+          "type": "checkbox",
+          "value": false
         }
       }
     }

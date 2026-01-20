@@ -771,6 +771,12 @@ select:focus {
   margin-top: 8px;
 }
 
+/* Emphasized warning style for important inline warnings (red + bold) */
+.small-note.warning {
+  color: var(--equinor-red);
+  font-weight: 800;
+}
+
 /* Horizontal container for Size select + inline controls */
 .size-with-ctrl {
   display: inline-flex;
@@ -976,7 +982,7 @@ select:focus {
 .input-inline {
   display: flex;
   gap: 6px;
-  align-items: center;
+  /* align-items: center; */
 } /* Narrow variant for specific inline inputs (e.g., Riser depth) */
 .input-inline.input-inline--narrow {
   flex: 0 0 auto; /* don't grow to fill available space */
@@ -1011,7 +1017,7 @@ select:focus {
 .input-row.three-cols .input-inline select {
   width: 100%;
   box-sizing: border-box;
-  height: 44px; /* uniform control height */
+  /* height: 44px; uniform control height */
 }
 
 /* Align the Default button left under the control */
@@ -1021,14 +1027,14 @@ select:focus {
 
 /* Slightly larger spacing between label and control for visual alignment */
 .input-row.three-cols .input-inline label {
-  margin-bottom: 10px;
+  margin-bottom: 0 px;
 }
 /* Reduce spacing specifically for Size, Top and Shoe labels */
 .input-row.three-cols .input-inline label[for$='_size'],
 .input-row.three-cols .input-inline label[for$='_top'],
 .input-row.three-cols .input-inline label.top-label,
 .input-row.three-cols .input-inline label.shoe-label {
-  margin-bottom: 0;
+  margin-bottom: 0 px;
 }
 .input-row .input-inline label {
   display: block;

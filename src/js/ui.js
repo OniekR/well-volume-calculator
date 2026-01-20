@@ -1,6 +1,6 @@
 import { el, qs } from './dom.js';
 import { getUpperCompletionTJ } from './validation.js';
-import { DRIFT } from './constants.js';
+import { DRIFT, OD } from './constants.js';
 
 export function setupEventDelegation(deps) {
   const { calculateVolume, scheduleSave } = deps;
@@ -448,27 +448,39 @@ export function setupSizeIdInputs(deps) {
             driftInput.value = driftVal;
           }
         } else {
-          // Fallback: check for drift-label in footer (conductor, surface, intermediate)
+          // Fallback: check for drift-label or legacy .drift-note in footer (conductor, surface, intermediate)
           const container = sel.closest('.casing-body');
           const driftLabel =
             container && container.querySelector('.drift-label');
           const driftInput =
             container && container.querySelector('input[id$="_drift"]');
+          const driftNote = container && container.querySelector('.drift-note');
+
+          const idNum = Number(sel.value);
+          const driftMap =
+            DRIFT && DRIFT[selId.replace('_size', '')]
+              ? DRIFT[selId.replace('_size', '')]
+              : selId === 'conductor_size' && DRIFT.conductor
+              ? DRIFT.conductor
+              : {};
+          const driftVal = driftMap[idNum];
+
           if (driftLabel && driftInput) {
-            const idNum = Number(sel.value);
-            const driftMap =
-              DRIFT && DRIFT[selId.replace('_size', '')]
-                ? DRIFT[selId.replace('_size', '')]
-                : selId === 'conductor_size' && DRIFT.conductor
-                ? DRIFT.conductor
-                : {};
-            const driftVal = driftMap[idNum];
             driftLabel.textContent = 'Drift:';
             if (
               typeof driftVal !== 'undefined' &&
               !driftInput.dataset.userEdited
             ) {
               driftInput.value = driftVal;
+            }
+          }
+
+          // Legacy: display as text in footer (tests expect "Drift: X in")
+          if (driftNote) {
+            if (typeof driftVal !== 'undefined') {
+              driftNote.textContent = `Drift: ${String(driftVal)} in`;
+            } else {
+              driftNote.textContent = '';
             }
           }
         }
@@ -533,6 +545,186 @@ export function setupSizeIdInputs(deps) {
       });
     }
   });
+}
+
+// Check whether the Upper Completion OD will fit inside the deepest
+// active casing/liner drift. Shows an inline warning next to the
+// Upper Completion section when a restriction is found.
+export function checkUpperCompletionFit() {
+  try {
+    const ucIdEl = el('upper_completion_size_id');
+    if (!ucIdEl) return;
+    const ucKey = ucIdEl.value;
+    if (!ucKey) return removeUpperCompletionWarning();
+    const ucOd =
+      (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
+      (OD && OD.upper_completion && OD.upper_completion[Number(ucKey)]);
+
+    if (typeof ucOd === 'undefined') return removeUpperCompletionWarning();
+
+    // map role -> top/shoe field ids in the form
+    const topMap = {
+      conductor: 'depth_18_top',
+      surface: 'depth_13_top',
+      intermediate: 'depth_9_top',
+      production: 'depth_7_top',
+      reservoir: 'depth_5_top',
+      small_liner: 'depth_small_top'
+    };
+    const shoeMap = {
+      conductor: 'depth_18_bottom',
+      surface: 'depth_13',
+      intermediate: 'depth_9',
+      production: 'depth_7',
+      reservoir: 'depth_5',
+      small_liner: 'depth_small'
+    };
+
+    const roles = [
+      'small_liner',
+      'reservoir',
+      'production',
+      'intermediate',
+      'surface',
+      'conductor'
+    ];
+
+    const ucTopEl = el('depth_uc_top');
+    const ucShoeEl = el('depth_uc');
+    const ucTop = ucTopEl ? Number(ucTopEl.value) : NaN;
+    const ucShoe = ucShoeEl ? Number(ucShoeEl.value) : NaN;
+
+    for (const role of roles) {
+      const driftEl = el(role + '_drift');
+      if (!driftEl) continue;
+
+      const casingSection = driftEl.closest('.casing-input');
+      if (casingSection) {
+        const useCheckbox = casingSection.querySelector('.use-checkbox');
+        if (useCheckbox && !useCheckbox.checked) continue;
+      }
+
+      // Ensure we have valid casing top/shoe to determine whether UC is inside
+      const topEl = el(topMap[role]);
+      const shoeEl = el(shoeMap[role]);
+      if (!topEl || !shoeEl) continue;
+      const casingTop = Number(topEl.value);
+      const casingShoe = Number(shoeEl.value);
+      if (isNaN(casingTop) || isNaN(casingShoe)) continue;
+      if (casingShoe <= casingTop) continue; // invalid bounds
+
+      // determine whether UC depth range overlaps with this casing vertically
+      // UC passes through the casing if: UC_top < casing_shoe AND UC_shoe > casing_top
+      let overlaps = false;
+      if (!isNaN(ucTop) && !isNaN(ucShoe)) {
+        overlaps = ucTop < casingShoe && ucShoe > casingTop;
+      } else if (!isNaN(ucShoe)) {
+        // only shoe defined: check if shoe is within or extends past casing range
+        overlaps = ucShoe > casingTop;
+      } else {
+        // insufficient UC depth information -> skip this role
+        continue;
+      }
+
+      if (!overlaps) continue;
+
+      const driftVal = Number(driftEl.value);
+      if (isNaN(driftVal)) continue;
+
+      if (ucOd > driftVal) {
+        showUpperCompletionWarning(role, ucOd, driftVal);
+        return;
+      }
+    }
+
+    // No restriction found
+    removeUpperCompletionWarning();
+  } catch (err) {
+    /* ignore */
+  }
+}
+
+function showUpperCompletionWarning(role, ucOd, driftVal) {
+  const sec = el('upper_completion_section');
+  if (!sec) return;
+  const body = sec.querySelector('.casing-body') || sec;
+  let wr = el('upper_completion_fit_warning');
+  if (!wr) {
+    wr = document.createElement('div');
+    wr.id = 'upper_completion_fit_warning';
+    wr.className = 'small-note warning';
+    wr.setAttribute('aria-live', 'polite');
+    body.appendChild(wr);
+  }
+  wr.textContent = `Warning: Upper completion OD (${ucOd}) exceeds ${role.replace(
+    /_/g,
+    ' '
+  )} drift (${driftVal}). May not fit.`;
+}
+
+function removeUpperCompletionWarning() {
+  const wr = el('upper_completion_fit_warning');
+  if (wr && wr.parentNode) wr.parentNode.removeChild(wr);
+}
+
+export function initUpperCompletionChecks() {
+  const ucSelect = el('upper_completion_size');
+  const ucId = el('upper_completion_size_id');
+  const roles = [
+    'small_liner',
+    'reservoir',
+    'production',
+    'intermediate',
+    'surface',
+    'conductor'
+  ];
+
+  const schedule = () => setTimeout(checkUpperCompletionFit, 10);
+
+  const ucTopEl = el('depth_uc_top');
+  const ucShoeEl = el('depth_uc');
+  if (ucSelect) ucSelect.addEventListener('change', schedule);
+  if (ucId) ucId.addEventListener('input', schedule);
+  if (ucTopEl) ucTopEl.addEventListener('input', schedule);
+  if (ucShoeEl) ucShoeEl.addEventListener('input', schedule);
+
+  const topMap = {
+    conductor: 'depth_18_top',
+    surface: 'depth_13_top',
+    intermediate: 'depth_9_top',
+    production: 'depth_7_top',
+    reservoir: 'depth_5_top',
+    small_liner: 'depth_small_top'
+  };
+  const shoeMap = {
+    conductor: 'depth_18_bottom',
+    surface: 'depth_13',
+    intermediate: 'depth_9',
+    production: 'depth_7',
+    reservoir: 'depth_5',
+    small_liner: 'depth_small'
+  };
+
+  roles.forEach((r) => {
+    const d = el(r + '_drift');
+    if (d) {
+      d.addEventListener('input', schedule);
+      d.addEventListener('change', schedule);
+    }
+    const topField = el(topMap[r]);
+    const shoeField = el(shoeMap[r]);
+    if (topField) topField.addEventListener('input', schedule);
+    if (shoeField) shoeField.addEventListener('input', schedule);
+
+    const sec = d && d.closest('.casing-input');
+    if (sec) {
+      const useChk = sec.querySelector('.use-checkbox');
+      if (useChk) useChk.addEventListener('change', schedule);
+    }
+  });
+
+  // Initial check
+  schedule();
 }
 
 export function setupWellheadSync(deps) {
@@ -1019,6 +1211,7 @@ export function initUI(deps) {
   setupHideCasingsToggle();
   setupHideTotalToggle();
   setupSizeIdInputs(deps);
+  initUpperCompletionChecks();
   setupWellheadSync(deps);
   setupTiebackBehavior(deps);
   setupProductionToggleButtons(deps);
