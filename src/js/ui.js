@@ -79,7 +79,7 @@ export function setupButtons(deps) {
   } = Object.assign({ el }, deps);
 
   qs('.wellhead-btn').forEach((btn) =>
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', (_e) => {
       const targetId = btn.getAttribute('data-target');
       const input = _el(targetId);
       const well = _el('wellhead_depth');
@@ -92,7 +92,7 @@ export function setupButtons(deps) {
   );
 
   qs('.default-top-btn').forEach((btn) =>
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', (_e) => {
       const targetId = btn.getAttribute('data-target');
       const input = _el(targetId);
       if (!input) return;
@@ -394,10 +394,12 @@ export function setupHideTotalToggle() {
     btn.textContent = hidden ? 'Show total' : 'Hide total';
   };
 
+  // initialize
+  setState(form.classList.contains('total-hidden'));
+
   btn.addEventListener('click', () => {
     const hidden = form.classList.toggle('total-hidden');
-    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-    btn.textContent = hidden ? 'Show total' : 'Hide total';
+    setState(hidden);
   });
 
   // Keyboard accessibility

@@ -1,17 +1,12 @@
 'use strict';
 
 import { computeVolumes, computeUpperCompletionBreakdown } from './logic.js';
-import {
-  initDraw,
-  scheduleDraw as scheduleDrawFn,
-  drawSchematic as drawSchematicFn
-} from './draw.js';
+import { initDraw, scheduleDraw as scheduleDrawFn } from './draw.js';
 import {
   captureStateObject,
   applyStateObject as applyStateObjectFn
 } from './state.js';
 import { initUI } from './ui.js';
-import { OD } from './constants.js';
 import { gatherInputs } from './inputs.js';
 import { validateUpperCompletionFit } from './validation.js';
 import { renderResults, renderUpperCompletionBreakdown } from './render.js';
@@ -27,8 +22,6 @@ import { createPersistence } from './persistence.js';
  * - Handles high-DPI canvas scaling
  */
 const VolumeCalc = (() => {
-  const STORAGE_KEY = 'keino_volume_state_v2';
-
   const el = (id) => document.getElementById(id);
   const qs = (selector) => Array.from(document.querySelectorAll(selector));
 
@@ -71,17 +64,9 @@ const VolumeCalc = (() => {
 
   // Cached DOM
   const canvas = el('wellSchematic');
-  const ctx = canvas && canvas.getContext('2d');
-  const totalVolumeEl = el('totalVolume');
-  const form = el('well-form') || document.body;
 
-  // State
-  let saveTimer = null;
   // Currently loaded or saved preset name (displayed on the canvas)
   let currentPresetName = '';
-
-  // Utilities
-  const clampNumber = (v) => (isNaN(v) ? undefined : Number(v));
 
   // Drawing responsibilities (canvas sizing, DPR, scheduling) are provided by `src/js/draw.js`.
   // Initialize drawing module with the canvas element later during setup via `initDraw(canvas)`.
@@ -90,31 +75,6 @@ const VolumeCalc = (() => {
   // Preset management has been delegated to the module `src/js/presets.js`.
   // The module attaches helpers to `window.__KeinoPresets` for compatibility.
   // `captureStateObject` and `applyStateObject` are provided by `src/js/state.js`.
-  // IDs we should not populate when loading a preset
-  // IDs we should not populate when loading a preset (UI-only controls)
-  const _SKIP_POPULATE_ON_LOAD = new Set([
-    'preset_name',
-    'preset_list',
-    'import_presets_input'
-  ]);
-
-  function applyStateObject(state) {
-    // Delegate to `state.js` implementation and provide local callbacks
-    const scheduleSaveSafe = (...args) => {
-      if (
-        typeof persistence !== 'undefined' &&
-        persistence &&
-        typeof persistence.scheduleSave === 'function'
-      ) {
-        return persistence.scheduleSave(...args);
-      }
-      // noop if persistence unavailable (e.g., called before init)
-    };
-    return applyStateObjectFn(state, {
-      calculateVolume,
-      scheduleSave: scheduleSaveSafe
-    });
-  }
 
   // Ensure each casing section collapsed/expanded state matches its checkbox
   // (some environments may not run checkbox change handlers reliably, so
@@ -183,28 +143,9 @@ const VolumeCalc = (() => {
   // Export/import/save/delete/preset-name utilities are provided by the module.
   // (Delegated to `src/js/presets.js` via `window.__KeinoPresets`).
 
-  // Import presets: delegate to the presets module
-  function importPresetsFile(file) {
-    if (
-      window.__KeinoPresets &&
-      typeof window.__KeinoPresets.importPresetsFile === 'function'
-    ) {
-      return window.__KeinoPresets.importPresetsFile(file);
-    }
-    alert('Preset module unavailable.');
-  }
-
   // Drawing: delegate scheduling and rendering to the draw module
   function scheduleDraw(casings, opts = {}) {
     return scheduleDrawFn(
-      casings,
-      Object.assign({}, opts, { currentPresetName })
-    );
-  }
-
-  function drawSchematic(casings, opts = {}) {
-    // delegate to draw module implementation, include the current preset name on the canvas
-    return drawSchematicFn(
       casings,
       Object.assign({}, opts, { currentPresetName })
     );
@@ -230,13 +171,7 @@ const VolumeCalc = (() => {
       surfaceInUse,
       intermediateInUse
     });
-    const {
-      totalVolume,
-      perCasingVolumes,
-      casingsToDraw,
-      plugAboveVolume,
-      plugBelowVolume
-    } = result;
+    const { casingsToDraw } = result;
 
     // Render results to DOM
     renderResults(result);
@@ -302,11 +237,7 @@ const VolumeCalc = (() => {
   function init() {
     // initialize persistence handlers
     persistence = createPersistence({ captureStateObject });
-    const {
-      saveState: _saveState,
-      scheduleSave: _scheduleSave,
-      loadState: _loadState
-    } = persistence;
+    const { scheduleSave: _scheduleSave, loadState: _loadState } = persistence;
 
     // load persisted state (will apply state and call calculate/save via callbacks)
     _loadState({

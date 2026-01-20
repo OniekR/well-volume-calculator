@@ -1,7 +1,6 @@
 // Presets module (ES module)
 // Exposes preset management functions and attaches to window.__KeinoPresets for legacy compatibility.
 const PRESETS_KEY = 'well_presets_v1';
-const BUILTIN_PRESETS_URL = './well-presets.json'; // served from project root (public/)
 
 let BUILTIN_PRESETS = {};
 

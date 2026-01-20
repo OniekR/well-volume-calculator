@@ -61,7 +61,6 @@ export function drawSchematic(casings, opts = {}) {
   ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
   const rect = canvasEl.getBoundingClientRect();
-  const pixelHeight = canvasEl.height; // already scaled
 
   // background
   const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);

@@ -1,4 +1,4 @@
-import { el, qs } from './dom.js';
+import { el } from './dom.js';
 import { OD, DRIFT } from './constants.js';
 
 const clampNumber = (v) => (isNaN(v) ? undefined : Number(v));
@@ -87,7 +87,6 @@ export function gatherInputs() {
 
   // compute auto tops
   let surfaceTopFinal;
-  let surfaceTopAuto = false;
   const surfaceTopInputVal = clampNumber(Number(el('depth_13_top')?.value));
   if (!isNaN(surfaceTopInputVal)) surfaceTopFinal = surfaceTopInputVal;
   else if (
@@ -97,11 +96,9 @@ export function gatherInputs() {
     surfaceBottomVal > riserDepthVal
   ) {
     surfaceTopFinal = riserDepthVal;
-    surfaceTopAuto = true;
   }
 
   let intermediateTopFinal;
-  let intermediateTopAuto = false;
   const intermediateTopInputVal = clampNumber(Number(el('depth_9_top')?.value));
   if (!isNaN(intermediateTopInputVal))
     intermediateTopFinal = intermediateTopInputVal;
@@ -113,12 +110,10 @@ export function gatherInputs() {
     intermediateBottomVal > riserDepthVal
   ) {
     intermediateTopFinal = riserDepthVal;
-    intermediateTopAuto = true;
   }
 
   // Open Hole Top: always connect to the deepest casing shoe (across existing casings)
   let openTopFinal;
-  let openTopAuto = false;
   const conductorBottomVal = clampNumber(Number(el('depth_18_bottom')?.value));
   const productionBottomVal = clampNumber(Number(el('depth_7')?.value));
   const reservoirBottomVal = clampNumber(Number(el('depth_5')?.value));
@@ -152,7 +147,6 @@ export function gatherInputs() {
   if (shoeCandidates.length) {
     const deepest = Math.max(...shoeCandidates);
     openTopFinal = deepest;
-    openTopAuto = true;
     const openTopEl = el('depth_open_top');
     if (openTopEl) openTopEl.value = String(openTopFinal);
     const openNoteEl = el('open_hole_length_note');

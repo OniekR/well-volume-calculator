@@ -87,22 +87,22 @@ export function renderResults(result) {
     if (plugAboveEl) {
       plugAboveEl.classList.remove('hidden');
       const span = plugAboveEl.querySelector('span');
-      if (span) {
-        span.textContent =
-          typeof plugAboveVolume === 'undefined'
-            ? '— m³'
-            : (plugAboveVolume || 0).toFixed(2) + ' m³';
-      }
+      const value =
+        typeof plugAboveVolume === 'undefined'
+          ? '— m³'
+          : (plugAboveVolume || 0).toFixed(2) + ' m³';
+      if (span) span.textContent = value;
+      else plugAboveEl.textContent = value;
     }
     if (plugBelowEl) {
       plugBelowEl.classList.remove('hidden');
       const span = plugBelowEl.querySelector('span');
-      if (span) {
-        span.textContent =
-          typeof plugBelowVolume === 'undefined'
-            ? '— m³'
-            : (plugBelowVolume || 0).toFixed(2) + ' m³';
-      }
+      const value =
+        typeof plugBelowVolume === 'undefined'
+          ? '— m³'
+          : (plugBelowVolume || 0).toFixed(2) + ' m³';
+      if (span) span.textContent = value;
+      else plugBelowEl.textContent = value;
     }
 
     if (plugAboveTubingEl) plugAboveTubingEl.classList.add('hidden');
