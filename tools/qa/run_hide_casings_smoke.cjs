@@ -12,7 +12,9 @@ const puppeteer = require('puppeteer');
   const consoleMessages = [];
   page.on('console', (msg) => {
     try {
-      const args = msg.args ? msg.args().map((a) => a.toString && a.toString()) : [];
+      const args = msg.args
+        ? msg.args().map((a) => a.toString && a.toString())
+        : [];
       consoleMessages.push({ type: msg.type(), text: msg.text(), args });
     } catch (e) {
       consoleMessages.push({ type: 'error', text: String(msg) });
@@ -174,7 +176,18 @@ const puppeteer = require('puppeteer');
         if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
         fs.writeFileSync(
           path.join(outDir, `hide-casings-snapshot-${Date.now()}.json`),
-          JSON.stringify({ reservoirBefore, reservoirAfter, smallBefore, smallAfter, inputsSnapshot, consoleMessages }, null, 2)
+          JSON.stringify(
+            {
+              reservoirBefore,
+              reservoirAfter,
+              smallBefore,
+              smallAfter,
+              inputsSnapshot,
+              consoleMessages
+            },
+            null,
+            2
+          )
         );
         fs.writeFileSync(
           path.join(outDir, `hide-casings-table-${Date.now()}.html`),
@@ -182,7 +195,10 @@ const puppeteer = require('puppeteer');
         );
         console.error('Debug artifacts written to', outDir);
       } catch (err) {
-        console.error('Failed to write debug artifacts', err && err.message ? err.message : err);
+        console.error(
+          'Failed to write debug artifacts',
+          err && err.message ? err.message : err
+        );
       }
 
       console.error('FAIL: A per-casing volume changed after hiding UI', {

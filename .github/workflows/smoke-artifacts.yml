@@ -1,0 +1,46 @@
+name: Smoke Tests with Artifacts
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke-and-upload:
+    name: Smoke tests (Puppeteer) and upload artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Start static server
+        run: node tools/qa/simple_static_server.cjs &
+      - name: Wait for server
+        run: |
+          n=0
+          until curl -sSf http://localhost:5173/ > /dev/null || [ $n -gt 30 ]; do
+            n=$((n+1))
+            sleep 1
+          done
+      - name: Run P-9 smoke (Puppeteer)
+        run: node tools/qa/run_p9_smoke_puppeteer.cjs
+        continue-on-error: true
+      - name: Run Hide Casings smoke (Puppeteer)
+        run: node tools/qa/run_hide_casings_smoke.cjs
+        continue-on-error: true
+      - name: Run other smoke tests
+        run: |
+          node tools/qa/run_hide_total_smoke.cjs || true
+          node tools/qa/run_upper_completion_smoke.cjs || true
+        continue-on-error: true
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-artifacts
+          path: tools/qa/artifacts/**
+          retention-days: 7

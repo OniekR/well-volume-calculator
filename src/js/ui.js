@@ -337,13 +337,18 @@ export function setupHideCasingsToggle(deps = {}) {
     // capture a quick snapshot before toggling so we can see what changes
     try {
       if (typeof calculateVolume === 'function') calculateVolume();
-      const before = Array.from(document.querySelectorAll('#casingVolumes tbody tr')).map((tr) => ({
+      const before = Array.from(
+        document.querySelectorAll('#casingVolumes tbody tr')
+      ).map((tr) => ({
         name: tr.children[0] && tr.children[0].textContent.trim(),
         volume: tr.children[1] && tr.children[1].textContent.trim()
       }));
       console.debug('hide-casings: before', before);
     } catch (e) {
-      console.debug('hide-casings: before capture failed', e && e.message ? e.message : e);
+      console.debug(
+        'hide-casings: before capture failed',
+        (e && e.message) || e
+      );
     }
 
     const hidden = form.classList.toggle('casings-hidden');
@@ -354,13 +359,18 @@ export function setupHideCasingsToggle(deps = {}) {
     // Ensure the current volume calculation is up-to-date after UI-only toggle
     try {
       if (typeof calculateVolume === 'function') calculateVolume();
-      const after = Array.from(document.querySelectorAll('#casingVolumes tbody tr')).map((tr) => ({
+      const after = Array.from(
+        document.querySelectorAll('#casingVolumes tbody tr')
+      ).map((tr) => ({
         name: tr.children[0] && tr.children[0].textContent.trim(),
         volume: tr.children[1] && tr.children[1].textContent.trim()
       }));
       console.debug('hide-casings: after', after);
     } catch (e) {
-      console.debug('hide-casings: after capture failed', e && e.message ? e.message : e);
+      console.debug(
+        'hide-casings: after capture failed',
+        (e && e.message) || e
+      );
     }
   });
 
