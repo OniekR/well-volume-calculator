@@ -309,7 +309,8 @@ export function setupTooltips() {
   setup('reservoir_default_info_btn', 'reservoir_default_info_tooltip');
 }
 
-export function setupHideCasingsToggle() {
+export function setupHideCasingsToggle(deps = {}) {
+  const { calculateVolume } = deps;
   const btn = el('toggle_hide_casings_btn');
   const form = document.getElementById('well-form');
   if (!btn || !form) return;
@@ -333,10 +334,34 @@ export function setupHideCasingsToggle() {
   setState(form.classList.contains('casings-hidden'));
 
   btn.addEventListener('click', () => {
+    // capture a quick snapshot before toggling so we can see what changes
+    try {
+      if (typeof calculateVolume === 'function') calculateVolume();
+      const before = Array.from(document.querySelectorAll('#casingVolumes tbody tr')).map((tr) => ({
+        name: tr.children[0] && tr.children[0].textContent.trim(),
+        volume: tr.children[1] && tr.children[1].textContent.trim()
+      }));
+      console.debug('hide-casings: before', before);
+    } catch (e) {
+      console.debug('hide-casings: before capture failed', e && e.message ? e.message : e);
+    }
+
     const hidden = form.classList.toggle('casings-hidden');
     updateSectionsVisibility(hidden);
     btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
     btn.textContent = hidden ? 'Show casings' : 'Hide casings';
+
+    // Ensure the current volume calculation is up-to-date after UI-only toggle
+    try {
+      if (typeof calculateVolume === 'function') calculateVolume();
+      const after = Array.from(document.querySelectorAll('#casingVolumes tbody tr')).map((tr) => ({
+        name: tr.children[0] && tr.children[0].textContent.trim(),
+        volume: tr.children[1] && tr.children[1].textContent.trim()
+      }));
+      console.debug('hide-casings: after', after);
+    } catch (e) {
+      console.debug('hide-casings: after capture failed', e && e.message ? e.message : e);
+    }
   });
 
   // Keyboard accessibility
@@ -1208,7 +1233,7 @@ export function initUI(deps) {
   setupCasingToggles(deps);
   setupButtons(deps);
   setupTooltips(deps);
-  setupHideCasingsToggle();
+  setupHideCasingsToggle(deps);
   setupHideTotalToggle();
   setupSizeIdInputs(deps);
   initUpperCompletionChecks();

@@ -7,6 +7,18 @@ const puppeteer = require('puppeteer');
   });
   const page = await browser.newPage();
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // capture console messages for debugging
+  const consoleMessages = [];
+  page.on('console', (msg) => {
+    try {
+      const args = msg.args ? msg.args().map((a) => a.toString && a.toString()) : [];
+      consoleMessages.push({ type: msg.type(), text: msg.text(), args });
+    } catch (e) {
+      consoleMessages.push({ type: 'error', text: String(msg) });
+    }
+  });
+
   try {
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 10000 });
     // Ensure the form and some casings exist
@@ -117,18 +129,6 @@ const puppeteer = require('puppeteer');
     );
 
     // Also assert specific per-casing volumes (Reservoir and Small liner) didn't change
-    const readPerCasingVolume = () =>
-      Array.from(document.querySelectorAll('#casingVolumes tbody tr')).reduce(
-        (acc, tr) => {
-          const name = tr.children[0] && tr.children[0].textContent.trim();
-          const vol = tr.children[1] && tr.children[1].textContent.trim();
-          if (name && vol) acc[name] = vol;
-          return acc;
-        },
-        {}
-      );
-
-    const beforePer = await page.evaluate(readPerCasingVolume);
 
     if (beforeTotal !== afterTotal) {
       console.error('FAIL: totalVolume changed after hiding UI', {
@@ -174,7 +174,7 @@ const puppeteer = require('puppeteer');
         if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
         fs.writeFileSync(
           path.join(outDir, `hide-casings-snapshot-${Date.now()}.json`),
-          JSON.stringify({ reservoirBefore, reservoirAfter, smallBefore, smallAfter, inputsSnapshot }, null, 2)
+          JSON.stringify({ reservoirBefore, reservoirAfter, smallBefore, smallAfter, inputsSnapshot, consoleMessages }, null, 2)
         );
         fs.writeFileSync(
           path.join(outDir, `hide-casings-table-${Date.now()}.html`),
