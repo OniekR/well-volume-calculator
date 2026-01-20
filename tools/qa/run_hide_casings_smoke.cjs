@@ -26,7 +26,38 @@ const puppeteer = require('puppeteer');
       return last;
     };
 
-    const beforeTotal = await waitForStableTotal();
+    // Ensure built-in presets (e.g., P-9) have loaded and initial calculations completed.
+    // Prefer loading P-9 if present to seed known values; otherwise wait for totalVolume to become non-zero.
+    const waitForInitialNonZeroTotal = async (timeout = 5000) => {
+      const start = Date.now();
+
+      // If preset P-9 exists, load it to seed values
+      try {
+        const hasP9 = await page.evaluate(() => {
+          const sel = document.getElementById('preset_list');
+          if (!sel) return false;
+          return Array.from(sel.options).some((o) => o.value === 'P-9');
+        });
+        if (hasP9) {
+          await page.select('#preset_list', 'P-9');
+          await page.click('#load_preset_btn');
+          // wait a bit for preset to apply and recalc
+          await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      let cur = await page.$eval('#totalVolume', (el) => el.textContent.trim());
+      while (Date.now() - start < timeout) {
+        if (cur && cur !== '0.00 m³') return cur;
+        await (page.waitForTimeout ? page.waitForTimeout(150) : wait(150));
+        cur = await page.$eval('#totalVolume', (el) => el.textContent.trim());
+      }
+      return cur;
+    };
+
+    const beforeTotal = await waitForInitialNonZeroTotal();
 
     // Click the hide casings button
     await page.waitForSelector('#toggle_hide_casings_btn', { timeout: 5000 });
