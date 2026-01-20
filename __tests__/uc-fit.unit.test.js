@@ -42,20 +42,20 @@ function makeSmallLiner(
   document.body.appendChild(section);
 }
 
-test('shows warning when UC overlaps small liner and UC OD > drift', () => {
+test('shows warning when UC overlaps small liner and UC size metric exceeds drift (TJ or OD)', () => {
   makeUpperCompletion();
-  makeSmallLiner('4.0'); // drift < UC OD (5.5)
+  makeSmallLiner('4.0'); // drift < UC OD (5.5) and < UC TJ (6.098)
 
   checkUpperCompletionFit();
 
   const warn = document.getElementById('upper_completion_fit_warning');
   expect(warn).not.toBeNull();
-  expect(warn.textContent).toMatch(/Upper completion OD/);
+  expect(warn.textContent).toMatch(/Upper completion (TJ|OD)/);
 });
 
-test('does not warn when drift >= UC OD', () => {
+test('does not warn when drift >= UC TJ (preferred metric)', () => {
   makeUpperCompletion();
-  makeSmallLiner('6.0'); // drift >= UC OD
+  makeSmallLiner('7.0'); // drift >= UC TJ
 
   checkUpperCompletionFit();
 

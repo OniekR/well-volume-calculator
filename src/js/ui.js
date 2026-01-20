@@ -1,6 +1,6 @@
 import { el, qs } from './dom.js';
 import { getUpperCompletionTJ } from './validation.js';
-import { DRIFT, OD } from './constants.js';
+import { DRIFT, OD, TJ } from './constants.js';
 
 export function setupEventDelegation(deps) {
   const { calculateVolume, scheduleSave } = deps;
@@ -594,8 +594,13 @@ export function checkUpperCompletionFit() {
     const ucOd =
       (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
       (OD && OD.upper_completion && OD.upper_completion[Number(ucKey)]);
+    const ucTj =
+      (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
+      (TJ && TJ.upper_completion && TJ.upper_completion[Number(ucKey)]);
 
-    if (typeof ucOd === 'undefined') return removeUpperCompletionWarning();
+    // prefer TJ for fit-checks if available (TJ is the tool-joint dimension)
+    const ucCompareValue = typeof ucTj !== 'undefined' ? ucTj : ucOd;
+    if (typeof ucCompareValue === 'undefined') return removeUpperCompletionWarning();
 
     // map role -> top/shoe field ids in the form
     const topMap = {
@@ -666,8 +671,10 @@ export function checkUpperCompletionFit() {
       const driftVal = Number(driftEl.value);
       if (isNaN(driftVal)) continue;
 
-      if (ucOd > driftVal) {
-        showUpperCompletionWarning(role, ucOd, driftVal);
+      if (ucCompareValue > driftVal) {
+        // include whether we compared TJ or OD in the message
+        const what = typeof ucTj !== 'undefined' ? 'TJ' : 'OD';
+        showUpperCompletionWarning(role, what, ucCompareValue, driftVal);
         return;
       }
     }
@@ -679,7 +686,7 @@ export function checkUpperCompletionFit() {
   }
 }
 
-function showUpperCompletionWarning(role, ucOd, driftVal) {
+function showUpperCompletionWarning(role, what, ucValue, driftVal) {
   const sec = el('upper_completion_section');
   if (!sec) return;
   const body = sec.querySelector('.casing-body') || sec;
@@ -691,15 +698,24 @@ function showUpperCompletionWarning(role, ucOd, driftVal) {
     wr.setAttribute('aria-live', 'polite');
     body.appendChild(wr);
   }
-  wr.textContent = `Warning: Upper completion OD (${ucOd}) exceeds ${role.replace(
-    /_/g,
-    ' '
-  )} drift (${driftVal}). May not fit.`;
+  const msg = `Warning: Upper completion ${what} (${String(ucValue)}) exceeds ${role.replace(/_/g, ' ')} drift (${String(driftVal)}). May not fit.`;
+  wr.textContent = msg;
+  // also write to legacy warning element if present so older scripts/tests can detect it
+  const legacy = el('upper_completion_warning');
+  if (legacy) {
+    legacy.classList.remove('hidden');
+    legacy.textContent = msg.replace(/Warning: /, 'WARNING: ');
+  }
 }
 
 function removeUpperCompletionWarning() {
   const wr = el('upper_completion_fit_warning');
   if (wr && wr.parentNode) wr.parentNode.removeChild(wr);
+  const legacy = el('upper_completion_warning');
+  if (legacy) {
+    legacy.classList.add('hidden');
+    legacy.textContent = '';
+  }
 }
 
 export function initUpperCompletionChecks() {
