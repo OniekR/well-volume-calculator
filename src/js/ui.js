@@ -713,12 +713,7 @@ function showUpperCompletionWarning(role, what, ucValue, driftVal) {
   ];
   const msg = parts.join(' ');
   wr.textContent = msg;
-  // also write to legacy warning element if present so older scripts/tests can detect it
-  const legacy = el('upper_completion_warning');
-  if (legacy) {
-    legacy.classList.remove('hidden');
-    legacy.textContent = msg.replace(/Warning: /, 'WARNING: ');
-  }
+
 }
 
 function removeUpperCompletionWarning() {

@@ -206,23 +206,10 @@ const VolumeCalc = (() => {
           : undefined
     });
 
-    // Validate Upper completion fit and show/hide a warning if needed
+    // Upper completion fit warnings are handled by the UI module (initUpperCompletionChecks)
+    // so avoid updating any legacy DOM elements here.
     try {
-      const failures = validateUpperCompletionFit(casingsInput);
-      const warnEl = el('upper_completion_warning');
-      if (warnEl) {
-        if (failures && failures.length) {
-          warnEl.classList.remove('hidden');
-          warnEl.textContent = `WARNING: Upper completion TJ (${
-            failures[0].tj
-          } in) does not fit inside casing(s): ${failures
-            .map((f) => `${f.role} (drift ${f.drift} in)`)
-            .join(', ')}`;
-        } else {
-          warnEl.classList.add('hidden');
-          warnEl.textContent = '';
-        }
-      }
+      // no-op (UI will show/hide warnings via checkUpperCompletionFit)
     } catch (e) {
       /* ignore */
     }
