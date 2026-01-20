@@ -23,5 +23,19 @@ module.exports = {
     ],
     'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     '@vitest/no-focused-tests': 'error' // Example: helps avoid committing '.only' tests
-  }
+  },
+  overrides: [
+    {
+      files: ['**/__tests__/**', '**/*.test.js', '**/*.unit.test.js'],
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        vi: 'readonly'
+      }
+    }
+  ]
 };
