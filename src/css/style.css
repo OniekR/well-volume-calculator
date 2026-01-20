@@ -56,6 +56,23 @@
   );
 }
 
+/* Dark-mode top button tweaks for Point of interest and hide controls */
+[data-theme='dark'] #toggle_hide_casings_btn,
+[data-theme='dark'] #toggle_hide_total_btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-color);
+}
+[data-theme='dark'] #toggle_hide_casings_btn:not(.active):hover,
+[data-theme='dark'] #toggle_hide_total_btn:not(.active):hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+[data-theme='dark'] #toggle_hide_casings_btn:focus,
+[data-theme='dark'] #toggle_hide_total_btn:focus {
+  outline: 3px solid rgba(255, 123, 128, 0.16);
+  outline-offset: 2px;
+}
+
 /* Header controls positioned top-right */
 .header-controls {
   position: absolute;
@@ -765,6 +782,31 @@ select:focus {
 .volume-table tbody tr:hover {
   background: var(--table-row-hover);
 }
+
+/* Upper completion table tweaks: subtle width adjustments */
+#upperCompletionVolumes th:first-child,
+#upperCompletionVolumes td:first-child {
+  /* slightly wider to show depth ranges without truncation */
+  width: 110px;
+  min-width: 140px;
+}
+
+#upperCompletionVolumes th:nth-child(2),
+#upperCompletionVolumes td:nth-child(2),
+#upperCompletionVolumes th:nth-child(3),
+#upperCompletionVolumes td:nth-child(3),
+#upperCompletionVolumes th:nth-child(4),
+#upperCompletionVolumes td:nth-child(4),
+#upperCompletionVolumes th:nth-child(5),
+#upperCompletionVolumes td:nth-child(5),
+#upperCompletionVolumes th:nth-child(6),
+#upperCompletionVolumes td:nth-child(6) {
+  /* minor reduction for the L/m columns (values are short) */
+  width: 64px;
+  min-width: 48px;
+  text-align: right;
+}
+
 .small-note {
   font-size: 0.85rem;
   color: var(--muted);
@@ -907,7 +949,7 @@ select:focus {
   font-weight: 700;
 }
 
-/* Plug panel (moved below Total Volume) */
+/* Point of interest panel (moved below Total Volume) */
 .plug-panel {
   margin-top: 12px;
   padding: 12px;

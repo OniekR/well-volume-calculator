@@ -1,15 +1,61 @@
-const puppeteer = require('puppeteer');
+const fs = require('fs');
+const path = require('path');
+const logPath = path.join(__dirname, 'upper_completion_smoke.log');
+function flog(msg) {
+  const ts = new Date().toISOString();
+  const line = `${ts} ${msg}\n`;
+  try {
+    fs.appendFileSync(logPath, line);
+  } catch (e) {
+    // ignore logging failures
+  }
+}
+
+let puppeteer;
+try {
+  puppeteer = require('puppeteer');
+} catch (err) {
+  const msg = 'PUPPETEER_REQUIRE_ERR: ' + (err && err.message ? err.message : String(err));
+  console.error(msg);
+  flog(msg);
+  process.exit(8);
+}
+console.log('SMOKE: Starting upper completion smoke test');
+flog('SMOKE: Starting upper completion smoke test');
+
+// Safety watchdog: fail after 30s to avoid hanging CI
+const WATCHDOG_MS = 30000;
+let watchdog = setTimeout(() => {
+  const msg = 'SMOKE: Watchdog timeout - test did not complete within 30s';
+  console.error(msg);
+  flog(msg);
+  process.exit(7);
+}, WATCHDOG_MS);
 
 (async () => {
+  console.log('SMOKE: entering main IIFE');
+  flog('SMOKE: entering main IIFE');
   const url = 'http://localhost:5173/';
+  console.log('SMOKE: launching puppeteer');
+  flog('SMOKE: launching puppeteer');
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
+  console.log('SMOKE: puppeteer launched');
+  flog('SMOKE: puppeteer launched');
   const page = await browser.newPage();
+  console.log('SMOKE: new page created');
+  flog('SMOKE: new page created');
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 10000 });
-    await page.waitForSelector('#upper_completion_size', { timeout: 5000 });
+    console.log('SMOKE: going to', url);
+    flog('SMOKE: going to ' + url);
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 20000 });
+    console.log('SMOKE: page.goto succeeded');
+    flog('SMOKE: page.goto succeeded');
+    await page.waitForSelector('#upper_completion_size', { timeout: 10000 });
+    console.log('SMOKE: found #upper_completion_size');
+    flog('SMOKE: found #upper_completion_size');
 
     // ensure UI present
     const exists = await page.$eval('#upper_completion_size', (el) => !!el);

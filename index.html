@@ -988,6 +988,43 @@
             </div>
           </div>
 
+          <!-- Upper Completion Volume breakdown table (moved below UC inputs) -->
+          <section
+            id="upper-completion-breakdown"
+            class="volume-breakdown hidden"
+            aria-labelledby="upper-completion-breakdown-title"
+          >
+            <h2 id="upper-completion-breakdown-title">
+              Upper Completion breakdown
+            </h2>
+            <div class="table-wrap">
+              <table
+                id="upperCompletionVolumes"
+                class="volume-table"
+                aria-live="polite"
+                aria-describedby="upper-completion-breakdown-note"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Depth (m)</th>
+                    <th scope="col">Tubing (m³)</th>
+                    <th scope="col">Annulus (m³)</th>
+                    <th scope="col">length (m)</th>
+                    <th scope="col">Tubing (L/m)</th>
+                    <th scope="col">Annulus (L/m)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Rows populated by script -->
+                </tbody>
+              </table>
+              <div id="upper-completion-breakdown-note" class="small-note">
+                UC ID volume and annulus volume (between casing/liner ID and UC
+                tubing OD).
+              </div>
+            </div>
+          </section>
+
           <div class="plug-toggle" aria-hidden="false">
             <label class="inline-checkbox">
               <input
@@ -996,13 +1033,13 @@
                 checked
                 aria-controls="plug-panel"
               />
-              Plug
+              Point of interest
             </label>
           </div>
 
           <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
             <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
-              Plug
+              Point of interest
             </h3>
 
             <div class="plug-control">
@@ -1018,11 +1055,29 @@
             </div>
 
             <div class="plug-volumes">
-              <div>
-                Volume above plug: <span id="plugAboveVolume">— m³</span>
+              <div id="plugAboveVolume">
+                Volume above point of interest:
+                <span>— m³</span>
               </div>
-              <div>
-                Volume below plug: <span id="plugBelowVolume">— m³</span>
+              <div id="plugAboveTubing" class="hidden">
+                Volume above (tubing):
+                <span>— m³</span>
+              </div>
+              <div id="plugAboveAnnulus" class="hidden">
+                Volume above (annulus):
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowVolume">
+                Volume below point of interest:
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowTubing" class="hidden">
+                Volume below (tubing):
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowAnnulus" class="hidden">
+                Volume below (annulus):
+                <span>— m³</span>
               </div>
             </div>
           </div>

@@ -10,6 +10,16 @@ export function computeVolumes(casingsInput, opts = {}) {
   const surfaceInUse = !!opts.surfaceInUse;
   const intermediateInUse = !!opts.intermediateInUse;
 
+  // Check if upper completion is active
+  const uc = casingsInput.find((c) => c.role === 'upper_completion');
+  const ucActive = uc && uc.use;
+  const ucTopVal = ucActive && typeof uc.top !== 'undefined' ? uc.top : 0;
+  const ucBottomVal = ucActive ? uc.depth : 0;
+  const ucIdArea =
+    ucActive && uc.id ? Math.PI * Math.pow((uc.id / 2) * 0.0254, 2) : 0;
+  const ucOdRadius = ucActive ? (uc.od / 2) * 0.0254 : 0;
+  const ucOdArea = ucActive ? Math.PI * Math.pow(ucOdRadius, 2) : 0;
+
   // prepare draw entries and per-casing map
   const perCasingMap = {};
   const casingsToDraw = [];
@@ -64,6 +74,10 @@ export function computeVolumes(casingsInput, opts = {}) {
   let totalVolume = 0;
   let plugAboveVolume = 0;
   let plugBelowVolume = 0;
+  let plugAboveTubing = 0;
+  let plugBelowTubing = 0;
+  let plugAboveAnnulus = 0;
+  let plugBelowAnnulus = 0;
 
   for (let i = 0; i < points.length - 1; i++) {
     const segStart = points[i];
@@ -101,17 +115,77 @@ export function computeVolumes(casingsInput, opts = {}) {
       !isNaN(plugDepthVal) &&
       typeof plugDepthVal !== 'undefined'
     ) {
-      if (segEnd <= plugDepthVal) {
-        plugAboveVolume += segVol;
-      } else if (segStart >= plugDepthVal) {
-        plugBelowVolume += segVol;
+      // Check if this segment is within UC range
+      const inUcRange =
+        ucActive && segStart >= ucTopVal && segEnd <= ucBottomVal;
+
+      if (inUcRange) {
+        // Split volume into tubing and annulus
+        const tubingVol = ucIdArea * segLength;
+
+        // Find containing casing for annulus calculation
+        const containing = casingsInput
+          .filter((c) => c.use && c.role !== 'upper_completion')
+          .filter((c) => {
+            const cTopVal = typeof c.top !== 'undefined' ? c.top : 0;
+            return cTopVal <= segStart && c.depth >= segEnd;
+          })
+          .sort((a, b) => {
+            const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+            const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+            return ai - bi;
+          });
+
+        let annulusVol = 0;
+        if (containing.length > 0 && containing[0].id) {
+          const casingIdRadius = (containing[0].id / 2) * 0.0254;
+          const casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
+          const annulusArea = Math.max(0, casingIdArea - ucOdArea);
+          annulusVol = annulusArea * segLength;
+        }
+
+        if (segEnd <= plugDepthVal) {
+          plugAboveTubing += tubingVol;
+          plugAboveAnnulus += annulusVol;
+          plugAboveVolume += segVol;
+        } else if (segStart >= plugDepthVal) {
+          plugBelowTubing += tubingVol;
+          plugBelowAnnulus += annulusVol;
+          plugBelowVolume += segVol;
+        } else {
+          const aboveLen = Math.max(0, plugDepthVal - segStart);
+          const belowLen = Math.max(0, segEnd - plugDepthVal);
+
+          const tubingAbove = ucIdArea * aboveLen;
+          const tubingBelow = ucIdArea * belowLen;
+
+          const annulusAbove = annulusVol * (aboveLen / segLength);
+          const annulusBelow = annulusVol * (belowLen / segLength);
+
+          plugAboveTubing += tubingAbove;
+          plugBelowTubing += tubingBelow;
+          plugAboveAnnulus += annulusAbove;
+          plugBelowAnnulus += annulusBelow;
+
+          const volAbove = area * aboveLen;
+          const volBelow = area * belowLen;
+          plugAboveVolume += volAbove;
+          plugBelowVolume += volBelow;
+        }
       } else {
-        const aboveLen = Math.max(0, plugDepthVal - segStart);
-        const belowLen = Math.max(0, segEnd - plugDepthVal);
-        const volAbove = area * aboveLen;
-        const volBelow = area * belowLen;
-        plugAboveVolume += volAbove;
-        plugBelowVolume += volBelow;
+        // Normal handling for non-UC segments
+        if (segEnd <= plugDepthVal) {
+          plugAboveVolume += segVol;
+        } else if (segStart >= plugDepthVal) {
+          plugBelowVolume += segVol;
+        } else {
+          const aboveLen = Math.max(0, plugDepthVal - segStart);
+          const belowLen = Math.max(0, segEnd - plugDepthVal);
+          const volAbove = area * aboveLen;
+          const volBelow = area * belowLen;
+          plugAboveVolume += volAbove;
+          plugBelowVolume += volBelow;
+        }
       }
     }
   }
@@ -133,6 +207,164 @@ export function computeVolumes(casingsInput, opts = {}) {
     perCasingVolumes,
     casingsToDraw,
     plugAboveVolume,
-    plugBelowVolume
+    plugBelowVolume,
+    plugAboveTubing,
+    plugBelowTubing,
+    plugAboveAnnulus,
+    plugBelowAnnulus,
+    ucActive
+  };
+}
+
+/**
+ * Calculate upper completion volume breakdown:
+ * - UC ID volume (tubing inside volume)
+ * - Annulus volume (between casing/liner ID and UC tubing OD)
+ *
+ * @param {Array} casingsInput - Array of casing descriptors
+ * @returns {Object} - UC volume breakdown with ID and annulus volumes (section-wise and totals)
+ */
+export function computeUpperCompletionBreakdown(casingsInput) {
+  // Find the upper completion
+  const uc = casingsInput.find((c) => c.role === 'upper_completion');
+  if (!uc || !uc.use) {
+    return {
+      used: false,
+      sections: [],
+      ucIdVolume: 0,
+      annulusVolume: 0,
+      ucIdLength: 0,
+      annulusLength: 0
+    };
+  }
+
+  const ucTopVal = typeof uc.top !== 'undefined' ? uc.top : 0;
+  const ucBottomVal = uc.depth;
+  if (ucBottomVal <= ucTopVal) {
+    return {
+      used: false,
+      sections: [],
+      ucIdVolume: 0,
+      annulusVolume: 0,
+      ucIdLength: 0,
+      annulusLength: 0
+    };
+  }
+
+  // Calculate UC ID area (tubing inside)
+  const ucIdArea = uc.id ? Math.PI * Math.pow((uc.id / 2) * 0.0254, 2) : 0;
+
+  // Calculate UC OD area for annulus calculation
+  const ucOdRadius = (uc.od / 2) * 0.0254; // Convert to meters
+  const ucOdArea = Math.PI * Math.pow(ucOdRadius, 2);
+
+  // Create section points within UC range
+  const pointsSet = new Set([ucTopVal, ucBottomVal]);
+  casingsInput.forEach((c) => {
+    if (c.role === 'upper_completion') return;
+    if (!c.use) return;
+    if (c.depth <= ucTopVal || c.top >= ucBottomVal) return;
+    // Add casing transition points within UC range
+    if (
+      typeof c.top !== 'undefined' &&
+      c.top > ucTopVal &&
+      c.top < ucBottomVal
+    ) {
+      pointsSet.add(c.top);
+    }
+    if (c.depth > ucTopVal && c.depth < ucBottomVal) {
+      pointsSet.add(c.depth);
+    }
+  });
+
+  const points = Array.from(pointsSet).sort((a, b) => a - b);
+
+  // Build fine-grained segments then merge adjacent segments that have the same
+  // containing casing to reduce the number of rows shown to the user.
+  const rawSegments = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const segStart = points[i];
+    const segEnd = points[i + 1];
+    const segLength = segEnd - segStart;
+    if (segLength <= 0) continue;
+
+    // UC ID volume for this section
+    const ucIdVol = ucIdArea * segLength;
+
+    // Find containing casings for this section and choose the smallest ID (narrowest)
+    const containing = casingsInput
+      .filter((c) => c.use && c.role !== 'upper_completion')
+      .filter((c) => {
+        const cTopVal = typeof c.top !== 'undefined' ? c.top : 0;
+        return cTopVal <= segStart && c.depth >= segEnd;
+      })
+      .sort((a, b) => {
+        const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+        const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+        return ai - bi;
+      });
+
+    const containingCasing = containing.length ? containing[0] : null;
+
+    let annulusVol = 0;
+    let containerKey = 'open';
+    if (containingCasing && containingCasing.id) {
+      containerKey = `${containingCasing.role}|${containingCasing.id}`;
+      const casingIdRadius = (containingCasing.id / 2) * 0.0254; // meters
+      const casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
+      const annulusArea = Math.max(0, casingIdArea - ucOdArea);
+      annulusVol = annulusArea * segLength;
+    }
+
+    rawSegments.push({
+      start: segStart,
+      end: segEnd,
+      length: segLength,
+      containerKey,
+      ucIdVol,
+      annulusVol
+    });
+  }
+
+  // Merge consecutive raw segments that share the same containerKey
+  const merged = [];
+  for (const seg of rawSegments) {
+    const last = merged.length ? merged[merged.length - 1] : null;
+    if (last && last.containerKey === seg.containerKey) {
+      last.end = seg.end;
+      last.length += seg.length;
+      last.ucIdVol += seg.ucIdVol;
+      last.annulusVol += seg.annulusVol;
+    } else {
+      merged.push({ ...seg });
+    }
+  }
+
+  const sections = merged.map((m) => ({
+    depth: `${m.start.toFixed(1)}-${m.end.toFixed(1)}`,
+    ucIdVolume: m.ucIdVol,
+    annulusVolume: m.annulusVol,
+    sectionLength: m.length
+  }));
+
+  let totalUcIdVolume = 0;
+  let totalAnnulusVolume = 0;
+  let totalUcIdLength = 0;
+  let totalAnnulusLength = 0;
+
+  sections.forEach((s) => {
+    totalUcIdVolume += s.ucIdVolume;
+    totalAnnulusVolume += s.annulusVolume;
+    totalUcIdLength += s.sectionLength;
+    totalAnnulusLength += s.sectionLength;
+  });
+
+  return {
+    used: true,
+    sections,
+    ucIdVolume: totalUcIdVolume,
+    annulusVolume: totalAnnulusVolume,
+    ucIdLength: totalUcIdLength,
+    annulusLength: totalAnnulusLength
   };
 }

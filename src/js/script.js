@@ -1,6 +1,6 @@
 'use strict';
 
-import { computeVolumes } from './logic.js';
+import { computeVolumes, computeUpperCompletionBreakdown } from './logic.js';
 import {
   initDraw,
   scheduleDraw as scheduleDrawFn,
@@ -14,7 +14,7 @@ import { initUI } from './ui.js';
 import { OD } from './constants.js';
 import { gatherInputs } from './inputs.js';
 import { validateUpperCompletionFit } from './validation.js';
-import { renderResults } from './render.js';
+import { renderResults, renderUpperCompletionBreakdown } from './render.js';
 import { setupPresetsUI } from './presets-ui.js';
 import { createPersistence } from './persistence.js';
 
@@ -240,6 +240,10 @@ const VolumeCalc = (() => {
 
     // Render results to DOM
     renderResults(result);
+
+    // Render upper completion breakdown
+    const ucBreakdown = computeUpperCompletionBreakdown(casingsInput);
+    renderUpperCompletionBreakdown(ucBreakdown);
 
     // Show subsea water column when appropriate
     let showWater = false;

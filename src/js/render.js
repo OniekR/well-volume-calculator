@@ -13,25 +13,103 @@ const roleLabel = {
 };
 
 export function renderResults(result) {
-  const { totalVolume, perCasingVolumes, plugAboveVolume, plugBelowVolume } =
-    result;
+  const {
+    totalVolume,
+    perCasingVolumes,
+    plugAboveVolume,
+    plugBelowVolume,
+    plugAboveTubing,
+    plugBelowTubing,
+    plugAboveAnnulus,
+    plugBelowAnnulus,
+    ucActive
+  } = result;
 
   const totalVolumeEl = el('totalVolume');
   if (totalVolumeEl)
     totalVolumeEl.textContent = (totalVolume || 0).toFixed(2) + ' m³';
 
+  // Update plug volumes - show UC split if active
   const plugAboveEl = el('plugAboveVolume');
   const plugBelowEl = el('plugBelowVolume');
-  if (plugAboveEl)
-    plugAboveEl.textContent =
-      typeof plugAboveVolume === 'undefined'
-        ? '— m³'
-        : (plugAboveVolume || 0).toFixed(2) + ' m³';
-  if (plugBelowEl)
-    plugBelowEl.textContent =
-      typeof plugBelowVolume === 'undefined'
-        ? '— m³'
-        : (plugBelowVolume || 0).toFixed(2) + ' m³';
+  const plugAboveTubingEl = el('plugAboveTubing');
+  const plugBelowTubingEl = el('plugBelowTubing');
+  const plugAboveAnnulusEl = el('plugAboveAnnulus');
+  const plugBelowAnnulusEl = el('plugBelowAnnulus');
+
+  if (ucActive) {
+    // Show tubing and annulus splits
+    if (plugAboveEl) plugAboveEl.classList.add('hidden');
+    if (plugBelowEl) plugBelowEl.classList.add('hidden');
+
+    if (plugAboveTubingEl) {
+      plugAboveTubingEl.classList.remove('hidden');
+      const span = plugAboveTubingEl.querySelector('span');
+      if (span) {
+        span.textContent =
+          typeof plugAboveTubing === 'undefined'
+            ? '— m³'
+            : (plugAboveTubing || 0).toFixed(2) + ' m³';
+      }
+    }
+    if (plugBelowTubingEl) {
+      plugBelowTubingEl.classList.remove('hidden');
+      const span = plugBelowTubingEl.querySelector('span');
+      if (span) {
+        span.textContent =
+          typeof plugBelowTubing === 'undefined'
+            ? '— m³'
+            : (plugBelowTubing || 0).toFixed(2) + ' m³';
+      }
+    }
+    if (plugAboveAnnulusEl) {
+      plugAboveAnnulusEl.classList.remove('hidden');
+      const span = plugAboveAnnulusEl.querySelector('span');
+      if (span) {
+        span.textContent =
+          typeof plugAboveAnnulus === 'undefined'
+            ? '— m³'
+            : (plugAboveAnnulus || 0).toFixed(2) + ' m³';
+      }
+    }
+    if (plugBelowAnnulusEl) {
+      plugBelowAnnulusEl.classList.remove('hidden');
+      const span = plugBelowAnnulusEl.querySelector('span');
+      if (span) {
+        span.textContent =
+          typeof plugBelowAnnulus === 'undefined'
+            ? '— m³'
+            : (plugBelowAnnulus || 0).toFixed(2) + ' m³';
+      }
+    }
+  } else {
+    // Show combined volumes
+    if (plugAboveEl) {
+      plugAboveEl.classList.remove('hidden');
+      const span = plugAboveEl.querySelector('span');
+      if (span) {
+        span.textContent =
+          typeof plugAboveVolume === 'undefined'
+            ? '— m³'
+            : (plugAboveVolume || 0).toFixed(2) + ' m³';
+      }
+    }
+    if (plugBelowEl) {
+      plugBelowEl.classList.remove('hidden');
+      const span = plugBelowEl.querySelector('span');
+      if (span) {
+        span.textContent =
+          typeof plugBelowVolume === 'undefined'
+            ? '— m³'
+            : (plugBelowVolume || 0).toFixed(2) + ' m³';
+      }
+    }
+
+    if (plugAboveTubingEl) plugAboveTubingEl.classList.add('hidden');
+    if (plugBelowTubingEl) plugBelowTubingEl.classList.add('hidden');
+    if (plugAboveAnnulusEl) plugAboveAnnulusEl.classList.add('hidden');
+    if (plugBelowAnnulusEl) plugBelowAnnulusEl.classList.add('hidden');
+  }
 
   // Render per-casing volume table
   const casingVolumesTable = el('casingVolumes');
@@ -111,5 +189,112 @@ export function renderResults(result) {
     totalsPerMTd.textContent = '0.0';
   }
   totalsTr.appendChild(totalsPerMTd);
+  tbody.appendChild(totalsTr);
+}
+
+/**
+ * Render upper completion volume breakdown table
+ * Shows UC ID volumes and annulus volumes section-wise and in total
+ * @param {Object} ucBreakdown - Result from computeUpperCompletionBreakdown()
+ */
+export function renderUpperCompletionBreakdown(ucBreakdown) {
+  const section = el('upper-completion-breakdown');
+  if (!section) return;
+
+  if (!ucBreakdown.used) {
+    section.classList.add('hidden');
+    return;
+  }
+
+  section.classList.remove('hidden');
+
+  const table = el('upperCompletionVolumes');
+  if (!table) return;
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  // Render section rows (single row per section, with separate columns for UC ID and annulus)
+  ucBreakdown.sections.forEach((section) => {
+    const tr = document.createElement('tr');
+
+    const depthTd = document.createElement('td');
+    depthTd.textContent = section.depth;
+    tr.appendChild(depthTd);
+
+    const ucIdVolTd = document.createElement('td');
+    ucIdVolTd.textContent = (section.ucIdVolume || 0).toFixed(1);
+    tr.appendChild(ucIdVolTd);
+
+    const annulusVolTd = document.createElement('td');
+    annulusVolTd.textContent = (section.annulusVolume || 0).toFixed(1);
+    tr.appendChild(annulusVolTd);
+
+    const lenTd = document.createElement('td');
+    lenTd.textContent = (section.sectionLength || 0).toFixed(1);
+    tr.appendChild(lenTd);
+
+    const ucPerMTd = document.createElement('td');
+    if (section.sectionLength > 0) {
+      ucPerMTd.textContent = (
+        (section.ucIdVolume / section.sectionLength) *
+        1000
+      ).toFixed(1);
+    } else {
+      ucPerMTd.textContent = '0.0';
+    }
+    tr.appendChild(ucPerMTd);
+
+    const annulusPerMTd = document.createElement('td');
+    if (section.sectionLength > 0) {
+      annulusPerMTd.textContent = (
+        (section.annulusVolume / section.sectionLength) *
+        1000
+      ).toFixed(1);
+    } else {
+      annulusPerMTd.textContent = '0.0';
+    }
+    tr.appendChild(annulusPerMTd);
+
+    tbody.appendChild(tr);
+  });
+
+  // Totals row (separate totals for inside tubing and annulus)
+  const totalsTr = document.createElement('tr');
+  totalsTr.classList.add('totals-row');
+  const totalsLabelTd = document.createElement('td');
+  totalsLabelTd.textContent = 'Totals';
+  totalsTr.appendChild(totalsLabelTd);
+
+  const totalUcTd = document.createElement('td');
+  const totalUcVol = ucBreakdown.ucIdVolume || 0;
+  totalUcTd.textContent = totalUcVol.toFixed(1);
+  totalsTr.appendChild(totalUcTd);
+
+  const totalAnnTd = document.createElement('td');
+  const totalAnnVol = ucBreakdown.annulusVolume || 0;
+  totalAnnTd.textContent = totalAnnVol.toFixed(1);
+  totalsTr.appendChild(totalAnnTd);
+
+  const totalLenTd = document.createElement('td');
+  const totalLen = ucBreakdown.ucIdLength || 0;
+  totalLenTd.textContent = totalLen.toFixed(1);
+  totalsTr.appendChild(totalLenTd);
+
+  const totalUcPerMTd = document.createElement('td');
+  if (totalLen > 0) {
+    totalUcPerMTd.textContent = ((totalUcVol / totalLen) * 1000).toFixed(1);
+  } else {
+    totalUcPerMTd.textContent = '0.0';
+  }
+  totalsTr.appendChild(totalUcPerMTd);
+
+  const totalAnnPerMTd = document.createElement('td');
+  if (totalLen > 0) {
+    totalAnnPerMTd.textContent = ((totalAnnVol / totalLen) * 1000).toFixed(1);
+  } else {
+    totalAnnPerMTd.textContent = '0.0';
+  }
+  totalsTr.appendChild(totalAnnPerMTd);
   tbody.appendChild(totalsTr);
 }
