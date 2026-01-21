@@ -383,34 +383,6 @@ export function setupHideCasingsToggle(deps = {}) {
   });
 }
 
-export function setupHideTotalToggle() {
-  const btn = el('toggle_hide_total_btn');
-  const form = document.getElementById('well-form');
-  if (!btn || !form) return;
-
-  const setState = (hidden) => {
-    form.classList.toggle('total-hidden', hidden);
-    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-    btn.textContent = hidden ? 'Show total' : 'Hide total';
-  };
-
-  // initialize
-  setState(form.classList.contains('total-hidden'));
-
-  btn.addEventListener('click', () => {
-    const hidden = form.classList.toggle('total-hidden');
-    setState(hidden);
-  });
-
-  // Keyboard accessibility
-  btn.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      btn.click();
-    }
-  });
-}
-
 export function setupSizeIdInputs(deps) {
   const { scheduleSave, calculateVolume } = deps;
   const pairs = [
@@ -440,25 +412,8 @@ export function setupSizeIdInputs(deps) {
         sizeInline && sizeInline.querySelector('.nom-id-inline');
 
       if (nomInline) {
-        // Set label text
-        if (selId === 'upper_completion_size') {
-          nomInline.textContent = 'TJ:';
-          // Upper completion might show TJ value in a note?
-          // Currently the input itself holds the Size ID (4.892).
-          // The "TJ" value is derived.
-          // If we want "TJ: [value]", then the Input shows Size ID, but where is TJ shown?
-          // In legacy UC, `note.textContent = 'TJ: ' + tjValue`.
-          // If we switch UC to this layout:
-          // Label="TJ:", Input="4.892" (Size ID).
-          // The user might want the TJ value visible.
-          // Let's stick to "Nom ID:" for casing sections for now.
-          // If UC is updated, we might need a separate field or logic.
-          // Let's keep logic simple: If nomInline exists, set to 'Nom ID:' generally.
-          // But for UC it's special. Let's Handle UC separately if needed, or just skip it for now.
-          // For now, let's assume 'Nom ID:' for standard casings.
-        } else {
-          nomInline.textContent = 'Nom ID:';
-        }
+        // Set label text (Upper Completion uses the same "Nom ID:" label as other casings)
+        nomInline.textContent = 'Nom ID:';
 
         // Handle Drift (if present below the Nom ID)
         const sizeIdInline =
@@ -521,13 +476,44 @@ export function setupSizeIdInputs(deps) {
             }
           }
         }
+
+        // If this is the Upper Completion, also populate the small-note under the Top input with TJ
+        if (selId === 'upper_completion_size') {
+          const tj = getUpperCompletionTJ(Number(idInput.value));
+          const ucSection =
+            sel.closest('#upper_completion_section') ||
+            sel.closest('.casing-body');
+          const topInput =
+            ucSection && ucSection.querySelector('#depth_uc_top');
+          const topInline = topInput && topInput.closest('.input-inline');
+          const topNote = topInline && topInline.querySelector('.small-note');
+          if (topNote) {
+            topNote.textContent =
+              typeof tj !== 'undefined'
+                ? `TJ: ${String(tj)}`
+                : idInput.value
+                ? `TJ: ${idInput.value}`
+                : '';
+          }
+        }
+
         return;
       }
 
       // 2. Legacy/Fallback for sections not yet updated or UC special case
       const inline = sel.closest('.input-inline');
-      const note = inline && inline.querySelector('.small-note');
+      let note = inline && inline.querySelector('.small-note');
+      // If note not found in the Size inline and this is UC, look for the
+      // small-note elsewhere in the Upper Completion section (we moved it
+      // under the "Top" input)
+      if (!note && selId === 'upper_completion_size') {
+        const ucSection =
+          sel.closest('#upper_completion_section') ||
+          sel.closest('.casing-body');
+        note = ucSection && ucSection.querySelector('.small-note');
+      }
       if (!note) return;
+
       if (selId === 'conductor_size') {
         // Should be covered by block above if HTML updated, but keep safe
         // ... existing conductor logic reduced ...
@@ -589,6 +575,13 @@ export function setupSizeIdInputs(deps) {
 // Upper Completion section when a restriction is found.
 export function checkUpperCompletionFit() {
   try {
+    // Skip warning if drill pipe mode is active
+    const modeToggle = el('uc_mode_toggle');
+    if (modeToggle && modeToggle.checked) {
+      removeUpperCompletionWarning();
+      return;
+    }
+
     const ucIdEl = el('upper_completion_size_id');
     if (!ucIdEl) return;
     const ucKey = ucIdEl.value;
@@ -1260,6 +1253,108 @@ export function setupThemeToggle() {
   });
 }
 
+function setupDrillPipeMode(deps) {
+  const { calculateVolume } = deps;
+  const modeToggle = el('uc_mode_toggle');
+  const tubingSection = el('uc_tubing_section');
+  const drillpipeSection = el('uc_drillpipe_section');
+  const drillpipeCount = el('drillpipe_count');
+  const drillpipeContainer = el('drillpipe_inputs_container');
+
+  if (!modeToggle || !drillpipeSection) return;
+
+  // Dynamic async import for drill pipe functions
+  (async () => {
+    const drillpipeModule = await import('./drillpipe.js');
+    const { renderDrillPipeInputs, updateDrillPipeDepthDisplays } =
+      drillpipeModule;
+
+    // Toggle between tubing and drill pipe mode
+    modeToggle.addEventListener('change', () => {
+      const isDP = modeToggle.checked;
+      if (isDP) {
+        if (tubingSection) tubingSection.classList.add('hidden');
+        drillpipeSection.classList.remove('hidden');
+        // Disable tubing inputs when drill pipe mode is active
+        if (tubingSection) {
+          const tubingControls = tubingSection.querySelectorAll(
+            'input, select, textarea, button'
+          );
+          tubingControls.forEach((ctrl) => {
+            try {
+              ctrl.disabled = true;
+              ctrl.classList.add('readonly-input');
+            } catch (e) {
+              /* ignore */
+            }
+          });
+        }
+        // Render default drill pipe inputs
+        const count = parseInt(drillpipeCount.value, 10) || 3;
+        renderDrillPipeInputs(count);
+        attachDrillPipeListeners();
+        // Hide upper completion warning when switching to drill pipe mode
+        removeUpperCompletionWarning();
+      } else {
+        if (tubingSection) tubingSection.classList.remove('hidden');
+        drillpipeSection.classList.add('hidden');
+        // Re-enable tubing inputs when switching back to tubing mode
+        if (tubingSection) {
+          const tubingControls = tubingSection.querySelectorAll(
+            'input, select, textarea, button'
+          );
+          tubingControls.forEach((ctrl) => {
+            try {
+              ctrl.disabled = false;
+              ctrl.classList.remove('readonly-input');
+            } catch (e) {
+              /* ignore */
+            }
+          });
+        }
+      }
+      calculateVolume();
+    });
+
+    // Update drill pipe count
+    drillpipeCount.addEventListener('change', () => {
+      const count = parseInt(drillpipeCount.value, 10) || 1;
+      renderDrillPipeInputs(count);
+      attachDrillPipeListeners();
+      calculateVolume();
+    });
+
+    // Ensure UI initially reflects the toggle state (in case it was set by saved state)
+    try {
+      modeToggle.dispatchEvent(new Event('change'));
+    } catch (e) {
+      /* ignore */
+    }
+
+    function attachDrillPipeListeners() {
+      const rows = drillpipeContainer.querySelectorAll('.drillpipe-input-row');
+      rows.forEach((row) => {
+        const sizeSelect = row.querySelector('select[id^="drillpipe_size_"]');
+        const lengthInput = row.querySelector('input[id^="drillpipe_length_"]');
+
+        if (sizeSelect) {
+          sizeSelect.addEventListener('change', () => {
+            updateDrillPipeDepthDisplays();
+            calculateVolume();
+          });
+        }
+
+        if (lengthInput) {
+          lengthInput.addEventListener('input', () => {
+            updateDrillPipeDepthDisplays();
+            calculateVolume();
+          });
+        }
+      });
+    }
+  })();
+}
+
 export function initUI(deps) {
   // deps: { calculateVolume, scheduleSave, captureStateObject, applyStateObject, initDraw }
   setupEventDelegation(deps);
@@ -1267,7 +1362,6 @@ export function initUI(deps) {
   setupButtons(deps);
   setupTooltips(deps);
   setupHideCasingsToggle(deps);
-  setupHideTotalToggle();
   setupSizeIdInputs(deps);
   initUpperCompletionChecks();
   setupWellheadSync(deps);
@@ -1276,6 +1370,7 @@ export function initUI(deps) {
   setupRiserTypeHandler(deps);
   setupRiserPositionToggle(deps);
   setupPlugToggle(deps);
+  setupDrillPipeMode(deps);
   setupNavActive();
   setupThemeToggle();
 }

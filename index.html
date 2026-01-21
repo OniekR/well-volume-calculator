@@ -103,16 +103,6 @@
               >
                 Hide casings
               </button>
-
-              <button
-                id="toggle_hide_total_btn"
-                class="default-top-btn"
-                type="button"
-                aria-pressed="false"
-                aria-label="Toggle hide total volume (UI only)"
-              >
-                Hide total
-              </button>
             </div>
           </div>
 
@@ -919,11 +909,6 @@
             </div>
           </div>
 
-          <div class="result">
-            <h2>Total Volume</h2>
-            <p id="totalVolume">0.00 m³</p>
-          </div>
-
           <!-- Upper completion: placed inside casings and drawn on top -->
           <div class="casing-input no-hide" id="upper_completion_section">
             <div class="casing-header">
@@ -933,56 +918,117 @@
                 id="use_upper_completion"
                 checked
               />
-              <h3>Upper completion</h3>
+              <h3>Completion or DP</h3>
               <div class="header-inline">
-                <span class="small-note">In-casing component</span>
+                <!-- Toggle between Tubing and Drill Pipe -->
+                <div class="toggle-inline">
+                  <label
+                    class="switch"
+                    title="Switch between tubing and drill pipe"
+                  >
+                    <input
+                      type="checkbox"
+                      id="uc_mode_toggle"
+                      class="toggle-input"
+                      aria-label="Switch to drill pipe mode"
+                    />
+                    <span class="slider round" aria-hidden="true"></span>
+                  </label>
+                  <span id="uc_mode_label" class="small-note-inline"
+                    >Tubing -</span
+                  >
+                  <span id="uc_mode_label_dp" class="small-note-inline"
+                    >Drill pipe</span
+                  >
+                </div>
               </div>
             </div>
             <div class="casing-body">
-              <div class="input-row three-cols">
-                <div class="input-inline">
-                  <label for="upper_completion_size">Size:</label>
-                  <div class="size-with-id">
-                    <select
-                      id="upper_completion_size"
-                      name="upper_completion_size"
-                    >
-                      <option value="4.892">5 1/2" 17#</option>
-                    </select>
+              <!-- Tubing section (hidden when drill pipe mode active) -->
+              <div id="uc_tubing_section" class="uc-tubing-section">
+                <div class="input-row three-cols">
+                  <div class="input-inline">
+                    <label for="upper_completion_size">Size:</label>
+                    <div class="size-with-id">
+                      <select
+                        id="upper_completion_size"
+                        name="upper_completion_size"
+                      >
+                        <option value="4.892">5 1/2" 17#</option>
+                      </select>
+
+                      <div class="size-id-inline">
+                        <div class="nom-input-group">
+                          <div
+                            class="small-note nom-id-inline"
+                            aria-live="polite"
+                          ></div>
+                          <input
+                            id="upper_completion_size_id"
+                            class="size-id-input size-id-input--narrow"
+                            type="number"
+                            step="1"
+                            value="4.892"
+                            aria-label="Upper completion size id"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="input-inline">
+                    <label class="top-label" for="depth_uc_top">Top (m):</label>
                     <input
-                      id="upper_completion_size_id"
-                      class="size-id-input"
                       type="number"
-                      step="0.001"
-                      value="4.892"
-                      aria-label="Upper completion size id"
+                      id="depth_uc_top"
+                      name="depth_uc_top"
+                      step="1"
+                      placeholder="Optional"
+                      min="0"
+                    />
+                    <div
+                      class="small-note nom-id-inline"
+                      aria-live="polite"
+                    ></div>
+                  </div>
+
+                  <div class="input-inline">
+                    <label class="shoe-label" for="depth_uc">Shoe (m):</label>
+                    <input
+                      type="number"
+                      id="depth_uc"
+                      name="depth_uc"
+                      step="1"
+                      value="0"
+                      min="0"
                     />
                   </div>
-                  <div class="small-note">4.892</div>
+                </div>
+              </div>
+
+              <!-- Drill Pipe section (hidden until drill pipe mode active) -->
+              <div
+                id="uc_drillpipe_section"
+                class="uc-drillpipe-section hidden"
+              >
+                <div class="input-row">
+                  <label for="drillpipe_count"
+                    >Number of drill pipe sizes:</label
+                  >
+                  <select
+                    id="drillpipe_count"
+                    name="drillpipe_count"
+                    aria-label="Number of drill pipe sizes in string"
+                  >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                  </select>
                 </div>
 
-                <div class="input-inline">
-                  <label class="top-label" for="depth_uc_top">Top (m):</label>
-                  <input
-                    type="number"
-                    id="depth_uc_top"
-                    name="depth_uc_top"
-                    step="0.1"
-                    placeholder="Optional"
-                    min="0"
-                  />
-                </div>
-
-                <div class="input-inline">
-                  <label class="shoe-label" for="depth_uc">Shoe (m):</label>
-                  <input
-                    type="number"
-                    id="depth_uc"
-                    name="depth_uc"
-                    step="1.0"
-                    value="0"
-                    min="0"
-                  />
+                <!-- Drill pipe size inputs (container for dynamic rows) -->
+                <div id="drillpipe_inputs_container">
+                  <!-- Rows will be populated by script -->
                 </div>
               </div>
             </div>
@@ -1098,7 +1144,7 @@
           class="volume-breakdown"
           aria-labelledby="volume-breakdown-title"
         >
-          <h2 id="volume-breakdown-title">Volume breakdown</h2>
+          <h2 id="volume-breakdown-title">Hole volume</h2>
           <div class="table-wrap">
             <table
               id="casingVolumes"

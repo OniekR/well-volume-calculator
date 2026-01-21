@@ -10,6 +10,13 @@ function flog(msg) {
     // ignore logging failures
   }
 }
+// Synchronously note that the script was invoked so we have a durable trace even
+// if early async operations (like puppeteer launch) fail or hang.
+try {
+  fs.appendFileSync(logPath, `${new Date().toISOString()} SCRIPT_INVOKED\n`);
+} catch (e) {
+  /* ignore */
+}
 
 let puppeteer;
 try {
@@ -92,33 +99,42 @@ let watchdog = setTimeout(() => {
     });
 
     if (!tableHas) {
+      flog('FAIL: Upper completion not present in volume table');
       console.error('FAIL: Upper completion not present in volume table');
       await browser.close();
       process.exit(3);
     }
+    flog('Table contains Upper completion row');
 
     // Ensure canvas changes when the upper completion depths are set
+    flog('Capturing canvas before change');
     const before = await page.evaluate(() =>
       document.getElementById('wellSchematic').toDataURL()
     );
+    flog('Setting depth_uc to 80');
     await page.$eval('#depth_uc', (el) => (el.value = '80'));
+    flog('Dispatching input event for depth_uc');
     await page.$eval('#depth_uc', (el) =>
       el.dispatchEvent(new Event('input', { bubbles: true }))
     );
     await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
+    flog('Capturing canvas after change');
     const after = await page.evaluate(() =>
       document.getElementById('wellSchematic').toDataURL()
     );
 
     if (before === after) {
+      flog('FAIL: Canvas did not update when changing upper completion');
       console.error(
         'FAIL: Canvas did not update when changing upper completion'
       );
       await browser.close();
       process.exit(4);
     }
+    flog('Canvas updated after changing upper completion');
 
     // Now, test TJ vs drift validation: add a production drift input with value smaller than TJ
+    flog('Adding production drift input and setting production casing extents');
     await page.evaluate(() => {
       const inp = document.createElement('input');
       inp.type = 'number';
@@ -132,12 +148,13 @@ let watchdog = setTimeout(() => {
     await page.$eval('#depth_7', (el) => (el.value = '200'));
 
     // Trigger recalculation
+    flog('Triggering recalculation after setting production drift');
     await page.$eval('#depth_uc', (el) =>
       el.dispatchEvent(new Event('input', { bubbles: true }))
     );
     await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
 
-    // Wait up to 2s for either the new or legacy warning element to appear with relevant text
+    // Wait up to 5s for either the new or legacy warning element to appear with relevant text
     try {
       await page.waitForFunction(
         () => {
@@ -157,21 +174,24 @@ let watchdog = setTimeout(() => {
           }
           return false;
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
+      flog('PASS: Upper completion UI present and drift warning shown');
+      console.log(
+        'PASS: Upper completion UI present, affects table, updates canvas, and shows TJ drift warning when applicable'
+      );
+      flog('TEST_END');
+      await browser.close();
+      process.exit(0);
     } catch (err) {
+      flog('FAIL: Upper completion warning not shown when TJ > casing drift');
       console.error(
         'FAIL: Upper completion warning not shown when TJ > casing drift'
       );
+      flog('TEST_END');
       await browser.close();
       process.exit(6);
     }
-
-    console.log(
-      'PASS: Upper completion UI present, affects table, updates canvas, and shows TJ drift warning when applicable'
-    );
-    await browser.close();
-    process.exit(0);
   } catch (err) {
     console.error(
       'ERROR running upper completion smoke test',

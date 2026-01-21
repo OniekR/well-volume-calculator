@@ -121,7 +121,8 @@ export function renderResults(result) {
   let totals = { volume: 0, includedLength: 0 };
 
   perCasingVolumes.forEach((c) => {
-    if (!c.use) return;
+    // Skip upper_completion entries (they are handled separately)
+    if (!c.use || c.role === 'upper_completion') return;
     const tr = document.createElement('tr');
     const nameTd = document.createElement('td');
     nameTd.textContent = roleLabel[c.role] || c.role;
@@ -195,62 +196,116 @@ export function renderResults(result) {
 /**
  * Render upper completion volume breakdown table
  * Shows UC ID volumes and annulus volumes section-wise and in total
- * @param {Object} ucBreakdown - Result from computeUpperCompletionBreakdown()
+ * Can render either tubing or drill pipe breakdown
+ * @param {Object} breakdown - Result from computeUpperCompletionBreakdown() or computeDrillPipeBreakdown()
+ * @param {string} mode - 'tubing' or 'drillpipe'
  */
-export function renderUpperCompletionBreakdown(ucBreakdown) {
+export function renderUpperCompletionBreakdown(breakdown, mode = 'tubing') {
   const section = el('upper-completion-breakdown');
   if (!section) return;
 
-  if (!ucBreakdown.used) {
+  if (!breakdown.used) {
     section.classList.add('hidden');
     return;
   }
 
   section.classList.remove('hidden');
 
+  // Update table title based on mode
+  const titleEl = el('upper-completion-breakdown-title');
+  if (titleEl) {
+    titleEl.textContent =
+      mode === 'drillpipe'
+        ? 'Drill Pipe breakdown'
+        : 'Upper Completion breakdown';
+  }
+
   const table = el('upperCompletionVolumes');
   if (!table) return;
+
+  // Update table headers based on mode
+  const thead = table.querySelector('thead');
+  if (thead && mode === 'drillpipe') {
+    thead.innerHTML = `
+      <tr>
+        <th scope="col">Casing</th>
+        <th scope="col">DP ID (m³)</th>
+        <th scope="col">Annulus (m³)</th>
+        <th scope="col">Length (m)</th>
+        <th scope="col">DP ID (L/m)</th>
+        <th scope="col">Annulus (L/m)</th>
+      </tr>
+    `;
+  } else if (thead && mode === 'tubing') {
+    thead.innerHTML = `
+      <tr>
+        <th scope="col">Depth (m)</th>
+        <th scope="col">Tubing (m³)</th>
+        <th scope="col">Annulus (m³)</th>
+        <th scope="col">length (m)</th>
+        <th scope="col">Tubing (L/m)</th>
+        <th scope="col">Annulus (L/m)</th>
+      </tr>
+    `;
+  }
+
   const tbody = table.querySelector('tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
 
-  // Render section rows (single row per section, with separate columns for UC ID and annulus)
-  ucBreakdown.sections.forEach((section) => {
+  // Render section rows
+  breakdown.sections.forEach((sec) => {
     const tr = document.createElement('tr');
 
-    const depthTd = document.createElement('td');
-    depthTd.textContent = section.depth;
-    tr.appendChild(depthTd);
+    // First column: casing name (drill pipe) or depth (tubing)
+    const col1Td = document.createElement('td');
+    if (mode === 'drillpipe') {
+      col1Td.textContent = sec.casing ? sec.casing.replace(/_/g, ' ') : '';
+    } else {
+      col1Td.textContent = sec.depth;
+    }
+    tr.appendChild(col1Td);
 
-    const ucIdVolTd = document.createElement('td');
-    ucIdVolTd.textContent = (section.ucIdVolume || 0).toFixed(1);
-    tr.appendChild(ucIdVolTd);
+    // DP/Tubing ID volume
+    const idVolTd = document.createElement('td');
+    const idVol = mode === 'drillpipe' ? sec.dpIdVolume : sec.ucIdVolume;
+    idVolTd.textContent = (idVol || 0).toFixed(1);
+    tr.appendChild(idVolTd);
 
+    // Annulus volume
     const annulusVolTd = document.createElement('td');
-    annulusVolTd.textContent = (section.annulusVolume || 0).toFixed(1);
+    annulusVolTd.textContent = (sec.annulusVolume || 0).toFixed(1);
     tr.appendChild(annulusVolTd);
 
+    // Length
     const lenTd = document.createElement('td');
-    lenTd.textContent = (section.sectionLength || 0).toFixed(1);
+    const length =
+      mode === 'drillpipe'
+        ? sec.dpLength
+        : sec.sectionLength !== undefined
+        ? sec.sectionLength
+        : sec.length;
+    lenTd.textContent = (length || 0).toFixed(1);
     tr.appendChild(lenTd);
 
-    const ucPerMTd = document.createElement('td');
-    if (section.sectionLength > 0) {
-      ucPerMTd.textContent = (
-        (section.ucIdVolume / section.sectionLength) *
-        1000
-      ).toFixed(1);
+    // DP/Tubing ID L/m
+    const idPerMTd = document.createElement('td');
+    if (length > 0) {
+      const idLPerM = mode === 'drillpipe' ? sec.dpLPerM : sec.ucLPerM;
+      idPerMTd.textContent = (idLPerM || 0).toFixed(1);
     } else {
-      ucPerMTd.textContent = '0.0';
+      idPerMTd.textContent = '0.0';
     }
-    tr.appendChild(ucPerMTd);
+    tr.appendChild(idPerMTd);
 
+    // Annulus L/m
     const annulusPerMTd = document.createElement('td');
-    if (section.sectionLength > 0) {
-      annulusPerMTd.textContent = (
-        (section.annulusVolume / section.sectionLength) *
-        1000
-      ).toFixed(1);
+    if (length > 0) {
+      const annLPerM =
+        mode === 'drillpipe'
+          ? sec.annulusLPerM
+          : (sec.annulusVolume / length) * 1000;
+      annulusPerMTd.textContent = (annLPerM || 0).toFixed(1);
     } else {
       annulusPerMTd.textContent = '0.0';
     }
@@ -259,35 +314,41 @@ export function renderUpperCompletionBreakdown(ucBreakdown) {
     tbody.appendChild(tr);
   });
 
-  // Totals row (separate totals for inside tubing and annulus)
+  // Totals row
   const totalsTr = document.createElement('tr');
   totalsTr.classList.add('totals-row');
   const totalsLabelTd = document.createElement('td');
   totalsLabelTd.textContent = 'Totals';
   totalsTr.appendChild(totalsLabelTd);
 
-  const totalUcTd = document.createElement('td');
-  const totalUcVol = ucBreakdown.ucIdVolume || 0;
-  totalUcTd.textContent = totalUcVol.toFixed(1);
-  totalsTr.appendChild(totalUcTd);
+  const totalIdKey = mode === 'drillpipe' ? 'dpIdVolume' : 'ucIdVolume';
+  const totalIdVol = breakdown[totalIdKey] || 0;
+  const totalIdTd = document.createElement('td');
+  totalIdTd.textContent = totalIdVol.toFixed(1);
+  totalsTr.appendChild(totalIdTd);
 
   const totalAnnTd = document.createElement('td');
-  const totalAnnVol = ucBreakdown.annulusVolume || 0;
+  const totalAnnVol = breakdown.annulusVolume || 0;
   totalAnnTd.textContent = totalAnnVol.toFixed(1);
   totalsTr.appendChild(totalAnnTd);
 
+  const totalLenKey = mode === 'drillpipe' ? 'dpIdLength' : 'ucIdLength';
+  const totalLen = breakdown[totalLenKey] || 0;
   const totalLenTd = document.createElement('td');
-  const totalLen = ucBreakdown.ucIdLength || 0;
   totalLenTd.textContent = totalLen.toFixed(1);
   totalsTr.appendChild(totalLenTd);
 
-  const totalUcPerMTd = document.createElement('td');
+  const totalIdPerMTd = document.createElement('td');
   if (totalLen > 0) {
-    totalUcPerMTd.textContent = ((totalUcVol / totalLen) * 1000).toFixed(1);
+    const totalIdLPerM =
+      mode === 'drillpipe'
+        ? (totalIdVol / totalLen) * 1000
+        : (totalIdVol / totalLen) * 1000;
+    totalIdPerMTd.textContent = totalIdLPerM.toFixed(1);
   } else {
-    totalUcPerMTd.textContent = '0.0';
+    totalIdPerMTd.textContent = '0.0';
   }
-  totalsTr.appendChild(totalUcPerMTd);
+  totalsTr.appendChild(totalIdPerMTd);
 
   const totalAnnPerMTd = document.createElement('td');
   if (totalLen > 0) {

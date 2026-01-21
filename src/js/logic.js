@@ -9,6 +9,7 @@ export function computeVolumes(casingsInput, opts = {}) {
     typeof opts.plugDepthVal !== 'undefined' ? opts.plugDepthVal : undefined;
   const surfaceInUse = !!opts.surfaceInUse;
   const intermediateInUse = !!opts.intermediateInUse;
+  const drillPipeInput = opts.drillPipe || null; // { mode, count, pipes: [{size, length, lPerM, eod}] }
 
   // Check if upper completion is active
   const uc = casingsInput.find((c) => c.role === 'upper_completion');
@@ -188,6 +189,49 @@ export function computeVolumes(casingsInput, opts = {}) {
         }
       }
     }
+  }
+
+  // If drill pipe is present, subtract open-ended displacement (EOD) volumes
+  // from the per-casing volumes so the hole volume table reflects fluid displaced
+  // by the drill pipe string. Split EOD proportionally across all casings the DP passes through.
+  if (drillPipeInput && drillPipeInput.mode === 'drillpipe') {
+    let cumDepth = 0;
+    (drillPipeInput.pipes || []).forEach((dp) => {
+      const dpTop = cumDepth;
+      const dpBottom = cumDepth + (dp.length || 0);
+      cumDepth = dpBottom;
+      const eodLPerM = typeof dp.eod !== 'undefined' ? dp.eod : 0;
+
+      if (eodLPerM > 0) {
+        // Find ALL casings that this DP segment intersects and split EOD proportionally
+        const activeCasings = casingsInput.filter(
+          (c) => c.use && c.role !== 'upper_completion'
+        );
+
+        activeCasings.forEach((casing) => {
+          const casingTopVal =
+            typeof casing.top !== 'undefined' ? casing.top : 0;
+          const casingBottomVal = casing.depth;
+
+          // Calculate overlap between DP segment and this casing
+          const overlapTop = Math.max(dpTop, casingTopVal);
+          const overlapBottom = Math.min(dpBottom, casingBottomVal);
+          const overlapLength = Math.max(0, overlapBottom - overlapTop);
+
+          if (overlapLength > 0) {
+            // Subtract EOD for the portion of DP in this casing
+            const eodVolInCasing = (eodLPerM / 1000) * overlapLength;
+            if (perCasingMap[casing.role]) {
+              perCasingMap[casing.role].volume = Math.max(
+                0,
+                perCasingMap[casing.role].volume - eodVolInCasing
+              );
+              totalVolume = Math.max(0, totalVolume - eodVolInCasing);
+            }
+          }
+        });
+      }
+    });
   }
 
   const perCasingVolumes = casingsInput.map((c) => {

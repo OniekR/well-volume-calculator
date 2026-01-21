@@ -11,6 +11,10 @@ import { gatherInputs } from './inputs.js';
 import { renderResults, renderUpperCompletionBreakdown } from './render.js';
 import { setupPresetsUI } from './presets-ui.js';
 import { createPersistence } from './persistence.js';
+import {
+  gatherDrillPipeInput,
+  computeDrillPipeBreakdown
+} from './drillpipe.js';
 
 /*
  * Refactored module for the Well Volume Calculator
@@ -164,20 +168,53 @@ const VolumeCalc = (() => {
       wellheadDepthVal
     } = gatherInputs();
 
-    const result = computeVolumes(casingsInput, {
+    // Determine drill pipe mode early so we can exclude UC from volume calculations
+    const dpInput = gatherDrillPipeInput();
+
+    // For hole volume calculations, always treat upper_completion as not in use
+    // (so the hole volume table does not include tubing volumes). For drawing
+    // we still use the original casingsInput so UC is shown when in tubing mode.
+    const effectiveCasingsInput = casingsInput.map((c) =>
+      c.role === 'upper_completion' ? { ...c, use: false } : c
+    );
+
+    // Compute volumes using UC excluded
+    const result = computeVolumes(effectiveCasingsInput, {
       plugEnabled,
       plugDepthVal,
       surfaceInUse,
-      intermediateInUse
+      intermediateInUse,
+      drillPipe: dpInput
     });
-    const { casingsToDraw } = result;
 
-    // Render results to DOM
+    // Compute draw entries using original casings so UC is still drawn in tubing mode
+    const drawResult = computeVolumes(casingsInput, {
+      plugEnabled,
+      plugDepthVal,
+      surfaceInUse,
+      intermediateInUse,
+      drillPipe: dpInput
+    });
+    let { casingsToDraw } = drawResult;
+
+    // Render results to DOM (volumes exclude UC)
     renderResults(result);
 
-    // Render upper completion breakdown
-    const ucBreakdown = computeUpperCompletionBreakdown(casingsInput);
-    renderUpperCompletionBreakdown(ucBreakdown);
+    // Render upper completion breakdown (tubing or drill pipe)
+    if (dpInput.mode === 'drillpipe') {
+      const dpBreakdown = computeDrillPipeBreakdown(
+        dpInput.pipes,
+        casingsInput
+      );
+      renderUpperCompletionBreakdown(dpBreakdown, 'drillpipe');
+      // Ensure upper_completion isn't drawn
+      casingsToDraw = casingsToDraw.filter(
+        (c) => c.role !== 'upper_completion'
+      );
+    } else {
+      const ucBreakdown = computeUpperCompletionBreakdown(casingsInput);
+      renderUpperCompletionBreakdown(ucBreakdown, 'tubing');
+    }
 
     // Show subsea water column when appropriate
     let showWater = false;
@@ -202,6 +239,10 @@ const VolumeCalc = (() => {
         typeof plugDepthVal !== 'undefined' &&
         !isNaN(plugDepthVal)
           ? plugDepthVal
+          : undefined,
+      drillPipeSegments:
+        dpInput.mode === 'drillpipe' && dpInput.pipes.length > 0
+          ? dpInput.pipes
           : undefined
     });
 

@@ -257,4 +257,74 @@ export function drawSchematic(casings, opts = {}) {
         endDepth
       );
     });
+
+  // Draw drill pipe segments if provided
+  if (opts.drillPipeSegments && opts.drillPipeSegments.length > 0) {
+    const dpCatalog = [
+      { name: '3 1/2"', id: 2.602, od: 3.5 },
+      { name: '4"', id: 3.34, od: 4.0 },
+      { name: '5"', id: 4.276, od: 5.0 },
+      { name: '5 7/8"', id: 5.153, od: 5.875 }
+    ];
+    const dpColors = ['#DC143C', '#FF6347', '#FFA07A']; // reds for drill pipe
+
+    let cumulativeDepth = 0;
+    opts.drillPipeSegments.forEach((pipe, idx) => {
+      const sizeData = dpCatalog[pipe.size];
+      if (!sizeData) return;
+
+      const startDepth = cumulativeDepth * scale + startY;
+      const endDepth = (cumulativeDepth + pipe.length) * scale + startY;
+      cumulativeDepth += pipe.length;
+
+      const dpOD = sizeData.od;
+      const dpID = sizeData.id;
+
+      const width = (dpOD / maxOD) * 80;
+      const innerWidth = (dpID / maxOD) * 80;
+
+      // Draw drill pipe body
+      ctx.fillStyle = dpColors[idx % dpColors.length];
+      ctx.fillRect(
+        centerX - width / 2,
+        startDepth,
+        width,
+        endDepth - startDepth
+      );
+
+      // Draw drill pipe inner (hollow)
+      ctx.fillStyle = '#e6e6e6';
+      ctx.fillRect(
+        centerX - innerWidth / 2,
+        startDepth,
+        innerWidth,
+        endDepth - startDepth
+      );
+
+      // Draw borders
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX - width / 2, startDepth);
+      ctx.lineTo(centerX - width / 2, endDepth);
+      ctx.moveTo(centerX + width / 2, startDepth);
+      ctx.lineTo(centerX + width / 2, endDepth);
+      ctx.stroke();
+
+      // Draw label with size and depth
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px Arial';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(
+        sizeData.name,
+        centerX - width / 2 - 40,
+        (startDepth + endDepth) / 2
+      );
+      ctx.fillText(
+        pipe.length.toFixed(1) + 'm',
+        centerX + width / 2 + 10,
+        endDepth - 5
+      );
+    });
+  }
 }

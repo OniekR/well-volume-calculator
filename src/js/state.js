@@ -132,6 +132,15 @@ export function applyStateObject(state, callbacks = {}) {
     cb.dispatchEvent(new Event('change', { bubbles: true }))
   );
 
+  // Ensure drill pipe/tubing mode UI reflects restored checkbox state
+  try {
+    const ucModeToggle = el('uc_mode_toggle');
+    if (ucModeToggle)
+      ucModeToggle.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch (e) {
+    /* ignore */
+  }
+
   // Ensure production liner toggle handlers run
   try {
     const prodLinerEl = el('production_is_liner');

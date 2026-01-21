@@ -57,18 +57,15 @@
 }
 
 /* Dark-mode top button tweaks for Point of interest and hide controls */
-[data-theme='dark'] #toggle_hide_casings_btn,
-[data-theme='dark'] #toggle_hide_total_btn {
+[data-theme='dark'] #toggle_hide_casings_btn {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   color: var(--text-color);
 }
-[data-theme='dark'] #toggle_hide_casings_btn:not(.active):hover,
-[data-theme='dark'] #toggle_hide_total_btn:not(.active):hover {
+[data-theme='dark'] #toggle_hide_casings_btn:not(.active):hover {
   background: rgba(255, 255, 255, 0.05);
 }
-[data-theme='dark'] #toggle_hide_casings_btn:focus,
-[data-theme='dark'] #toggle_hide_total_btn:focus {
+[data-theme='dark'] #toggle_hide_casings_btn:focus {
   outline: 3px solid rgba(255, 123, 128, 0.16);
   outline-offset: 2px;
 }
@@ -425,10 +422,6 @@ h1 {
   font-weight: 700;
 }
 
-/* UI-only: hide total volume display when form has .total-hidden */
-#well-form.total-hidden .result {
-  display: none !important;
-}
 .input-group {
   margin-bottom: 12px;
 }
@@ -1132,4 +1125,150 @@ select:focus {
   color: var(--muted) !important;
   border-color: #e6e6e6 !important;
   cursor: not-allowed !important;
+}
+/* Drill Pipe Mode Toggle */
+.toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px; /* extra space to avoid overlap with the switch */
+  margin-left: 16px;
+  font-size: 0.9rem;
+  user-select: none;
+  white-space: nowrap; /* keep label text on one line */
+}
+
+.toggle-label span {
+  flex: none; /* prevent spans from shrinking */
+}
+
+/* Ensure the right-hand label has some extra breathing room */
+#uc_mode_label_dp {
+  margin-left: 10px;
+  display: inline-block;
+}
+
+/* Prevent parent clipping */
+.casing-header .header-inline {
+  padding-right: 8px;
+  overflow: visible;
+  flex-shrink: 0; /* prevent the header inline controls from shrinking and overlapping text */
+}
+
+.toggle-input {
+  position: relative;
+  width: 44px;
+  height: 22px;
+  appearance: none;
+  cursor: pointer;
+  background: #ccc;
+  border: none;
+  border-radius: 11px;
+  outline: none;
+  transition: background 0.3s ease;
+  flex: none; /* ensure the switch does not flex */
+}
+
+.toggle-input:checked {
+  background: var(--equinor-red);
+}
+
+.toggle-input:focus {
+  outline: 2px solid var(--equinor-accent);
+  outline-offset: 2px;
+}
+
+.toggle-input::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s ease;
+}
+
+.toggle-input:checked::before {
+  left: 24px;
+}
+
+/* give header-inline a little right padding so the switch has room */
+.casing-header .header-inline {
+  padding-right: 8px;
+}
+
+.toggle-input::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: left 0.3s ease;
+}
+
+.toggle-input:checked::before {
+  left: 24px;
+}
+
+/* Tubing vs Drill Pipe Sections */
+.uc-tubing-section,
+.uc-drillpipe-section {
+  transition: opacity 0.2s ease;
+}
+
+.uc-drillpipe-section.hidden {
+  display: none;
+}
+
+/* Drill Pipe Input Rows */
+.drillpipe-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: var(--surface-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+}
+
+.drillpipe-input-row label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text-color);
+}
+
+.drillpipe-size-select,
+.drillpipe-length-input,
+.drillpipe-depth-display {
+  padding: 8px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.drillpipe-size-select:focus,
+.drillpipe-length-input:focus,
+.drillpipe-depth-display:focus {
+  outline: 2px solid var(--equinor-accent);
+  outline-offset: 0;
+  border-color: var(--equinor-accent);
+}
+
+.drillpipe-depth-display {
+  background: rgba(227, 27, 35, 0.03);
+  cursor: default;
+}
+
+[data-theme='dark'] .drillpipe-depth-display {
+  background: rgba(255, 123, 128, 0.05);
 }
