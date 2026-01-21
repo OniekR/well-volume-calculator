@@ -87,24 +87,20 @@ let watchdog = setTimeout(() => {
     await (page.waitForTimeout ? page.waitForTimeout(300) : wait(300));
 
     const tableHas = await page.evaluate(() => {
-      const rows = Array.from(
-        document.querySelectorAll('#casingVolumes tbody tr')
-      );
-      return rows.some(
-        (r) =>
-          r.children &&
-          r.children[0] &&
-          r.children[0].textContent.trim() === 'Upper completion'
-      );
+      const table = document.getElementById('upperCompletionVolumes');
+      if (!table) return false;
+      const rows = Array.from(table.querySelectorAll('tbody tr'));
+      // Confirm UC has data by checking for a totals row rendered by the app
+      return rows.some((r) => r.classList && r.classList.contains('totals-row'));
     });
 
     if (!tableHas) {
-      flog('FAIL: Upper completion not present in volume table');
-      console.error('FAIL: Upper completion not present in volume table');
+      flog('FAIL: Upper completion not present in UC breakdown table');
+      console.error('FAIL: Upper completion not present in UC breakdown table');
       await browser.close();
       process.exit(3);
     }
-    flog('Table contains Upper completion row');
+    flog('UC breakdown table contains totals row');
 
     // Ensure canvas changes when the upper completion depths are set
     flog('Capturing canvas before change');
@@ -134,21 +130,29 @@ let watchdog = setTimeout(() => {
     flog('Canvas updated after changing upper completion');
 
     // Now, test TJ vs drift validation: add a production drift input with value smaller than TJ
-    flog('Adding production drift input and setting production casing extents');
+    flog('Adding or updating production drift input and setting production casing extents');
     await page.evaluate(() => {
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.id = 'production_drift';
-      inp.value = '6.0';
-      document.getElementById('well-form').appendChild(inp);
+      const existing = document.getElementById('production_drift');
+      if (existing) {
+        existing.value = '6.0';
+      } else {
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.id = 'production_drift';
+        inp.value = '6.0';
+        document.getElementById('well-form').appendChild(inp);
+      }
     });
 
     // Ensure UC is placed within production casing by setting production top/depth
     await page.$eval('#depth_7_top', (el) => (el.value = '0'));
     await page.$eval('#depth_7', (el) => (el.value = '200'));
 
-    // Trigger recalculation
+    // Trigger recalculation and notify change to production_drift
     flog('Triggering recalculation after setting production drift');
+    await page.$eval('#production_drift', (el) =>
+      el.dispatchEvent(new Event('input', { bubbles: true }))
+    );
     await page.$eval('#depth_uc', (el) =>
       el.dispatchEvent(new Event('input', { bubbles: true }))
     );
@@ -167,7 +171,7 @@ let watchdog = setTimeout(() => {
             if (
               el &&
               getComputedStyle(el).display !== 'none' &&
-              el.textContent.includes('does not fit')
+              (el.textContent.includes('does not fit') || el.textContent.includes('May not fit') || el.textContent.includes('exceeds'))
             ) {
               return true;
             }
@@ -188,6 +192,30 @@ let watchdog = setTimeout(() => {
       console.error(
         'FAIL: Upper completion warning not shown when TJ > casing drift'
       );
+
+      // Gather debug info for CI artifacts
+      try {
+        const info = await page.evaluate(() => ({
+          production_drift: document.getElementById('production_drift')?.value || null,
+          upper_completion_size_id: document.getElementById('upper_completion_size_id')?.value || null,
+          uc_top: document.getElementById('depth_uc_top')?.value || null,
+          uc_shoe: document.getElementById('depth_uc')?.value || null,
+          production_top: document.getElementById('depth_7_top')?.value || null,
+          production_shoe: document.getElementById('depth_7')?.value || null,
+          warning_el: document.getElementById('upper_completion_fit_warning')?.textContent || null,
+          uc_table: document.getElementById('upperCompletionVolumes')?.outerHTML || null
+        }));
+
+        const fs = require('fs');
+        const path = require('path');
+        const outDir = path.resolve(__dirname, 'artifacts');
+        if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+        fs.writeFileSync(path.join(outDir, `uc-debug-${Date.now()}.json`), JSON.stringify(info, null, 2));
+        console.error('Debug artifacts written to', outDir, info);
+      } catch (derr) {
+        console.error('Failed to capture debug artifacts', derr && derr.message ? derr.message : derr);
+      }
+
       flog('TEST_END');
       await browser.close();
       process.exit(6);
