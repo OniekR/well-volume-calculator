@@ -266,13 +266,6 @@ const VolumeCalc = (() => {
     persistence = createPersistence({ captureStateObject });
     const { scheduleSave: _scheduleSave, loadState: _loadState } = persistence;
 
-    // load persisted state (will apply state and call calculate/save via callbacks)
-    _loadState({
-      applyStateObject: applyStateObjectFn,
-      calculateVolume,
-      scheduleSave: _scheduleSave
-    });
-
     // initialize canvas drawing and DPR handling
     initDraw(canvas);
 
@@ -283,6 +276,14 @@ const VolumeCalc = (() => {
       captureStateObject,
       applyStateObject: applyStateObjectFn,
       initDraw
+    });
+
+    // load persisted state AFTER UI is initialized so dynamic inputs (e.g., drill pipe)
+    // have their event handlers attached and can be rendered/restored correctly.
+    _loadState({
+      applyStateObject: applyStateObjectFn,
+      calculateVolume,
+      scheduleSave: _scheduleSave
     });
 
     // initialize preset UI (delegates to the presets module)

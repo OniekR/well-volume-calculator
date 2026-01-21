@@ -114,6 +114,40 @@ export function applyStateObject(state, callbacks = {}) {
     }
   ];
 
+  // After key population and UI collapse/expand, ensure drill pipe inputs are
+  // restored when present in the state. This handles the case where drill pipe
+  // inputs are dynamically rendered when drill pipe mode is active.
+  try {
+    const dpHasKeys = Object.keys(state || {}).some((k) =>
+      /^drillpipe_(size|length)_\d+$/.test(k)
+    );
+    const dpCount = el('drillpipe_count');
+    if (dpHasKeys && dpCount) {
+      // dispatch change to render drill pipe inputs (handler attached during initUI)
+      dpCount.dispatchEvent(new Event('change', { bubbles: true }));
+      // schedule population slightly after render to ensure fields exist
+      setTimeout(() => {
+        Object.keys(state).forEach((id) => {
+          if (/^drillpipe_(size|length)_\d+$/.test(id)) {
+            const field = el(id);
+            if (field && state[id] && typeof state[id].value !== 'undefined') {
+              try {
+                field.value = state[id].value;
+                field.dispatchEvent(
+                  new Event(field.tagName.toLowerCase() === 'select' ? 'change' : 'input', { bubbles: true })
+                );
+              } catch (e) {
+                /* ignore invalid value */
+              }
+            }
+          }
+        });
+      }, 0);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
   casingGroups.forEach((group) => {
     if (typeof state[group.useId] === 'undefined') {
       const shouldEnable = group.keys.some((k) => {
