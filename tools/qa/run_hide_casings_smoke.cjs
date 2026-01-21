@@ -27,26 +27,12 @@ const puppeteer = require('puppeteer');
     await page.waitForSelector('#well-form', { timeout: 5000 });
     await page.waitForSelector('.casing-input', { timeout: 5000 });
 
-    // Wait until totalVolume has stabilized (avoid race with initial async calc)
-    const waitForStableTotal = async (timeout = 3000) => {
-      const start = Date.now();
-      let last = await page.$eval('#totalVolume', (el) =>
-        el.textContent.trim()
-      );
-      while (Date.now() - start < timeout) {
-        await (page.waitForTimeout ? page.waitForTimeout(100) : wait(100));
-        const cur = await page.$eval('#totalVolume', (el) =>
-          el.textContent.trim()
-        );
-        if (cur === last) return cur;
-        last = cur;
-      }
-      return last;
-    };
+    // Note: totalVolume UI was removed from the application. Readiness and stability
+    // are now determined from per-casing volume table values instead of a single total.
 
     // Ensure built-in presets (e.g., P-9) have loaded and initial calculations completed.
-    // Prefer loading P-9 if present to seed known values; otherwise wait for totalVolume to become non-zero.
-    const waitForInitialNonZeroTotal = async (timeout = 5000) => {
+    // Prefer loading P-9 if present to seed known values; otherwise wait for per-casing volumes to populate.
+    const waitForInitialPerCasing = async (timeout = 5000) => {
       const start = Date.now();
 
       // If preset P-9 exists, load it to seed values
@@ -66,14 +52,16 @@ const puppeteer = require('puppeteer');
         // ignore
       }
 
-      let cur = await page.$eval('#totalVolume', (el) => el.textContent.trim());
+      // Wait until at least one per-casing volume is non-empty and not '0.00 m³'
+      let per = await page.evaluate(readPerCasingVolume);
       while (Date.now() - start < timeout) {
-        if (cur && cur !== '0.00 m³') return cur;
+        const values = Object.values(per || {});
+        if (values.some((v) => v && v !== '0.00 m³')) return per;
         await (page.waitForTimeout ? page.waitForTimeout(150) : wait(150));
-        cur = await page.$eval('#totalVolume', (el) => el.textContent.trim());
+        per = await page.evaluate(readPerCasingVolume);
       }
-      return cur;
-    };
+      return per;
+    }; 
 
     const readPerCasingVolume = () =>
       Array.from(document.querySelectorAll('#casingVolumes tbody tr')).reduce(
@@ -86,8 +74,7 @@ const puppeteer = require('puppeteer');
         {}
       );
 
-    const beforeTotal = await waitForInitialNonZeroTotal();
-    const beforePer = await page.evaluate(readPerCasingVolume);
+    const beforePer = await waitForInitialPerCasing();
 
     // Click the hide casings button
     await page.waitForSelector('#toggle_hide_casings_btn', { timeout: 5000 });
@@ -126,20 +113,7 @@ const puppeteer = require('puppeteer');
       process.exit(3);
     }
 
-    const afterTotal = await page.$eval('#totalVolume', (el) =>
-      el.textContent.trim()
-    );
-
     // Also assert specific per-casing volumes (Reservoir and Small liner) didn't change
-
-    if (beforeTotal !== afterTotal) {
-      console.error('FAIL: totalVolume changed after hiding UI', {
-        before: beforeTotal,
-        after: afterTotal
-      });
-      await browser.close();
-      process.exit(3);
-    }
 
     const afterPer = await page.evaluate(readPerCasingVolume);
     const reservoirBefore = beforePer['Reservoir'];
