@@ -18,6 +18,10 @@ All notable changes to this project are documented in this file.
 - Refactor: extracted presets management into `src/js/presets.js` and removed duplicate implementations from `src/js/script.js`.
 - CI: added an HTTP Puppeteer smoke test for the P-9 preset and a CI job to run it (`.github/workflows/ci.yml`).
 
+### Removed
+
+- Remove large Total Volume display and the UI-only **Hide total** toggle. Hole volume table in the sidebar remains the canonical total volume display. A deprecation note has been added to the `README.md`.
+
 ### Notes
 
 - Recommended: review `well-presets.json` for other presets that may benefit from including `small_liner` defaults.
