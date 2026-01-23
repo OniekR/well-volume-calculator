@@ -1132,6 +1132,26 @@ export function setupRiserTypeHandler(deps) {
   update();
 }
 
+export function setupEodToggle(deps) {
+  const { calculateVolume, scheduleSave } = deps;
+  const toggle = el('subtract_eod_toggle');
+  const label = el('eod_toggle_label');
+  if (!toggle || !label) return;
+
+  const updateLabel = () => {
+    label.textContent = toggle.checked ? 'On' : 'Off';
+    label.setAttribute(
+      'aria-label',
+      toggle.checked ? 'EOD subtraction on' : 'EOD subtraction off'
+    );
+    calculateVolume();
+    scheduleSave();
+  };
+
+  toggle.addEventListener('change', updateLabel);
+  updateLabel();
+}
+
 export function setupPlugToggle(deps) {
   const { calculateVolume, scheduleSave } = deps;
   const toggle = el('use_plug');
@@ -1258,7 +1278,7 @@ function setupDrillPipeMode(deps) {
   const modeToggle = el('uc_mode_toggle');
   const tubingSection = el('uc_tubing_section');
   const drillpipeSection = el('uc_drillpipe_section');
-  const drillpipeCount = el('drillpipe_count');
+  const drillpipeCountBtns = document.querySelectorAll('.drillpipe-count-btn');
   const drillpipeContainer = el('drillpipe_inputs_container');
 
   if (!modeToggle || !drillpipeSection) return;
@@ -1289,9 +1309,11 @@ function setupDrillPipeMode(deps) {
             }
           });
         }
-        // Render default drill pipe inputs
-        const count = parseInt(drillpipeCount.value, 10) || 3;
+        // Render default drill pipe inputs (3 DPs by default)
+        const activeBtn = document.querySelector('.drillpipe-count-btn.active');
+        const count = parseInt(activeBtn?.dataset.count, 10) || 3;
         renderDrillPipeInputs(count);
+        updateDrillPipeDepthDisplays();
         attachDrillPipeListeners();
         // Hide upper completion warning when switching to drill pipe mode
         removeUpperCompletionWarning();
@@ -1316,12 +1338,25 @@ function setupDrillPipeMode(deps) {
       calculateVolume();
     });
 
-    // Update drill pipe count
-    drillpipeCount.addEventListener('change', () => {
-      const count = parseInt(drillpipeCount.value, 10) || 1;
-      renderDrillPipeInputs(count);
-      attachDrillPipeListeners();
-      calculateVolume();
+    // Update drill pipe count via buttons
+    drillpipeCountBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const count = parseInt(btn.dataset.count, 10) || 1;
+
+        // Update active button
+        drillpipeCountBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+
+        // Re-render drill pipe inputs
+        renderDrillPipeInputs(count);
+        updateDrillPipeDepthDisplays();
+        attachDrillPipeListeners();
+        calculateVolume();
+      });
     });
 
     // Ensure UI initially reflects the toggle state (in case it was set by saved state)
@@ -1369,6 +1404,7 @@ export function initUI(deps) {
   setupProductionToggleButtons(deps);
   setupRiserTypeHandler(deps);
   setupRiserPositionToggle(deps);
+  setupEodToggle(deps);
   setupPlugToggle(deps);
   setupDrillPipeMode(deps);
   setupNavActive();

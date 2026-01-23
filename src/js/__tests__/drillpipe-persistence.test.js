@@ -47,7 +47,10 @@ describe('drill pipe persistence', () => {
 
     // Apply state; this should render inputs and then our code in applyStateObject
     // will populate the newly created drill pipe inputs
-    applyStateObject(state, { calculateVolume: () => {}, scheduleSave: () => {} });
+    applyStateObject(state, {
+      calculateVolume: () => {},
+      scheduleSave: () => {}
+    });
 
     // The restoration runs asynchronously (setTimeout(0)) to ensure inputs are
     // present after rendering; wait a tick before asserting.

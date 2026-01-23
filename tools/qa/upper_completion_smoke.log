@@ -1,0 +1,163 @@
+2026-01-20T14:10:37.724Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:10:37.726Z SMOKE: entering main IIFE
+2026-01-20T14:10:37.726Z SMOKE: launching puppeteer
+2026-01-20T14:10:38.036Z SMOKE: puppeteer launched
+2026-01-20T14:10:38.077Z SMOKE: new page created
+2026-01-20T14:10:38.077Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:14:14.763Z SCRIPT_INVOKED
+2026-01-20T14:14:14.952Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:14:14.952Z SMOKE: entering main IIFE
+2026-01-20T14:14:14.953Z SMOKE: launching puppeteer
+2026-01-20T14:14:15.243Z SMOKE: puppeteer launched
+2026-01-20T14:14:15.279Z SMOKE: new page created
+2026-01-20T14:14:15.280Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:14:20.088Z SCRIPT_INVOKED
+2026-01-20T14:14:20.267Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:14:20.268Z SMOKE: entering main IIFE
+2026-01-20T14:14:20.269Z SMOKE: launching puppeteer
+2026-01-20T14:14:20.588Z SMOKE: puppeteer launched
+2026-01-20T14:14:20.625Z SMOKE: new page created
+2026-01-20T14:14:20.626Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:14:23.923Z SMOKE: page.goto succeeded
+2026-01-20T14:14:23.934Z SMOKE: found #upper_completion_size
+2026-01-20T14:14:27.839Z SCRIPT_INVOKED
+2026-01-20T14:14:28.039Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:14:28.040Z SMOKE: entering main IIFE
+2026-01-20T14:14:28.040Z SMOKE: launching puppeteer
+2026-01-20T14:14:28.323Z SMOKE: puppeteer launched
+2026-01-20T14:14:28.363Z SMOKE: new page created
+2026-01-20T14:14:28.363Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:14:33.716Z SMOKE: page.goto succeeded
+2026-01-20T14:14:33.730Z SMOKE: found #upper_completion_size
+2026-01-20T14:14:37.909Z SCRIPT_INVOKED
+2026-01-20T14:14:38.092Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:14:38.093Z SMOKE: entering main IIFE
+2026-01-20T14:14:38.094Z SMOKE: launching puppeteer
+2026-01-20T14:14:38.402Z SMOKE: puppeteer launched
+2026-01-20T14:14:38.439Z SMOKE: new page created
+2026-01-20T14:14:38.440Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:14:41.731Z SMOKE: page.goto succeeded
+2026-01-20T14:14:41.741Z SMOKE: found #upper_completion_size
+2026-01-20T14:14:45.607Z SCRIPT_INVOKED
+2026-01-20T14:14:45.785Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:14:45.786Z SMOKE: entering main IIFE
+2026-01-20T14:14:45.787Z SMOKE: launching puppeteer
+2026-01-20T14:14:46.064Z SMOKE: puppeteer launched
+2026-01-20T14:14:46.107Z SMOKE: new page created
+2026-01-20T14:14:46.108Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:14:51.450Z SMOKE: page.goto succeeded
+2026-01-20T14:14:51.461Z SMOKE: found #upper_completion_size
+2026-01-20T14:54:40.718Z SCRIPT_INVOKED
+2026-01-20T14:54:40.896Z SMOKE: Starting upper completion smoke test
+2026-01-20T14:54:40.897Z SMOKE: entering main IIFE
+2026-01-20T14:54:40.898Z SMOKE: launching puppeteer
+2026-01-20T14:54:41.190Z SMOKE: puppeteer launched
+2026-01-20T14:54:41.225Z SMOKE: new page created
+2026-01-20T14:54:41.226Z SMOKE: going to http://localhost:5173/
+2026-01-20T14:54:44.514Z SMOKE: page.goto succeeded
+2026-01-20T14:54:44.524Z SMOKE: found #upper_completion_size
+2026-01-20T14:54:45.156Z Table contains Upper completion row
+2026-01-20T14:54:45.156Z Capturing canvas before change
+2026-01-20T14:54:45.170Z Setting depth_uc to 80
+2026-01-20T14:54:45.173Z Dispatching input event for depth_uc
+2026-01-20T14:54:45.687Z Capturing canvas after change
+2026-01-20T14:54:45.695Z Canvas updated after changing upper completion
+2026-01-20T14:54:45.695Z Adding production drift input and setting production casing extents
+2026-01-20T14:54:45.704Z Triggering recalculation after setting production drift
+2026-01-20T14:54:51.232Z FAIL: Upper completion warning not shown when TJ > casing drift
+2026-01-20T14:54:51.233Z TEST_END
+2026-01-21T12:35:44.184Z SCRIPT_INVOKED
+2026-01-21T12:35:44.373Z SMOKE: Starting upper completion smoke test
+2026-01-21T12:35:44.374Z SMOKE: entering main IIFE
+2026-01-21T12:35:44.374Z SMOKE: launching puppeteer
+2026-01-21T12:35:44.674Z SMOKE: puppeteer launched
+2026-01-21T12:35:44.753Z SMOKE: new page created
+2026-01-21T12:35:44.754Z SMOKE: going to http://localhost:5173/
+2026-01-21T12:35:50.050Z SMOKE: page.goto succeeded
+2026-01-21T12:35:50.061Z SMOKE: found #upper_completion_size
+2026-01-21T12:35:50.694Z UC breakdown table contains totals row
+2026-01-21T12:35:50.695Z Capturing canvas before change
+2026-01-21T12:35:50.711Z Setting depth_uc to 80
+2026-01-21T12:35:50.714Z Dispatching input event for depth_uc
+2026-01-21T12:35:51.224Z Capturing canvas after change
+2026-01-21T12:35:51.233Z Canvas updated after changing upper completion
+2026-01-21T12:35:51.234Z Adding production drift input and setting production casing extents
+2026-01-21T12:35:51.242Z Triggering recalculation after setting production drift
+2026-01-21T12:35:56.764Z FAIL: Upper completion warning not shown when TJ > casing drift
+2026-01-21T12:35:56.764Z TEST_END
+2026-01-21T12:36:02.596Z SCRIPT_INVOKED
+2026-01-21T12:36:02.778Z SMOKE: Starting upper completion smoke test
+2026-01-21T12:36:02.779Z SMOKE: entering main IIFE
+2026-01-21T12:36:02.779Z SMOKE: launching puppeteer
+2026-01-21T12:36:03.051Z SMOKE: puppeteer launched
+2026-01-21T12:36:03.090Z SMOKE: new page created
+2026-01-21T12:36:03.090Z SMOKE: going to http://localhost:5173/
+2026-01-21T12:36:06.418Z SMOKE: page.goto succeeded
+2026-01-21T12:36:06.429Z SMOKE: found #upper_completion_size
+2026-01-21T12:36:07.060Z UC breakdown table contains totals row
+2026-01-21T12:36:07.061Z Capturing canvas before change
+2026-01-21T12:36:07.075Z Setting depth_uc to 80
+2026-01-21T12:36:07.078Z Dispatching input event for depth_uc
+2026-01-21T12:36:07.594Z Capturing canvas after change
+2026-01-21T12:36:07.600Z Canvas updated after changing upper completion
+2026-01-21T12:36:07.600Z Adding production drift input and setting production casing extents
+2026-01-21T12:36:07.606Z Triggering recalculation after setting production drift
+2026-01-21T12:36:13.120Z FAIL: Upper completion warning not shown when TJ > casing drift
+2026-01-21T12:36:13.120Z TEST_END
+2026-01-21T12:38:32.455Z SCRIPT_INVOKED
+2026-01-21T12:38:32.634Z SMOKE: Starting upper completion smoke test
+2026-01-21T12:38:32.635Z SMOKE: entering main IIFE
+2026-01-21T12:38:32.635Z SMOKE: launching puppeteer
+2026-01-21T12:38:32.904Z SMOKE: puppeteer launched
+2026-01-21T12:38:32.944Z SMOKE: new page created
+2026-01-21T12:38:32.944Z SMOKE: going to http://localhost:5173/
+2026-01-21T12:38:36.246Z SMOKE: page.goto succeeded
+2026-01-21T12:38:36.257Z SMOKE: found #upper_completion_size
+2026-01-21T12:38:36.889Z UC breakdown table contains totals row
+2026-01-21T12:38:36.890Z Capturing canvas before change
+2026-01-21T12:38:36.904Z Setting depth_uc to 80
+2026-01-21T12:38:36.908Z Dispatching input event for depth_uc
+2026-01-21T12:38:37.420Z Capturing canvas after change
+2026-01-21T12:38:37.427Z Canvas updated after changing upper completion
+2026-01-21T12:38:37.427Z Adding or updating production drift input and setting production casing extents
+2026-01-21T12:38:37.434Z Triggering recalculation after setting production drift
+2026-01-21T12:38:42.965Z FAIL: Upper completion warning not shown when TJ > casing drift
+2026-01-21T12:38:42.965Z TEST_END
+2026-01-21T12:39:04.418Z SCRIPT_INVOKED
+2026-01-21T12:39:04.613Z SMOKE: Starting upper completion smoke test
+2026-01-21T12:39:04.614Z SMOKE: entering main IIFE
+2026-01-21T12:39:04.614Z SMOKE: launching puppeteer
+2026-01-21T12:39:04.896Z SMOKE: puppeteer launched
+2026-01-21T12:39:04.932Z SMOKE: new page created
+2026-01-21T12:39:04.932Z SMOKE: going to http://localhost:5173/
+2026-01-21T12:39:10.267Z SMOKE: page.goto succeeded
+2026-01-21T12:39:10.278Z SMOKE: found #upper_completion_size
+2026-01-21T12:39:10.905Z UC breakdown table contains totals row
+2026-01-21T12:39:10.905Z Capturing canvas before change
+2026-01-21T12:39:10.921Z Setting depth_uc to 80
+2026-01-21T12:39:10.924Z Dispatching input event for depth_uc
+2026-01-21T12:39:11.438Z Capturing canvas after change
+2026-01-21T12:39:11.446Z Canvas updated after changing upper completion
+2026-01-21T12:39:11.447Z Adding or updating production drift input and setting production casing extents
+2026-01-21T12:39:11.453Z Triggering recalculation after setting production drift
+2026-01-21T12:39:16.968Z FAIL: Upper completion warning not shown when TJ > casing drift
+2026-01-21T12:39:16.979Z TEST_END
+2026-01-21T12:39:47.198Z SCRIPT_INVOKED
+2026-01-21T12:39:47.377Z SMOKE: Starting upper completion smoke test
+2026-01-21T12:39:47.377Z SMOKE: entering main IIFE
+2026-01-21T12:39:47.378Z SMOKE: launching puppeteer
+2026-01-21T12:39:47.659Z SMOKE: puppeteer launched
+2026-01-21T12:39:47.698Z SMOKE: new page created
+2026-01-21T12:39:47.699Z SMOKE: going to http://localhost:5173/
+2026-01-21T12:39:50.986Z SMOKE: page.goto succeeded
+2026-01-21T12:39:50.997Z SMOKE: found #upper_completion_size
+2026-01-21T12:39:51.626Z UC breakdown table contains totals row
+2026-01-21T12:39:51.626Z Capturing canvas before change
+2026-01-21T12:39:51.639Z Setting depth_uc to 80
+2026-01-21T12:39:51.642Z Dispatching input event for depth_uc
+2026-01-21T12:39:52.157Z Capturing canvas after change
+2026-01-21T12:39:52.165Z Canvas updated after changing upper completion
+2026-01-21T12:39:52.166Z Adding or updating production drift input and setting production casing extents
+2026-01-21T12:39:52.173Z Triggering recalculation after setting production drift
+2026-01-21T12:39:52.691Z PASS: Upper completion UI present and drift warning shown
+2026-01-21T12:39:52.692Z TEST_END

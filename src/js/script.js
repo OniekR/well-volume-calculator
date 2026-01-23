@@ -171,6 +171,10 @@ const VolumeCalc = (() => {
     // Determine drill pipe mode early so we can exclude UC from volume calculations
     const dpInput = gatherDrillPipeInput();
 
+    // Read the "Subtract DP steel displacement" toggle
+    const subtractEodToggle = document.getElementById('subtract_eod_toggle');
+    const subtractEod = subtractEodToggle ? subtractEodToggle.checked : true;
+
     // For hole volume calculations, always treat upper_completion as not in use
     // (so the hole volume table does not include tubing volumes). For drawing
     // we still use the original casingsInput so UC is shown when in tubing mode.
@@ -184,7 +188,8 @@ const VolumeCalc = (() => {
       plugDepthVal,
       surfaceInUse,
       intermediateInUse,
-      drillPipe: dpInput
+      drillPipe: dpInput,
+      subtractEod
     });
 
     // Compute draw entries using original casings so UC is still drawn in tubing mode
@@ -193,12 +198,18 @@ const VolumeCalc = (() => {
       plugDepthVal,
       surfaceInUse,
       intermediateInUse,
-      drillPipe: dpInput
+      drillPipe: dpInput,
+      subtractEod
     });
     let { casingsToDraw } = drawResult;
 
+    // Check if upper completion is enabled
+    const ucEnabled = casingsInput.find(
+      (c) => c.role === 'upper_completion'
+    )?.use;
+
     // Render results to DOM (volumes exclude UC)
-    renderResults(result);
+    renderResults(result, { ucEnabled, dpMode: dpInput.mode === 'drillpipe' });
 
     // Render upper completion breakdown (tubing or drill pipe)
     if (dpInput.mode === 'drillpipe') {

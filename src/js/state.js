@@ -134,7 +134,12 @@ export function applyStateObject(state, callbacks = {}) {
               try {
                 field.value = state[id].value;
                 field.dispatchEvent(
-                  new Event(field.tagName.toLowerCase() === 'select' ? 'change' : 'input', { bubbles: true })
+                  new Event(
+                    field.tagName.toLowerCase() === 'select'
+                      ? 'change'
+                      : 'input',
+                    { bubbles: true }
+                  )
                 );
               } catch (e) {
                 /* ignore invalid value */
@@ -180,6 +185,15 @@ export function applyStateObject(state, callbacks = {}) {
     const prodLinerEl = el('production_is_liner');
     if (prodLinerEl)
       prodLinerEl.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch (e) {
+    /* ignore */
+  }
+
+  // Ensure Point of Interest toggle handler runs
+  try {
+    const plugToggleEl = el('use_plug');
+    if (plugToggleEl)
+      plugToggleEl.dispatchEvent(new Event('change', { bubbles: true }));
   } catch (e) {
     /* ignore */
   }

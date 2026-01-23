@@ -91,7 +91,9 @@ let watchdog = setTimeout(() => {
       if (!table) return false;
       const rows = Array.from(table.querySelectorAll('tbody tr'));
       // Confirm UC has data by checking for a totals row rendered by the app
-      return rows.some((r) => r.classList && r.classList.contains('totals-row'));
+      return rows.some(
+        (r) => r.classList && r.classList.contains('totals-row')
+      );
     });
 
     if (!tableHas) {
@@ -130,7 +132,9 @@ let watchdog = setTimeout(() => {
     flog('Canvas updated after changing upper completion');
 
     // Now, test TJ vs drift validation: add a production drift input with value smaller than TJ
-    flog('Adding or updating production drift input and setting production casing extents');
+    flog(
+      'Adding or updating production drift input and setting production casing extents'
+    );
     await page.evaluate(() => {
       const existing = document.getElementById('production_drift');
       if (existing) {
@@ -171,7 +175,9 @@ let watchdog = setTimeout(() => {
             if (
               el &&
               getComputedStyle(el).display !== 'none' &&
-              (el.textContent.includes('does not fit') || el.textContent.includes('May not fit') || el.textContent.includes('exceeds'))
+              (el.textContent.includes('does not fit') ||
+                el.textContent.includes('May not fit') ||
+                el.textContent.includes('exceeds'))
             ) {
               return true;
             }
@@ -196,24 +202,35 @@ let watchdog = setTimeout(() => {
       // Gather debug info for CI artifacts
       try {
         const info = await page.evaluate(() => ({
-          production_drift: document.getElementById('production_drift')?.value || null,
-          upper_completion_size_id: document.getElementById('upper_completion_size_id')?.value || null,
+          production_drift:
+            document.getElementById('production_drift')?.value || null,
+          upper_completion_size_id:
+            document.getElementById('upper_completion_size_id')?.value || null,
           uc_top: document.getElementById('depth_uc_top')?.value || null,
           uc_shoe: document.getElementById('depth_uc')?.value || null,
           production_top: document.getElementById('depth_7_top')?.value || null,
           production_shoe: document.getElementById('depth_7')?.value || null,
-          warning_el: document.getElementById('upper_completion_fit_warning')?.textContent || null,
-          uc_table: document.getElementById('upperCompletionVolumes')?.outerHTML || null
+          warning_el:
+            document.getElementById('upper_completion_fit_warning')
+              ?.textContent || null,
+          uc_table:
+            document.getElementById('upperCompletionVolumes')?.outerHTML || null
         }));
 
         const fs = require('fs');
         const path = require('path');
         const outDir = path.resolve(__dirname, 'artifacts');
         if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-        fs.writeFileSync(path.join(outDir, `uc-debug-${Date.now()}.json`), JSON.stringify(info, null, 2));
+        fs.writeFileSync(
+          path.join(outDir, `uc-debug-${Date.now()}.json`),
+          JSON.stringify(info, null, 2)
+        );
         console.error('Debug artifacts written to', outDir, info);
       } catch (derr) {
-        console.error('Failed to capture debug artifacts', derr && derr.message ? derr.message : derr);
+        console.error(
+          'Failed to capture debug artifacts',
+          derr && derr.message ? derr.message : derr
+        );
       }
 
       flog('TEST_END');

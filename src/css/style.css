@@ -251,6 +251,16 @@ header {
   font-weight: 600;
 }
 
+.toggle-label-left {
+  order: -1;
+  margin-right: 0;
+}
+
+.toggle-label-right {
+  order: 3;
+  margin-left: 0;
+}
+
 /* Main card container */
 .container {
   /* slightly wider to accommodate the volume table without horizontal scrollbar */
@@ -284,6 +294,8 @@ h1 {
 .left-panel {
   background: transparent;
   padding: 0;
+  min-width: 0; /* Allow flex shrinking but prevent overflow */
+  overflow-x: hidden;
 }
 
 .casing-input {
@@ -435,21 +447,43 @@ label {
 input,
 select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid var(--input-border);
+  padding: 10px 12px;
+  border: 1.5px solid var(--input-border);
   border-radius: 6px;
   background: var(--input-bg);
   color: var(--text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+
+select {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
 input::placeholder,
 select::placeholder {
   color: var(--muted);
   opacity: 0.9;
 }
+
+input:hover,
+select:hover {
+  border-color: var(--equinor-red);
+  background-color: var(--input-bg);
+}
+
 input:focus,
 select:focus {
   outline: none;
   border-color: var(--equinor-red);
+  box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.15);
 }
 
 /* right panel (schematic) */
@@ -716,10 +750,52 @@ select:focus {
   gap: 8px;
   color: var(--text-color);
   font-weight: 600;
+  cursor: pointer;
+  user-select: none;
 }
+
+/* Modern styled checkbox */
 .inline-checkbox input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.inline-checkbox input[type='checkbox']:hover {
+  border-color: var(--equinor-red);
+  background: var(--input-bg);
+  box-shadow: 0 0 0 3px rgba(244, 83, 82, 0.1);
+}
+
+.inline-checkbox input[type='checkbox']:focus {
+  outline: none;
+  border-color: var(--equinor-red);
+  box-shadow: 0 0 0 3px rgba(244, 83, 82, 0.2);
+}
+
+.inline-checkbox input[type='checkbox']:checked {
+  background: var(--equinor-red);
+  border-color: var(--equinor-red);
+}
+
+.inline-checkbox input[type='checkbox']:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
 }
 
 /* Volume breakdown table */
@@ -945,16 +1021,31 @@ select:focus {
 /* Point of interest panel (moved below Total Volume) */
 .plug-panel {
   margin-top: 12px;
-  padding: 12px;
+  padding: 16px;
   border-radius: 8px;
   background: var(--surface-bg);
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--table-border);
 }
+
+.plug-panel h3 {
+  width: 100%;
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--equinor-red);
+}
+
 .plug-toggle {
   /* moved down to sit visually below the Total Volume card */
   margin-top: 3rem;
@@ -987,12 +1078,114 @@ select:focus {
 }
 .plug-volumes {
   width: 100%;
-  margin-top: 8px;
-  font-size: 0.95rem;
-  color: var(--muted);
-  display: flex;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
-  justify-content: center;
+  padding: 0;
+}
+
+.plug-volumes div {
+  padding: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.03),
+    rgba(255, 59, 77, 0.02)
+  );
+  border: 1px solid var(--table-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.plug-volumes div:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.06),
+    rgba(255, 59, 77, 0.04)
+  );
+  border-color: var(--equinor-red);
+}
+
+.plug-volumes div.highlight {
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.08),
+    rgba(255, 59, 77, 0.06)
+  );
+  border-color: var(--equinor-red);
+  box-shadow: 0 2px 8px rgba(227, 27, 35, 0.1);
+}
+
+.plug-volumes .label {
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.85;
+}
+
+.plug-volumes span:not(.label) {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--equinor-red);
+}
+
+#plugTotalBelowPOI {
+  grid-column: 1 / -1;
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.1),
+    rgba(255, 59, 77, 0.08)
+  ) !important;
+  border: 2px solid var(--equinor-red) !important;
+  box-shadow: 0 4px 12px rgba(227, 27, 35, 0.15);
+}
+
+#plugTotalBelowPOI .label {
+  font-size: 0.9rem;
+}
+
+#plugTotalBelowPOI span:not(.label) {
+  font-size: 1.35rem;
+}
+
+/* Responsive grid for smaller screens */
+@media (max-width: 768px) {
+  .plug-volumes {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .plug-volumes div {
+    padding: 10px;
+  }
+
+  .plug-volumes .label {
+    font-size: 0.8rem;
+  }
+
+  .plug-volumes span:not(.label) {
+    font-size: 1rem;
+  }
+
+  #plugTotalBelowPOI span:not(.label) {
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .plug-volumes {
+    grid-template-columns: 1fr;
+  }
+
+  #plugTotalBelowPOI {
+    grid-column: 1;
+  }
 }
 
 /* small utilities */
@@ -1224,51 +1417,291 @@ select:focus {
   display: none;
 }
 
-/* Drill Pipe Input Rows */
+/* Drill pipe count selector with buttons */
+.drillpipe-count-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.drillpipe-count-selector label {
+  font-weight: 600;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.drillpipe-button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.drillpipe-count-btn {
+  padding: 10px 16px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.drillpipe-count-btn:hover {
+  border-color: var(--equinor-red);
+  color: var(--equinor-red);
+}
+
+.drillpipe-count-btn.active {
+  background: var(--equinor-red);
+  border-color: var(--equinor-red);
+  color: white;
+  box-shadow: 0 2px 8px rgba(227, 27, 35, 0.3);
+}
+
+.drillpipe-count-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.15);
+}
+
+/* Drill pipe inputs container - constrain width to prevent layout overflow */
+#drillpipe_inputs_container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Drill pipe Input Rows - Compact horizontal layout */
 .drillpipe-input-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 12px;
-  align-items: flex-end;
-  margin-bottom: 12px;
-  padding: 12px;
-  background: var(--surface-bg);
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
+  grid-template-columns: 60px 80px 70px 80px 70px 75px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.02),
+    rgba(255, 59, 77, 0.01)
+  );
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+/* DP label (DP 1, DP 2, DP 3) */
+.drillpipe-input-row > label:nth-of-type(1) {
+  grid-column: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+/* Size select */
+.drillpipe-input-row > select:nth-of-type(1) {
+  grid-column: 2;
+}
+
+/* Length label */
+.drillpipe-input-row > label:nth-of-type(2) {
+  grid-column: 3;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
+/* Length input */
+.drillpipe-input-row > input:nth-of-type(1) {
+  grid-column: 4;
+}
+
+/* Depth label */
+.drillpipe-input-row > label:nth-of-type(3) {
+  grid-column: 5;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
+/* Depth display */
+.drillpipe-input-row > input:nth-of-type(2) {
+  grid-column: 6;
+}
+
+.drillpipe-input-row:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.04),
+    rgba(255, 59, 77, 0.02)
+  );
+  border-color: var(--equinor-red);
+  box-shadow: 0 1px 4px rgba(227, 27, 35, 0.08);
+}
+
+.drillpipe-input-row select,
+.drillpipe-input-row input {
+  padding: 10px 12px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.drillpipe-input-row select:hover,
+.drillpipe-input-row input:hover {
+  border-color: var(--equinor-red);
+}
+
+.drillpipe-input-row select:focus,
+.drillpipe-input-row input:focus {
+  outline: none;
+  border-color: var(--equinor-red);
+  box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.15);
+}
+
+.drillpipe-input-row select {
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.drillpipe-input-row input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
+
+.drillpipe-input-row input[readonly] {
+  background: rgba(227, 27, 35, 0.05);
+  cursor: default;
+  pointer-events: none;
 }
 
 .drillpipe-input-row label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 6px;
   color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.85;
 }
 
 .drillpipe-size-select,
 .drillpipe-length-input,
 .drillpipe-depth-display {
-  padding: 8px;
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
   background: var(--input-bg);
   color: var(--text-color);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.drillpipe-size-select {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
+.drillpipe-length-input {
+  font-variant-numeric: tabular-nums;
+}
+
+.drillpipe-size-select:hover,
+.drillpipe-length-input:hover,
+.drillpipe-depth-display:hover {
+  border-color: var(--equinor-red);
+  background-color: var(--input-bg);
 }
 
 .drillpipe-size-select:focus,
 .drillpipe-length-input:focus,
 .drillpipe-depth-display:focus {
-  outline: 2px solid var(--equinor-accent);
-  outline-offset: 0;
-  border-color: var(--equinor-accent);
+  outline: none;
+  border-color: var(--equinor-red);
+  box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.15);
 }
 
 .drillpipe-depth-display {
-  background: rgba(227, 27, 35, 0.03);
+  background: rgba(227, 27, 35, 0.05);
   cursor: default;
+  pointer-events: none;
 }
 
 [data-theme='dark'] .drillpipe-depth-display {
-  background: rgba(255, 123, 128, 0.05);
+  background: rgba(255, 123, 128, 0.08);
+}
+
+/* Volume breakdown header with options */
+.volume-breakdown-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.volume-breakdown-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.volume-option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.volume-option-row label.small-note {
+  flex: 1;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.volume-option-row .toggle-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.volume-option-row .switch {
+  width: 36px;
+  height: 20px;
+}
+
+.volume-option-row .slider {
+  border-radius: 20px;
+}
+
+.volume-option-row .slider:before {
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  border-radius: 50%;
+}
+
+.volume-option-row .switch input:checked + .slider:before {
+  transform: translateX(16px);
 }

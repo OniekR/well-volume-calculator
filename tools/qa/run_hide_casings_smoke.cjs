@@ -61,7 +61,7 @@ const puppeteer = require('puppeteer');
         per = await page.evaluate(readPerCasingVolume);
       }
       return per;
-    }; 
+    };
 
     const readPerCasingVolume = () =>
       Array.from(document.querySelectorAll('#casingVolumes tbody tr')).reduce(

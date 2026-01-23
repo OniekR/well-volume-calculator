@@ -59,8 +59,9 @@ export function gatherDrillPipeInput() {
     return { mode: 'tubing', count: 0, pipes: [] };
   }
 
-  const countSelect = document.getElementById('drillpipe_count');
-  const count = parseInt(countSelect.value, 10) || 1;
+  // Get count from active button (1 DP, 2 DPs, or 3 DPs)
+  const activeBtn = document.querySelector('.drillpipe-count-btn.active');
+  const count = activeBtn ? parseInt(activeBtn.dataset.count, 10) : 3;
 
   const pipes = [];
   for (let i = 0; i < count; i++) {
@@ -74,13 +75,15 @@ export function gatherDrillPipeInput() {
     const length = parseFloat(lengthInput.value) || 0;
     const lPerM = DRILLPIPE_CATALOG[selectedIndex]?.lPerM;
     const eod = DRILLPIPE_CATALOG[selectedIndex]?.eod;
+    const od = DRILLPIPE_CATALOG[selectedIndex]?.od;
 
     pipes.push({
       size: selectedIndex,
       sizeName,
       length,
       lPerM,
-      eod
+      eod,
+      od
     });
   }
 
@@ -256,6 +259,20 @@ export function renderDrillPipeInputs(count) {
   const container = document.getElementById('drillpipe_inputs_container');
   if (!container) return;
 
+  // Preserve existing input values before re-rendering
+  const preservedValues = {};
+  const existingRows = container.querySelectorAll('.drillpipe-input-row');
+  existingRows.forEach((row, idx) => {
+    const lengthInput = row.querySelector('input[id^="drillpipe_length_"]');
+    const sizeSelect = row.querySelector('select[id^="drillpipe_size_"]');
+    if (lengthInput && sizeSelect) {
+      preservedValues[idx] = {
+        length: lengthInput.value,
+        size: sizeSelect.value
+      };
+    }
+  });
+
   container.innerHTML = '';
 
   for (let i = 0; i < count; i++) {
@@ -282,7 +299,11 @@ export function renderDrillPipeInputs(count) {
     }
 
     // Default sizing: DP1 -> largest, DP2 -> next, DP3 -> smallest
-    const defaultIndex = Math.max(0, DRILLPIPE_CATALOG.length - 1 - i);
+    // BUT preserve the previous size if user has already set it
+    let defaultIndex = Math.max(0, DRILLPIPE_CATALOG.length - 1 - i);
+    if (preservedValues[i] && preservedValues[i].size) {
+      defaultIndex = preservedValues[i].size;
+    }
     sizeSelect.value = String(defaultIndex);
 
     // Length input
@@ -297,7 +318,8 @@ export function renderDrillPipeInputs(count) {
     // Use 1m step for drill pipe lengths (user requested whole-meter stepping)
     lengthInput.step = '1';
     lengthInput.min = '0';
-    lengthInput.value = '0';
+    // Preserve the previous length value if it exists, otherwise default to 0
+    lengthInput.value = preservedValues[i] ? preservedValues[i].length : '0';
     lengthInput.setAttribute(
       'aria-label',
       `Length of drill pipe size ${i + 1} in meters`

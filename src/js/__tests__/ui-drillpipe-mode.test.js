@@ -8,8 +8,9 @@ describe('Drill pipe mode UI sync', () => {
     document.body.innerHTML = `
       <input type="checkbox" id="uc_mode_toggle" />
       <div id="uc_tubing_section" class="uc-tubing-section"></div>
-      <div id="uc_drillpipe_section" class="uc-drillpipe-section hidden"></div>
-      <select id="drillpipe_count"><option value="1">1</option></select>
+      <div id="uc_drillpipe_section" class="uc-drillpipe-section hidden">
+        <button class="drillpipe-count-btn active" data-count="3" aria-pressed="true">3 DPs</button>
+      </div>
       <div id="drillpipe_inputs_container"></div>
     `;
 
@@ -19,8 +20,8 @@ describe('Drill pipe mode UI sync', () => {
     // Initialize UI; pass noop deps
     initUI({ calculateVolume: () => {} });
 
-    // Wait a short time for async import and dispatch to run
-    await new Promise((r) => setTimeout(r, 20));
+    // Wait for async import and dispatch to run
+    await new Promise((r) => setTimeout(r, 100));
 
     const tubing = document.getElementById('uc_tubing_section');
     const dp = document.getElementById('uc_drillpipe_section');
@@ -33,14 +34,15 @@ describe('Drill pipe mode UI sync', () => {
     document.body.innerHTML = `
       <input type="checkbox" id="uc_mode_toggle" />
       <div id="uc_tubing_section" class="uc-tubing-section hidden"></div>
-      <div id="uc_drillpipe_section" class="uc-drillpipe-section"></div>
-      <select id="drillpipe_count"><option value="1">1</option></select>
+      <div id="uc_drillpipe_section" class="uc-drillpipe-section">
+        <button class="drillpipe-count-btn active" data-count="3" aria-pressed="true">3 DPs</button>
+      </div>
       <div id="drillpipe_inputs_container"></div>
     `;
 
     document.getElementById('uc_mode_toggle').checked = false;
     initUI({ calculateVolume: () => {} });
-    await new Promise((r) => setTimeout(r, 20));
+    await new Promise((r) => setTimeout(r, 100));
 
     const tubing = document.getElementById('uc_tubing_section');
     const dp = document.getElementById('uc_drillpipe_section');

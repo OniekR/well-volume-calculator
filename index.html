@@ -922,6 +922,11 @@
               <div class="header-inline">
                 <!-- Toggle between Tubing and Drill Pipe -->
                 <div class="toggle-inline">
+                  <span
+                    id="uc_mode_label"
+                    class="small-note-inline toggle-label-left"
+                    >Tubing</span
+                  >
                   <label
                     class="switch"
                     title="Switch between tubing and drill pipe"
@@ -934,10 +939,9 @@
                     />
                     <span class="slider round" aria-hidden="true"></span>
                   </label>
-                  <span id="uc_mode_label" class="small-note-inline"
-                    >Tubing -</span
-                  >
-                  <span id="uc_mode_label_dp" class="small-note-inline"
+                  <span
+                    id="uc_mode_label_dp"
+                    class="small-note-inline toggle-label-right"
                     >Drill pipe</span
                   >
                 </div>
@@ -1011,19 +1015,38 @@
                 id="uc_drillpipe_section"
                 class="uc-drillpipe-section hidden"
               >
-                <div class="input-row">
-                  <label for="drillpipe_count"
-                    >Number of drill pipe sizes:</label
-                  >
-                  <select
-                    id="drillpipe_count"
-                    name="drillpipe_count"
-                    aria-label="Number of drill pipe sizes in string"
-                  >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3" selected>3</option>
-                  </select>
+                <div class="drillpipe-count-selector">
+                  <label>Number of drill pipe sizes:</label>
+                  <div class="drillpipe-button-group">
+                    <button
+                      type="button"
+                      id="drillpipe_count_1"
+                      class="drillpipe-count-btn"
+                      data-count="1"
+                      aria-label="Select 1 drill pipe size"
+                    >
+                      1 DP
+                    </button>
+                    <button
+                      type="button"
+                      id="drillpipe_count_2"
+                      class="drillpipe-count-btn"
+                      data-count="2"
+                      aria-label="Select 2 drill pipe sizes"
+                    >
+                      2 DPs
+                    </button>
+                    <button
+                      type="button"
+                      id="drillpipe_count_3"
+                      class="drillpipe-count-btn active"
+                      data-count="3"
+                      aria-label="Select 3 drill pipe sizes"
+                      aria-pressed="true"
+                    >
+                      3 DPs
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Drill pipe size inputs (container for dynamic rows) -->
@@ -1102,7 +1125,7 @@
 
             <div class="plug-volumes">
               <div id="plugAboveVolume">
-                Volume above point of interest:
+                <span class="label">Volume above point of interest:</span>
                 <span>— m³</span>
               </div>
               <div id="plugAboveTubing" class="hidden">
@@ -1113,8 +1136,16 @@
                 Volume above (annulus):
                 <span>— m³</span>
               </div>
+              <div id="plugAboveDrillpipe" class="hidden">
+                <span class="label">Vol above POI in DP:</span>
+                <span>— m³</span>
+              </div>
+              <div id="plugAboveDrillpipeAnnulus" class="hidden">
+                <span class="label">Vol above POI in annulus:</span>
+                <span>— m³</span>
+              </div>
               <div id="plugBelowVolume">
-                Volume below point of interest:
+                <span class="label">Volume below point of interest:</span>
                 <span>— m³</span>
               </div>
               <div id="plugBelowTubing" class="hidden">
@@ -1123,6 +1154,26 @@
               </div>
               <div id="plugBelowAnnulus" class="hidden">
                 Volume below (annulus):
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowDrillpipe" class="hidden">
+                <span class="label">Casing vol between DP and POI:</span>
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowDrillpipeAnnulus" class="hidden">
+                <span class="label">Casing volume below POI:</span>
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowDrillpipeCrossing" class="hidden">
+                <span class="label">Vol below POI in DP:</span>
+                <span>— m³</span>
+              </div>
+              <div id="plugBelowDrillpipeAnnulusCrossing" class="hidden">
+                <span class="label">Vol below POI in annulus:</span>
+                <span>— m³</span>
+              </div>
+              <div id="plugTotalBelowPOI" class="hidden">
+                <span class="label">Total vol below POI:</span>
                 <span>— m³</span>
               </div>
             </div>
@@ -1144,7 +1195,27 @@
           class="volume-breakdown"
           aria-labelledby="volume-breakdown-title"
         >
-          <h2 id="volume-breakdown-title">Hole volume</h2>
+          <div class="volume-breakdown-header">
+            <h2 id="volume-breakdown-title">Hole volume</h2>
+            <div class="volume-option-row">
+              <label for="subtract_eod_toggle" class="small-note">
+                Subtract DP steel displacement:
+              </label>
+              <div class="toggle-inline">
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="subtract_eod_toggle"
+                    checked
+                    role="switch"
+                    aria-checked="true"
+                  />
+                  <span class="slider round"></span>
+                </label>
+                <span id="eod_toggle_label" class="small-note-inline">On</span>
+              </div>
+            </div>
+          </div>
           <div class="table-wrap">
             <table
               id="casingVolumes"
