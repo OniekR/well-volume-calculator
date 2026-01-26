@@ -1,0 +1,14 @@
+TO DO:
+- Fullfør å reparer POI total volum under DP/Tubing
+	- Kanskje det kan funke om man gjør at den automatisk fjerner den motsatte sine inputs når man velger over
+- Legg inn Flow velocity feature
+	- Leg g til B/U tid i samme modul
+- Det gjenstår fortsatt å fikse 'Well type'
+- Legg til mulighet til å legge til egne DP, casings og tubing
+	- Må også standardisere for hvilke inputs man legge til
+- Fiks 'Steel displacement' for tubing
+- Legg til mulighet for å legge til tapered tubing
+
+Tanker:
+- Kanskje gjøre at man åpner et ekstra vindu for å legge inn casings så går denne bort når man er ferdig
+- Kanskje lage en python script for å gjøre tubing utskrift om til ei .js fil får lette å importere tubings til programmet

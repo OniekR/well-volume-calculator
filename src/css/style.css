@@ -1,6 +1,7 @@
 :root {
   --equinor-red: #e31b23;
   --equinor-accent: #ff3b4d;
+  --uc-tubing-green: #2fa84f;
   --equinor-blue: #e9f4f8;
   --card-bg: #ffffff;
   --surface-bg: #ffffff; /* inner surfaces / cards */
@@ -116,6 +117,18 @@
 }
 .switch input:checked + .slider:before {
   transform: translateX(22px);
+}
+
+/* UC toggle: tubing mode (unchecked) shows green */
+#uc_mode_toggle:not(:checked) + .slider,
+.slider.slider--tubing {
+  background-color: var(--uc-tubing-green);
+}
+
+/* Dark theme override for tubing green */
+[data-theme='dark'] #uc_mode_toggle:not(:checked) + .slider,
+[data-theme='dark'] .slider.slider--tubing {
+  background-color: #1f6f2f;
 }
 
 /* Theme label next to switch */
@@ -1136,7 +1149,7 @@ select:focus {
 }
 
 #plugTotalBelowPOI {
-  grid-column: 1 / -1;
+  /* positioned inline with other plug volumes on wide screens; mobile rules keep it full-width */
   background: linear-gradient(
     135deg,
     rgba(227, 27, 35, 0.1),
@@ -1151,6 +1164,26 @@ select:focus {
 }
 
 #plugTotalBelowPOI span:not(.label) {
+  font-size: 1.35rem;
+}
+
+/* When tubing crosses the POI we show a dedicated total element; make it full width */
+#plugTotalBelowPOITubing {
+  grid-column: 1 / -1;
+  background: linear-gradient(
+    135deg,
+    rgba(227, 27, 35, 0.1),
+    rgba(255, 59, 77, 0.08)
+  ) !important;
+  border: 2px solid var(--equinor-red) !important;
+  box-shadow: 0 4px 12px rgba(227, 27, 35, 0.15);
+}
+
+#plugTotalBelowPOITubing .label {
+  font-size: 0.9rem;
+}
+
+#plugTotalBelowPOITubing span:not(.label) {
   font-size: 1.35rem;
 }
 
@@ -1704,4 +1737,15 @@ select:focus {
 
 .volume-option-row .switch input:checked + .slider:before {
   transform: translateX(16px);
+}
+
+/* POI grid layouts */
+.poi-grid-2col {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.poi-grid-2col.hidden {
+  display: none !important;
 }

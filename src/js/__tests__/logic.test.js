@@ -1,5 +1,9 @@
 import { describe, test, expect } from 'vitest';
-import { computeVolumes, computeUpperCompletionBreakdown } from '../logic.js';
+import {
+  computeVolumes,
+  computeUpperCompletionBreakdown,
+  calculatePipeSteelVolume
+} from '../logic.js';
 
 describe('computeVolumes', () => {
   test('single casing volume computed correctly', () => {
@@ -360,5 +364,49 @@ describe('computeUpperCompletionBreakdown', () => {
     // UC crosses intermediate and production casings -> expect two merged sections
     expect(res.sections.length).toBe(2);
     expect(res.ucIdLength).toBeCloseTo(250, 6); // 350 - 100 = 250
+  });
+});
+
+describe('Steel displacement calculations', () => {
+  test('calculatePipeSteelVolume: 5 1/2" 17# tubing with 2838 m length', () => {
+    // OD = 5.5", ID = 4.892"
+    // Expected steel volume ≈ 9.09 m³
+    const volume = calculatePipeSteelVolume(2838, 5.5, 4.892);
+    expect(volume).toBeCloseTo(9.086, 2);
+  });
+
+  test('calculatePipeSteelVolume: 2 7/8" drill pipe (id: 2.151, od: 2.875)', () => {
+    // Standard drill pipe dimensions
+    const length = 363; // meters
+    const volume = calculatePipeSteelVolume(length, 2.875, 2.151);
+    expect(volume).toBeCloseTo(0.669, 2);
+  });
+
+  test('calculatePipeSteelVolume: 4" drill pipe (id: 3.34, od: 4.0)', () => {
+    const length = 363;
+    const volume = calculatePipeSteelVolume(length, 4.0, 3.34);
+    expect(volume).toBeCloseTo(0.891, 2);
+  });
+
+  test('calculatePipeSteelVolume: 5" drill pipe (id: 4.276, od: 5.0)', () => {
+    const length = 363;
+    const volume = calculatePipeSteelVolume(length, 5.0, 4.276);
+    expect(volume).toBeCloseTo(1.235, 2);
+  });
+
+  test('calculatePipeSteelVolume: 5 7/8" drill pipe (id: 5.153, od: 5.875)', () => {
+    const length = 363;
+    const volume = calculatePipeSteelVolume(length, 5.875, 5.153);
+    expect(volume).toBeCloseTo(1.465, 2);
+  });
+
+  test('calculatePipeSteelVolume handles invalid input gracefully', () => {
+    expect(calculatePipeSteelVolume(0, 5.5, 4.892)).toBe(0);
+    expect(calculatePipeSteelVolume(-100, 5.5, 4.892)).toBe(0);
+    expect(calculatePipeSteelVolume('invalid', 5.5, 4.892)).toBe(0);
+    expect(calculatePipeSteelVolume(100, 'invalid', 4.892)).toBe(0);
+    expect(calculatePipeSteelVolume(100, 5.5, 'invalid')).toBe(0);
+    // OD <= ID should return 0
+    expect(calculatePipeSteelVolume(100, 4.892, 5.5)).toBe(0);
   });
 });

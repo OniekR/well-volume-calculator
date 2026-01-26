@@ -28,14 +28,12 @@ describe('Drill pipe POI with fallback EOD calculation', () => {
       }
     });
 
-    // Test 2: DP at 363m WITHOUT EOD (should use fallback calculation)
-    // For 5.875" OD with 13.1 L/m ID volume, calculate what the steel displacement should be
-    // ID volume rate = 13.1 L/m = 0.0131 m³/m
-    // ID area = 0.0131 m²
-    // ID radius = sqrt(0.0131 / π) = sqrt(0.004167) = 0.06455 m
-    // OD radius = 5.875/2 * 0.0254 = 0.07462 m
-    // Steel area = π * (0.07462² - 0.06455²) = π * (0.005568 - 0.004167) = 0.004401 m²
-    // Steel volume per meter = 0.004401 m³/m = 4.401 L/m
+    // Test 2: DP at 363m WITHOUT EOD (should use fallback calculation with lPerM)
+    // For 5.875" OD with 13.1 L/m ID volume, calculate steel displacement:
+    // ID area = lPerM / 1000 = 13.1 / 1000 = 0.0131 m² (use lPerM directly, don't reverse-engineer)
+    // OD area = π * (5.875/2 * 0.0254)² = π * (0.07462)² = 0.01748 m²
+    // Steel area = OD_area - ID_area = 0.01748 - 0.0131 = 0.00438 m²
+    // Steel volume per meter = 0.00438 m³/m = 4.38 L/m
     const result2 = computeVolumes(casings, {
       plugEnabled: true,
       plugDepthVal: 362,
