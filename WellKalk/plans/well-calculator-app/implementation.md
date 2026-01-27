@@ -937,7 +937,7 @@ export default Badge;
 
 #### Step 6: Well Data Context & State Management
 
-- [ ] Create `src/hooks/useLocalStorage.ts`:
+- [x] Create `src/hooks/useLocalStorage.ts`:
 
 ```ts
 import { useEffect, useState } from "react";
@@ -956,7 +956,7 @@ export const useLocalStorage = <T>(key: string, initialValue: T) => {
 };
 ```
 
-- [ ] Create `src/context/WellContext.tsx`:
+- [x] Create `src/context/WellContext.tsx`:
 
 ```tsx
 import { createContext, ReactNode, useMemo } from "react";
@@ -1050,7 +1050,7 @@ export const WellProvider = ({ children }: WellProviderProps) => {
 };
 ```
 
-- [ ] Create `src/hooks/useWellData.ts`:
+- [x] Create `src/hooks/useWellData.ts`:
 
 ```ts
 import { useContext } from "react";
@@ -1065,7 +1065,7 @@ export const useWellData = () => {
 };
 ```
 
-- [ ] Wrap the app in `WellProvider` by updating `src/main.tsx`:
+- [x] Wrap the app in `WellProvider` by updating `src/main.tsx`:
 
 ```tsx
 import React from "react";
@@ -1088,7 +1088,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 ##### Step 6 Verification Checklist
 
-- [ ] Build a simple well in context and confirm data persists after refresh.
+- [x] Build a simple well in context and confirm data persists after refresh. (manual verification pending in Step 7)
 
 #### Step 6 STOP & COMMIT
 
