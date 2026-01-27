@@ -3,6 +3,8 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Label from "../ui/Label";
 import Select from "../ui/Select";
+import ErrorMessage from "../ui/ErrorMessage";
+import Toast from "../ui/Toast";
 import { WellSection, WellSectionType } from "../../types/well.types";
 
 const sectionOptions: { label: string; value: WellSectionType }[] = [
@@ -127,7 +129,16 @@ const WellSectionForm = ({ onAdd }: WellSectionFormProps) => {
 
   const profile = useMemo(() => casingProfiles[profileIndex], [profileIndex]);
 
+  const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
   const handleAdd = () => {
+    // basic validation
+    if (shoeMd <= topMd) {
+      setError("Shoe MD must be deeper than Top MD.");
+      return;
+    }
+
     const section: WellSection = {
       id: crypto.randomUUID(),
       type,
@@ -142,7 +153,11 @@ const WellSectionForm = ({ onAdd }: WellSectionFormProps) => {
       weightPerFt: profile.weightPerFt,
       grade: profile.grade,
     };
+
     onAdd(section);
+    setError(null);
+    setToast("Section added");
+    setTimeout(() => setToast(null), 2500);
   };
 
   return (
@@ -195,7 +210,12 @@ const WellSectionForm = ({ onAdd }: WellSectionFormProps) => {
           ))}
         </Select>
       </div>
+
+      {error && <ErrorMessage message={error} />}
+
       <Button onClick={handleAdd}>Add Section</Button>
+
+      {toast && <Toast message={toast} />}
     </div>
   );
 };

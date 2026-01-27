@@ -2198,7 +2198,7 @@ export const useCalculatorData = () => {
 
 #### Step 15: Export & Data Persistence
 
-- [ ] Update `package.json` to add XLSX dependency:
+- [x] Update `package.json` to add XLSX dependency:
 
 ```json
 {
@@ -2232,7 +2232,7 @@ export const useCalculatorData = () => {
 }
 ```
 
-- [ ] Create `src/utils/exportHelpers.ts`:
+- [x] Create `src/utils/exportHelpers.ts`:
 
 ```ts
 import * as XLSX from "xlsx";
@@ -2256,7 +2256,7 @@ export const exportWellToExcel = (well: WellDesign) => {
 };
 ```
 
-- [ ] Create `src/components/well-builder/ExportMenu.tsx`:
+- [x] Create `src/components/well-builder/ExportMenu.tsx`:
 
 ```tsx
 import Button from "../ui/Button";
@@ -2282,7 +2282,7 @@ export default ExportMenu;
 
 ##### Step 15 Verification Checklist
 
-- [ ] Export a well and confirm the Excel file downloads.
+- [x] Export a well and confirm the Excel file downloads. (verified manually on dev server)
 
 #### Step 15 STOP & COMMIT
 
