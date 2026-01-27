@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./variables.css";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: var(--eq-surface);
+  color: var(--eq-text);
+}

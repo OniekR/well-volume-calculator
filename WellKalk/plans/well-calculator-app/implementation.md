@@ -223,7 +223,7 @@ dist
 
 #### Step 2: Type Definitions & Data Models
 
-- [ ] Create `src/types/well.types.ts` and paste:
+- [x] Create `src/types/well.types.ts` and paste:
 
 ```ts
 export type RiserType = "drilling" | "production" | "marine" | "none";
@@ -273,7 +273,7 @@ export interface WellDesign {
 }
 ```
 
-- [ ] Create `src/types/calculator.types.ts` and paste:
+- [x] Create `src/types/calculator.types.ts` and paste:
 
 ```ts
 export type UnitSystem = "metric" | "imperial";
@@ -310,7 +310,7 @@ export interface StringLiftInputs {
 }
 ```
 
-- [ ] Create `src/types/common.types.ts` and paste:
+- [x] Create `src/types/common.types.ts` and paste:
 
 ```ts
 export interface NavItem {
@@ -327,7 +327,7 @@ export interface SelectOption<T extends string | number> {
 
 ##### Step 2 Verification Checklist
 
-- [ ] `npm run build` succeeds with no TypeScript errors.
+- [x] `npm run build` succeeds with no TypeScript errors. (completed)
 
 #### Step 2 STOP & COMMIT
 
