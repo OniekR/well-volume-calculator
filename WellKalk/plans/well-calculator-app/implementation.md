@@ -760,7 +760,7 @@ export default StringLiftCalculator;
 
 #### Step 5: Shared UI Components
 
-- [ ] Create `src/components/ui/Button.tsx`:
+- [x] Create `src/components/ui/Button.tsx`:
 
 ```tsx
 import { ButtonHTMLAttributes } from "react";
@@ -792,7 +792,7 @@ const Button = ({ variant = "primary", className, ...props }: ButtonProps) => {
 export default Button;
 ```
 
-- [ ] Create `src/components/ui/Card.tsx`:
+- [x] Create `src/components/ui/Card.tsx`:
 
 ```tsx
 import { ReactNode } from "react";
@@ -821,7 +821,7 @@ const Card = ({ title, children, className }: CardProps) => {
 export default Card;
 ```
 
-- [ ] Create `src/components/ui/Input.tsx`:
+- [x] Create `src/components/ui/Input.tsx`:
 
 ```tsx
 import { InputHTMLAttributes } from "react";
@@ -847,7 +847,7 @@ const Input = ({ hasError, className, ...props }: InputProps) => {
 export default Input;
 ```
 
-- [ ] Create `src/components/ui/Select.tsx`:
+- [x] Create `src/components/ui/Select.tsx`:
 
 ```tsx
 import { SelectHTMLAttributes } from "react";
@@ -873,7 +873,7 @@ const Select = ({ hasError, className, ...props }: SelectProps) => {
 export default Select;
 ```
 
-- [ ] Create `src/components/ui/Label.tsx`:
+- [x] Create `src/components/ui/Label.tsx`:
 
 ```tsx
 import { LabelHTMLAttributes } from "react";
@@ -897,7 +897,7 @@ const Label = ({
 export default Label;
 ```
 
-- [ ] Create `src/components/ui/Badge.tsx`:
+- [x] Create `src/components/ui/Badge.tsx`:
 
 ```tsx
 import { ReactNode } from "react";
@@ -929,7 +929,7 @@ export default Badge;
 
 ##### Step 5 Verification Checklist
 
-- [ ] Create a temporary test page and verify all variants render correctly in light and dark mode.
+- [x] Create a temporary test page and verify all variants render correctly in light and dark mode. (created `/ui-test` and visually verified)
 
 #### Step 5 STOP & COMMIT
 
