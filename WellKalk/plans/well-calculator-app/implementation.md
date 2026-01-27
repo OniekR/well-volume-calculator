@@ -1974,13 +1974,13 @@ export default PressureTestCalculator;
 
 #### Step 12: Fluid Flow Calculator
 
-- [ ] Create `src/utils/unitConversions.ts`:
+- [x] Create `src/utils/unitConversions.ts`:
 
 ```ts
 export const lpmToM3s = (lpm: number) => lpm / 1000 / 60;
 ```
 
-- [ ] Create `src/utils/flowCalculations.ts`:
+- [x] Create `src/utils/flowCalculations.ts`:
 
 ```ts
 import { lpmToM3s } from "./unitConversions";
@@ -2000,7 +2000,7 @@ export const calculateAnnularVelocity = (
 };
 ```
 
-- [ ] Update `src/pages/calculators/FluidFlowCalculator.tsx`:
+- [x] Update `src/pages/calculators/FluidFlowCalculator.tsx`:
 
 ```tsx
 import { useMemo, useState } from "react";
@@ -2068,7 +2068,7 @@ export default FluidFlowCalculator;
 
 ##### Step 12 Verification Checklist
 
-- [ ] Verify annular velocity matches manual calculations for sample data.
+- [x] Verify annular velocity matches manual calculations for sample data. (verified in dev server)
 
 #### Step 12 STOP & COMMIT
 
