@@ -16,7 +16,8 @@ const Button = ({ variant = "primary", className, ...props }: ButtonProps) => {
           "bg-[var(--eq-primary)] text-white hover:bg-[var(--eq-primary-strong)]",
         variant === "secondary" &&
           "bg-transparent border border-[var(--eq-border)] text-[var(--eq-text)] hover:bg-[var(--eq-border)]",
-        variant === "danger" && "bg-[var(--eq-danger)] text-white hover:opacity-90",
+        variant === "danger" &&
+          "bg-[var(--eq-danger)] text-white hover:opacity-90",
         className,
       )}
       {...props}

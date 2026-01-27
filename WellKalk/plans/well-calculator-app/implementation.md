@@ -23,7 +23,7 @@ If not, move them to the correct branch. If the branch does not exist, create it
 #### Step 1: Project Initialization & Configuration
 
 - [x] Create the project root files listed below.
-- [x] Copy and paste code below into `package.json`: 
+- [x] Copy and paste code below into `package.json`:
 
 ```json
 {
@@ -56,7 +56,7 @@ If not, move them to the correct branch. If the branch does not exist, create it
 }
 ```
 
-- [x] Copy and paste code below into `vite.config.ts`: 
+- [x] Copy and paste code below into `vite.config.ts`:
 
 ```ts
 import { defineConfig } from "vite";
@@ -67,7 +67,7 @@ export default defineConfig({
 });
 ```
 
-- [x] Copy and paste code below into `tsconfig.json`: 
+- [x] Copy and paste code below into `tsconfig.json`:
 
 ```json
 {
@@ -98,7 +98,7 @@ export default defineConfig({
 }
 ```
 
-- [x] Copy and paste code below into `tsconfig.node.json`: 
+- [x] Copy and paste code below into `tsconfig.node.json`:
 
 ```json
 {
@@ -113,7 +113,7 @@ export default defineConfig({
 }
 ```
 
-- [x] Copy and paste code below into `tailwind.config.js`: 
+- [x] Copy and paste code below into `tailwind.config.js`:
 
 ```js
 /** @type {import('tailwindcss').Config} */
@@ -131,7 +131,7 @@ export default {
 };
 ```
 
-- [x] Copy and paste code below into `postcss.config.js`: 
+- [x] Copy and paste code below into `postcss.config.js`:
 
 ```js
 export default {
@@ -142,7 +142,7 @@ export default {
 };
 ```
 
-- [x] Copy and paste code below into `index.html`: 
+- [x] Copy and paste code below into `index.html`:
 
 ```html
 <!doctype html>
@@ -159,13 +159,13 @@ export default {
 </html>
 ```
 
-- [x] Copy and paste code below into `src/vite-env.d.ts`: 
+- [x] Copy and paste code below into `src/vite-env.d.ts`:
 
 ```ts
 /// <reference types="vite/client" />
 ```
 
-- [x] Copy and paste code below into `src/main.tsx`: 
+- [x] Copy and paste code below into `src/main.tsx`:
 
 ```tsx
 import React from "react";
@@ -183,7 +183,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 ```
 
-- [x] Copy and paste code below into `src/App.tsx`: 
+- [x] Copy and paste code below into `src/App.tsx`:
 
 ```tsx
 const App = () => {
@@ -202,7 +202,7 @@ const App = () => {
 export default App;
 ```
 
-- [x] Copy and paste code below into `.gitignore`: 
+- [x] Copy and paste code below into `.gitignore`:
 
 ```
 node_modules
@@ -214,7 +214,7 @@ dist
 
 ##### Step 1 Verification Checklist
 
-- [x] Run `npm install`. (completed) 
+- [x] Run `npm install`. (completed)
 - [x] Run `npm run dev` and confirm the page renders without errors. (Vite server started at http://localhost:5173/)
 
 #### Step 1 STOP & COMMIT
@@ -1096,7 +1096,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 #### Step 7: Well Builder Core Functionality
 
-- [ ] Create `src/utils/wellValidation.ts`:
+- [x] Create `src/utils/wellValidation.ts`:
 
 ```ts
 import { WellSection } from "../types/well.types";
@@ -1123,7 +1123,7 @@ export const validateSections = (sections: WellSection[]) => {
 };
 ```
 
-- [ ] Create `src/components/well-builder/WellSectionForm.tsx`:
+- [x] Create `src/components/well-builder/WellSectionForm.tsx`:
 
 ```tsx
 import { useMemo, useState } from "react";
@@ -1331,7 +1331,7 @@ const WellSectionForm = ({ onAdd }: WellSectionFormProps) => {
 export default WellSectionForm;
 ```
 
-- [ ] Create `src/components/well-builder/SectionCard.tsx`:
+- [x] Create `src/components/well-builder/SectionCard.tsx`:
 
 ```tsx
 import { AlertTriangle, Trash2 } from "lucide-react";
@@ -1375,7 +1375,7 @@ const SectionCard = ({ section, showWarning, onDelete }: SectionCardProps) => {
 export default SectionCard;
 ```
 
-- [ ] Create `src/components/well-builder/SectionList.tsx`:
+- [x] Create `src/components/well-builder/SectionList.tsx`:
 
 ```tsx
 import { WellSection } from "../../types/well.types";
@@ -1415,7 +1415,7 @@ const SectionList = ({ sections, warnings, onDelete }: SectionListProps) => {
 export default SectionList;
 ```
 
-- [ ] Update `src/pages/WellBuilderPage.tsx` to:
+- [x] Update `src/pages/WellBuilderPage.tsx` to:
 
 ```tsx
 import { useMemo } from "react";
@@ -1476,8 +1476,8 @@ export default WellBuilderPage;
 
 ##### Step 7 Verification Checklist
 
-- [ ] Add multiple sections and delete them.
-- [ ] Confirm warnings appear when casing OD exceeds previous drift.
+- [x] Add multiple sections and delete them. (verified in dev server)
+- [x] Confirm warnings appear when casing OD exceeds previous drift. (verified in dev server)
 
 #### Step 7 STOP & COMMIT
 

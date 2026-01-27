@@ -15,7 +15,9 @@ const SectionCard = ({ section, showWarning, onDelete }: SectionCardProps) => {
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold">{section.name}</h4>
-            <span className="text-xs text-[var(--eq-text-muted)]">{section.type}</span>
+            <span className="text-xs text-[var(--eq-text-muted)]">
+              {section.type}
+            </span>
           </div>
           <p className="text-xs text-[var(--eq-text-muted)] mt-2">
             Top MD: {section.topMd} m • Shoe MD: {section.shoeMd} m
@@ -25,7 +27,8 @@ const SectionCard = ({ section, showWarning, onDelete }: SectionCardProps) => {
           </p>
           {showWarning && (
             <p className="mt-2 flex items-center gap-2 text-xs text-[var(--eq-warning)]">
-              <AlertTriangle size={14} /> This section may conflict with previous drift.
+              <AlertTriangle size={14} /> This section may conflict with
+              previous drift.
             </p>
           )}
         </div>

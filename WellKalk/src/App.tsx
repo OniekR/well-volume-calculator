@@ -17,7 +17,10 @@ const App = () => {
         <Route path="/builder" element={<WellBuilderPage />} />
         <Route path="/calculators/volumes" element={<WellVolumeCalculator />} />
         <Route path="/calculators/cement" element={<CementCalculator />} />
-        <Route path="/calculators/pressure" element={<PressureTestCalculator />} />
+        <Route
+          path="/calculators/pressure"
+          element={<PressureTestCalculator />}
+        />
         <Route path="/calculators/flow" element={<FluidFlowCalculator />} />
         <Route path="/calculators/lift" element={<StringLiftCalculator />} />
         <Route path="/ui-test" element={<UiTest />} />

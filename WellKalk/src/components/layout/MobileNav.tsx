@@ -20,7 +20,9 @@ const MobileNav = () => {
               to={item.to}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 text-xs ${
-                  isActive ? "text-[var(--eq-primary)]" : "text-[var(--eq-text-muted)]"
+                  isActive
+                    ? "text-[var(--eq-primary)]"
+                    : "text-[var(--eq-text-muted)]"
                 }`
               }
             >

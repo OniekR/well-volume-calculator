@@ -54,7 +54,9 @@ export const WellProvider = ({ children }: WellProviderProps) => {
       const exists = prev.find((item) => item.id === well.id);
       if (exists) {
         return prev.map((item) =>
-          item.id === well.id ? { ...well, updatedAt: new Date().toISOString() } : item,
+          item.id === well.id
+            ? { ...well, updatedAt: new Date().toISOString() }
+            : item,
         );
       }
       return [...prev, { ...well, updatedAt: new Date().toISOString() }];
