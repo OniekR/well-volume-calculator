@@ -4,6 +4,9 @@ import Input from "../../components/ui/Input";
 import Label from "../../components/ui/Label";
 import ResultCard from "../../components/calculators/shared/ResultCard";
 import { calculateStrokesToBump } from "../../utils/cementCalculations";
+import Button from "../../components/ui/Button";
+import { useCalculatorData } from "../../hooks/useCalculatorData";
+import calculateCylinderVolume from "../../utils/volumeCalculations";
 
 const CementCalculator = () => {
   const [cementVolumeM3, setCementVolumeM3] = useState(30);
@@ -14,11 +17,26 @@ const CementCalculator = () => {
     [cementVolumeM3, strokeVolumeM3],
   );
 
+  const { getTopSection } = useCalculatorData();
+
+  const useTopSection = () => {
+    const top = getTopSection();
+    if (!top) return;
+    const length = top.shoeMd - top.topMd;
+    const vol = calculateCylinderVolume(top.outerDiameterIn, length);
+    setCementVolumeM3(Number(vol.toFixed(3)));
+  };
+
   return (
     <CalculatorLayout
       title="Cement Calculator"
       description="Estimate cement displacement strokes."
     >
+      <div className="flex items-center justify-end">
+        <Button variant="secondary" onClick={useTopSection}>
+          Use Well Data
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <Label htmlFor="cement-volume">Cement Volume (m³)</Label>

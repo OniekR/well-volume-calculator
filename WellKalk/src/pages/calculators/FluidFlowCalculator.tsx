@@ -3,7 +3,9 @@ import CalculatorLayout from "../../components/calculators/shared/CalculatorLayo
 import Input from "../../components/ui/Input";
 import Label from "../../components/ui/Label";
 import ResultCard from "../../components/calculators/shared/ResultCard";
+import Button from "../../components/ui/Button";
 import { calculateAnnularVelocity } from "../../utils/flowCalculations";
+import { useCalculatorData } from "../../hooks/useCalculatorData";
 
 const FluidFlowCalculator = () => {
   const [flowRateLpm, setFlowRateLpm] = useState(1000);
@@ -16,11 +18,25 @@ const FluidFlowCalculator = () => {
     [flowRateLpm, outerDiameterIn, innerDiameterIn],
   );
 
+  const { getTopSection } = useCalculatorData();
+
+  const useTopSection = () => {
+    const top = getTopSection();
+    if (!top) return;
+    setOuterDiameterIn(top.outerDiameterIn);
+    setInnerDiameterIn(top.innerDiameterIn);
+  };
+
   return (
     <CalculatorLayout
       title="Fluid Flow Calculator"
       description="Convert flow rate to annular velocity."
     >
+      <div className="flex items-center justify-end">
+        <Button variant="secondary" onClick={useTopSection}>
+          Use Well Data
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-3">
         <div>
           <Label htmlFor="flow">Flow Rate (L/min)</Label>

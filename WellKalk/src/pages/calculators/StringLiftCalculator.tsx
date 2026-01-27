@@ -4,6 +4,8 @@ import Input from "../../components/ui/Input";
 import Label from "../../components/ui/Label";
 import ResultCard from "../../components/calculators/shared/ResultCard";
 import { calculateLiftForce } from "../../utils/liftCalculations";
+import Button from "../../components/ui/Button";
+import { useCalculatorData } from "../../hooks/useCalculatorData";
 
 const StringLiftCalculator = () => {
   const [casingId, setCasingId] = useState(8.6);
@@ -15,11 +17,27 @@ const StringLiftCalculator = () => {
     [casingId, pipeOd, pressureBar],
   );
 
+  const { getTopSection } = useCalculatorData();
+
+  const useTopSection = () => {
+    const top = getTopSection();
+    if (!top) return;
+    setCasingId(top.innerDiameterIn);
+    // Set a reasonable drill pipe OD (smaller than casing ID)
+    setPipeOd(Math.max(0.1, top.innerDiameterIn - 3));
+  };
+
   return (
     <CalculatorLayout
       title="String Lift Calculator"
       description="Compute lift force from pressure."
     >
+      <div className="flex items-center justify-end">
+        <Button variant="secondary" onClick={useTopSection}>
+          Use Well Data
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-3">
         <div>
           <Label htmlFor="casing-id">Casing ID (in)</Label>

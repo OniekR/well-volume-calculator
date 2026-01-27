@@ -16,3 +16,5 @@ export const buildSectionVolumes = (rows: VolumeRow[]) => {
     volumeM3: calculateCylinderVolume(row.diameterIn, row.lengthM),
   }));
 };
+
+export default calculateCylinderVolume;

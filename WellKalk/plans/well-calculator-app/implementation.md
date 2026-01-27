@@ -2076,7 +2076,7 @@ export default FluidFlowCalculator;
 
 #### Step 13: String Lift Calculator
 
-- [ ] Create `src/utils/liftCalculations.ts`:
+- [x] Create `src/utils/liftCalculations.ts`:
 
 ```ts
 const INCH_TO_M = 0.0254;
@@ -2094,7 +2094,7 @@ export const calculateLiftForce = (
 };
 ```
 
-- [ ] Update `src/pages/calculators/StringLiftCalculator.tsx`:
+- [x] Update `src/pages/calculators/StringLiftCalculator.tsx`:
 
 ```tsx
 import { useMemo, useState } from "react";
@@ -2161,7 +2161,7 @@ export default StringLiftCalculator;
 
 ##### Step 13 Verification Checklist
 
-- [ ] Confirm lift force matches a hand calculation for sample input.
+- [x] Confirm lift force matches a hand calculation for sample input. (verified in dev server)
 
 #### Step 13 STOP & COMMIT
 

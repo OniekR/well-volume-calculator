@@ -3,7 +3,9 @@ import CalculatorLayout from "../../components/calculators/shared/CalculatorLayo
 import ResultCard from "../../components/calculators/shared/ResultCard";
 import Input from "../../components/ui/Input";
 import Label from "../../components/ui/Label";
+import Button from "../../components/ui/Button";
 import { buildSectionVolumes } from "../../utils/volumeCalculations";
+import { useCalculatorData } from "../../hooks/useCalculatorData";
 
 const WellVolumeCalculator = () => {
   const [lengthM, setLengthM] = useState(1000);
@@ -16,11 +18,25 @@ const WellVolumeCalculator = () => {
 
   const totalVolume = rows.reduce((sum, row) => sum + row.volumeM3, 0);
 
+  const { getTopSection } = useCalculatorData();
+
+  const useTopSection = () => {
+    const top = getTopSection();
+    if (!top) return;
+    setLengthM(top.shoeMd - top.topMd);
+    setDiameterIn(top.outerDiameterIn);
+  };
+
   return (
     <CalculatorLayout
       title="Well Volume Calculator"
       description="Compute section volumes and totals."
     >
+      <div className="flex items-center justify-end">
+        <Button variant="secondary" onClick={useTopSection}>
+          Use Well Data
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <Label htmlFor="length">Length (m)</Label>

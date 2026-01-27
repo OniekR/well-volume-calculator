@@ -3,8 +3,10 @@ import CalculatorLayout from "../../components/calculators/shared/CalculatorLayo
 import Input from "../../components/ui/Input";
 import Label from "../../components/ui/Label";
 import ResultCard from "../../components/calculators/shared/ResultCard";
-import Button from "../../components/ui/Button";
 import { calculatePressurizedLiters } from "../../utils/pressureCalculations";
+import Button from "../../components/ui/Button";
+import { useCalculatorData } from "../../hooks/useCalculatorData";
+import calculateCylinderVolume from "../../utils/volumeCalculations";
 
 const kOptions = [
   { label: "Brine/WBM", value: 21 },
@@ -23,11 +25,27 @@ const PressureTestCalculator = () => {
     [volumeM3, deltaPressureBar, kFactor],
   );
 
+  const { getTopSection } = useCalculatorData();
+
+  const useTopSection = () => {
+    const top = getTopSection();
+    if (!top) return;
+    const length = top.shoeMd - top.topMd;
+    const vol = calculateCylinderVolume(top.outerDiameterIn, length);
+    setVolumeM3(Number(vol.toFixed(3)));
+  };
+
   return (
     <CalculatorLayout
       title="Pressure Test Calculator"
       description="Compute pressurized fluid volume in liters."
     >
+      <div className="flex items-center justify-end">
+        <Button variant="secondary" onClick={useTopSection}>
+          Use Well Data
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <Label htmlFor="volume">Volume (m³)</Label>
