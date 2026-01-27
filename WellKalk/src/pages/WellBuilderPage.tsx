@@ -4,6 +4,7 @@ import WellSectionForm from "../components/well-builder/WellSectionForm";
 import SectionList from "../components/well-builder/SectionList";
 import { validateSections } from "../utils/wellValidation";
 import WellVisualization from "../components/well-builder/WellVisualization";
+import ExportMenu from "../components/well-builder/ExportMenu";
 
 const WellBuilderPage = () => {
   const { activeWell, updateSections } = useWellData();
@@ -46,7 +47,8 @@ const WellBuilderPage = () => {
           />
         </div>
       </div>
-      <div className="rounded-3xl border border-[var(--eq-border)] bg-[var(--eq-surface)] p-4">
+      <div className="rounded-3xl border border-[var(--eq-border)] bg-[var(--eq-surface)] p-4 space-y-4">
+        <ExportMenu well={activeWell} />
         <WellVisualization sections={activeWell.sections} />
       </div>
     </section>

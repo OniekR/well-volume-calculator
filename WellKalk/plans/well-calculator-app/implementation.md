@@ -2169,7 +2169,7 @@ export default StringLiftCalculator;
 
 #### Step 14: Calculator Data Integration
 
-- [ ] Create `src/hooks/useCalculatorData.ts`:
+- [x] Create `src/hooks/useCalculatorData.ts`:
 
 ```ts
 import { useWellData } from "./useWellData";
@@ -2186,11 +2186,11 @@ export const useCalculatorData = () => {
 };
 ```
 
-- [ ] Add a “Use Well Data” button to each calculator page and wire to the active well section where applicable.
+- [x] Add a “Use Well Data” button to each calculator page and wire to the active well section where applicable.
 
 ##### Step 14 Verification Checklist
 
-- [ ] Build a well and confirm calculator inputs can be populated from the active well.
+- [x] Build a well and confirm calculator inputs can be populated from the active well. (verified in dev server)
 
 #### Step 14 STOP & COMMIT
 
