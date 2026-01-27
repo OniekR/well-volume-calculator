@@ -1803,7 +1803,7 @@ export default WellVolumeCalculator;
 
 #### Step 10: Well Cement Calculator
 
-- [ ] Create `src/utils/cementCalculations.ts`:
+- [x] Create `src/utils/cementCalculations.ts`:
 
 ```ts
 export const calculateStrokesToBump = (
@@ -1815,7 +1815,7 @@ export const calculateStrokesToBump = (
 };
 ```
 
-- [ ] Update `src/pages/calculators/CementCalculator.tsx`:
+- [x] Update `src/pages/calculators/CementCalculator.tsx`:
 
 ```tsx
 import { useMemo, useState } from "react";
@@ -1869,7 +1869,7 @@ export default CementCalculator;
 
 ##### Step 10 Verification Checklist
 
-- [ ] Validate that the stroke calculation matches expected manual results.
+- [x] Validate that the stroke calculation matches expected manual results. (verified in dev server)
 
 #### Step 10 STOP & COMMIT
 
