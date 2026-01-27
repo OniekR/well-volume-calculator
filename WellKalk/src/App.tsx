@@ -7,6 +7,7 @@ import CementCalculator from "./pages/calculators/CementCalculator";
 import PressureTestCalculator from "./pages/calculators/PressureTestCalculator";
 import FluidFlowCalculator from "./pages/calculators/FluidFlowCalculator";
 import StringLiftCalculator from "./pages/calculators/StringLiftCalculator";
+import UiTest from "./pages/UiTest";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/calculators/pressure" element={<PressureTestCalculator />} />
         <Route path="/calculators/flow" element={<FluidFlowCalculator />} />
         <Route path="/calculators/lift" element={<StringLiftCalculator />} />
+        <Route path="/ui-test" element={<UiTest />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

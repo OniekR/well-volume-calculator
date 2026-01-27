@@ -591,7 +591,7 @@ export default ThemeToggle;
 
 #### Step 4: Routing & Page Structure
 
-- [ ] Update `src/App.tsx` to:
+- [x] Update `src/App.tsx` to:
 
 ```tsx
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -627,7 +627,7 @@ const App = () => {
 export default App;
 ```
 
-- [ ] Create `src/pages/Home.tsx` and paste:
+- [x] Create `src/pages/Home.tsx` and paste:
 
 ```tsx
 const Home = () => {
@@ -645,7 +645,7 @@ const Home = () => {
 export default Home;
 ```
 
-- [ ] Create `src/pages/WellBuilderPage.tsx` and paste:
+- [x] Create `src/pages/WellBuilderPage.tsx` and paste:
 
 ```tsx
 const WellBuilderPage = () => {
@@ -662,7 +662,7 @@ const WellBuilderPage = () => {
 export default WellBuilderPage;
 ```
 
-- [ ] Create calculator pages:
+- [x] Create calculator pages:
 
 `src/pages/calculators/WellVolumeCalculator.tsx`
 
@@ -751,8 +751,8 @@ export default StringLiftCalculator;
 
 ##### Step 4 Verification Checklist
 
-- [ ] Navigate to all routes and confirm pages render.
-- [ ] Use back/forward browser buttons successfully.
+- [x] Navigate to all routes and confirm pages render. (verified visually in dev server)
+- [x] Use back/forward browser buttons successfully. (verified visually)
 
 #### Step 4 STOP & COMMIT
 
