@@ -138,6 +138,8 @@ describe('POI Cross-Contamination', () => {
       ...baseOpts,
       drillPipe: { mode: 'tubing' }
     });
+    // Sanity: tubing-mode result should be defined
+    expect(tubingResult.plugBelowVolumeTubing).toBeDefined();
 
     // Calculate for DP mode with short DP (above POI)
     const dpShortResult = computeVolumes(casings, {
@@ -229,6 +231,8 @@ describe('POI Cross-Contamination', () => {
         pipes: [{ size: '5 7/8"', length: 363, id: 0.127 }]
       }
     });
+    // Sanity: DP run should produce a valid result
+    expect(dpResult.plugBelowVolume).toBeDefined();
 
     // Switch back to tubing mode
     const tubingResult2 = computeVolumes(casings, {

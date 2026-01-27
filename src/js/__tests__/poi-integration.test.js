@@ -253,18 +253,30 @@ describe('POI Integration Tests', () => {
     console.log('Tubing shoe volume test:', {
       tubingShoe: 3228.2,
       casingVolumeBelowTubingShoe: result.casingVolumeBelowTubingShoe,
-      reservoirVolume: result.perCasingVolumes.find(c => c.role === 'reservoir')?.volume
+      reservoirVolume: result.perCasingVolumes.find(
+        function (c) {
+          return c.role === 'reservoir';
+        }
+      )?.volume
     });
 
     // The casing volume below the tubing shoe should include the Production segment
     // between the tubing shoe and the production shoe, plus the Reservoir volume
-    const reservoirVolume = result.perCasingVolumes.find(c => c.role === 'reservoir')?.volume || 0;
-    const production = result.perCasingVolumes.find(c => c.role === 'production');
+    const reservoirVolume =
+      result.perCasingVolumes.find(function (c) {
+        return c.role === 'reservoir';
+      })?.volume || 0;
+    const production = result.perCasingVolumes.find(function (c) {
+      return c.role === 'production';
+    });
     const prodPerMeter = production?.perMeter_m3 || 0;
     const prodTop = 2081; // from test data
     const prodDepth = 3277.5;
     const tubingShoe = 3228.2;
-    const prodLenBelow = Math.max(0, Math.min(prodDepth, Infinity) - Math.max(prodTop, tubingShoe));
+    const prodLenBelow = Math.max(
+      0,
+      Math.min(prodDepth, Infinity) - Math.max(prodTop, tubingShoe)
+    );
     const prodBelowVol = prodPerMeter * prodLenBelow;
     const expected = reservoirVolume + prodBelowVol;
     expect(result.casingVolumeBelowTubingShoe).toBeCloseTo(expected, 2);

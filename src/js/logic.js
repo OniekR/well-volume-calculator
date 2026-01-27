@@ -868,7 +868,6 @@ export function computeVolumes(casingsInput, opts = {}) {
       const openCasingBelowLen = Math.max(0, plugDepthVal - dpBottom);
 
       // Get the casing volume from the hole volume table for the relevant depth range
-      let dpCasingRole = null;
       let openCasingVolAbove = 0;
       let openCasingVolBelow = 0;
 
@@ -877,8 +876,6 @@ export function computeVolumes(casingsInput, opts = {}) {
         if (casing.use && casing.depth > dpBottom) {
           const casingTop = typeof casing.top !== 'undefined' ? casing.top : 0;
           if (casingTop <= dpBottom) {
-            dpCasingRole = casing.role;
-
             // Calculate open casing volume: total casing volume - DP volume - annulus volume
             // for the depth ranges relevant to POI
             const casingPerMeter =
