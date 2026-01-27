@@ -335,7 +335,7 @@ export interface SelectOption<T extends string | number> {
 
 #### Step 3: Core Layout & Responsive Navigation
 
-- [ ] Create `src/styles/variables.css` and paste:
+- [x] Create `src/styles/variables.css` and paste:
 
 ```css
 :root {
@@ -367,7 +367,7 @@ export interface SelectOption<T extends string | number> {
 }
 ```
 
-- [ ] Create `src/styles/globals.css` and paste:
+- [x] Create `src/styles/globals.css` and paste:
 
 ```css
 @tailwind base;
@@ -391,7 +391,7 @@ body {
 }
 ```
 
-- [ ] Create `src/components/layout/Layout.tsx` and paste:
+- [x] Create `src/components/layout/Layout.tsx` and paste:
 
 ```tsx
 import { ReactNode } from "react";
@@ -421,7 +421,7 @@ const Layout = ({ children }: LayoutProps) => {
 export default Layout;
 ```
 
-- [ ] Create `src/components/layout/Header.tsx` and paste:
+- [x] Create `src/components/layout/Header.tsx` and paste:
 
 ```tsx
 import { Droplets } from "lucide-react";
@@ -451,7 +451,7 @@ const Header = () => {
 export default Header;
 ```
 
-- [ ] Create `src/components/layout/Sidebar.tsx` and paste:
+- [x] Create `src/components/layout/Sidebar.tsx` and paste:
 
 ```tsx
 import { NavLink } from "react-router-dom";
@@ -493,7 +493,7 @@ const Sidebar = () => {
 export default Sidebar;
 ```
 
-- [ ] Create `src/components/layout/MobileNav.tsx` and paste:
+- [x] Create `src/components/layout/MobileNav.tsx` and paste:
 
 ```tsx
 import { NavLink } from "react-router-dom";
@@ -537,7 +537,7 @@ const MobileNav = () => {
 export default MobileNav;
 ```
 
-- [ ] Create `src/components/ui/ThemeToggle.tsx` and paste:
+- [x] Create `src/components/ui/ThemeToggle.tsx` and paste:
 
 ```tsx
 import { useEffect, useState } from "react";
@@ -582,8 +582,8 @@ export default ThemeToggle;
 
 ##### Step 3 Verification Checklist
 
-- [ ] Resize the browser to confirm sidebar hides on mobile and mobile nav appears.
-- [ ] Toggle dark mode and confirm colors update.
+- [x] Resize the browser to confirm sidebar hides on mobile and mobile nav appears. (verified visually in dev server)
+- [x] Toggle dark mode and confirm colors update. (verified visually in dev server)
 
 #### Step 3 STOP & COMMIT
 
