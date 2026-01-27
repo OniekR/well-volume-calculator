@@ -1485,7 +1485,7 @@ export default WellBuilderPage;
 
 #### Step 8: Well Visualization Component
 
-- [ ] Create `src/utils/wellGeometry.ts`:
+- [x] Create `src/utils/wellGeometry.ts`:
 
 ```ts
 import { WellSection } from "../types/well.types";
@@ -1511,7 +1511,7 @@ export const buildSlices = (sections: WellSection[]): WellSlice[] => {
 };
 ```
 
-- [ ] Create `src/components/well-builder/WellCanvas.tsx`:
+- [x] Create `src/components/well-builder/WellCanvas.tsx`:
 
 ```tsx
 import { WellSlice } from "../../utils/wellGeometry";
@@ -1558,7 +1558,7 @@ const WellCanvas = ({ slices }: WellCanvasProps) => {
 export default WellCanvas;
 ```
 
-- [ ] Create `src/components/well-builder/WellVisualization.tsx`:
+- [x] Create `src/components/well-builder/WellVisualization.tsx`:
 
 ```tsx
 import { WellSection } from "../../types/well.types";
@@ -1589,7 +1589,7 @@ const WellVisualization = ({ sections }: WellVisualizationProps) => {
 export default WellVisualization;
 ```
 
-- [ ] Update `src/pages/WellBuilderPage.tsx` right panel to render `WellVisualization`:
+- [x] Update `src/pages/WellBuilderPage.tsx` right panel to render `WellVisualization`:
 
 ```tsx
 import { useMemo } from "react";
@@ -1649,7 +1649,7 @@ export default WellBuilderPage;
 
 ##### Step 8 Verification Checklist
 
-- [ ] Add 3–4 sections and confirm the SVG schematic appears.
+- [x] Add 3–4 sections and confirm the SVG schematic appears. (verified in dev server)
 
 #### Step 8 STOP & COMMIT
 
