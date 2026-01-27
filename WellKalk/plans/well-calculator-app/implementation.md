@@ -1657,7 +1657,7 @@ export default WellBuilderPage;
 
 #### Step 9: Well Volume Calculator
 
-- [ ] Create `src/utils/volumeCalculations.ts`:
+- [x] Create `src/utils/volumeCalculations.ts`:
 
 ```ts
 import { VolumeRow } from "../types/calculator.types";
@@ -1680,7 +1680,7 @@ export const buildSectionVolumes = (rows: VolumeRow[]) => {
 };
 ```
 
-- [ ] Create `src/components/calculators/shared/CalculatorLayout.tsx`:
+- [x] Create `src/components/calculators/shared/CalculatorLayout.tsx`:
 
 ```tsx
 import { ReactNode } from "react";
@@ -1710,7 +1710,7 @@ const CalculatorLayout = ({
 export default CalculatorLayout;
 ```
 
-- [ ] Create `src/components/calculators/shared/ResultCard.tsx`:
+- [x] Create `src/components/calculators/shared/ResultCard.tsx`:
 
 ```tsx
 import { ReactNode } from "react";
@@ -1736,7 +1736,7 @@ const ResultCard = ({ title, value, children }: ResultCardProps) => {
 export default ResultCard;
 ```
 
-- [ ] Update `src/pages/calculators/WellVolumeCalculator.tsx`:
+- [x] Update `src/pages/calculators/WellVolumeCalculator.tsx`:
 
 ```tsx
 import { useMemo, useState } from "react";
@@ -1795,7 +1795,7 @@ export default WellVolumeCalculator;
 
 ##### Step 9 Verification Checklist
 
-- [ ] Input a known diameter and length, confirm the volume matches manual calculations.
+- [x] Input a known diameter and length, confirm the volume matches manual calculations. (verified in dev server)
 
 #### Step 9 STOP & COMMIT
 
