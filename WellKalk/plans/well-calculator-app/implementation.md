@@ -1877,7 +1877,7 @@ export default CementCalculator;
 
 #### Step 11: Pressure Test Calculator
 
-- [ ] Create `src/utils/pressureCalculations.ts`:
+- [x] Create `src/utils/pressureCalculations.ts`:
 
 ```ts
 export const calculatePressurizedLiters = (
@@ -1890,7 +1890,7 @@ export const calculatePressurizedLiters = (
 };
 ```
 
-- [ ] Update `src/pages/calculators/PressureTestCalculator.tsx`:
+- [x] Update `src/pages/calculators/PressureTestCalculator.tsx`:
 
 ```tsx
 import { useMemo, useState } from "react";
@@ -1966,7 +1966,7 @@ export default PressureTestCalculator;
 
 ##### Step 11 Verification Checklist
 
-- [ ] Confirm liters output matches manual calculation.
+- [x] Confirm liters output matches manual calculation. (verified in dev server)
 
 #### Step 11 STOP & COMMIT
 

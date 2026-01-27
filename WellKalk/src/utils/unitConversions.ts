@@ -1,0 +1,1 @@
+export const lpmToM3s = (lpm: number) => lpm / 1000 / 60;
