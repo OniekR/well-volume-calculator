@@ -307,7 +307,7 @@
             </div>
           </div>
 
-          <div class="casing-input">
+          <div class="casing-input" id="casings-section">
             <div class="casing-header">
               <input
                 type="checkbox"
@@ -1296,22 +1296,23 @@
             </div>
           </section>
 
-          <div class="plug-toggle" aria-hidden="false">
-            <label class="inline-checkbox">
-              <input
-                type="checkbox"
-                id="use_plug"
-                checked
-                aria-controls="plug-panel"
-              />
-              Point of interest
-            </label>
-          </div>
+          <div id="poi-section">
+            <div class="plug-toggle" aria-hidden="false">
+              <label class="inline-checkbox">
+                <input
+                  type="checkbox"
+                  id="use_plug"
+                  checked
+                  aria-controls="plug-panel"
+                />
+                Point of interest
+              </label>
+            </div>
 
-          <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
-            <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
-              Point of interest
-            </h3>
+            <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
+              <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
+                Point of interest
+              </h3>
 
             <div class="plug-control">
               <label for="plug_depth">depth (m):</label>
@@ -1400,6 +1401,7 @@
                 <span class="label">Total vol below tubing:</span>
                 <span>— m³</span>
               </div>
+            </div>
             </div>
           </div>
         </form>

@@ -7,6 +7,7 @@ import {
   applyStateObject as applyStateObjectFn
 } from './state.js';
 import { initPOIToggle, initUI } from './ui.js';
+import { initializeSidebar } from './sidebar.js';
 import { gatherInputs } from './inputs.js';
 import { renderResults, renderUpperCompletionBreakdown } from './render.js';
 import { setupPresetsUI } from './presets-ui.js';
@@ -333,6 +334,7 @@ const VolumeCalc = (() => {
       initDraw
     });
     initPOIToggle();
+    initializeSidebar();
 
     // load persisted state AFTER UI is initialized so dynamic inputs (e.g., drill pipe)
     // have their event handlers attached and can be rendered/restored correctly.
