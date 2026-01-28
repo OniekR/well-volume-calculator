@@ -1899,6 +1899,10 @@ select:focus {
     display: none;
   }
 
+  #presets {
+    display: none;
+  }
+
   #app {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -2118,7 +2122,7 @@ select:focus {
 /* Small desktop - 2 column layout (form + sidebar combines with canvas) */
 @media (max-width: 1100px) and (min-width: 901px) {
   #app {
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 200px 1fr;
     grid-template-areas:
       'sidebar form'
       'sidebar canvas';
@@ -2139,7 +2143,7 @@ select:focus {
     grid-template-areas:
       'form'
       'canvas';
-    padding-bottom: 80px;
+    padding-bottom: 96px;
   }
 
   /* Hide desktop sidebar */
@@ -2157,8 +2161,6 @@ select:focus {
     overflow-x: auto;
     overflow-y: visible;
     background: var(--bg-secondary);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
 
   .sidebar-content {
