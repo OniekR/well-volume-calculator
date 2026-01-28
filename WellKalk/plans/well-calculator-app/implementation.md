@@ -2332,11 +2332,11 @@ export default Toast;
 
 #### Step 17: Responsive Design & Mobile Optimization
 
-- [ ] Create `src/styles/responsive.css` with any additional responsive tweaks needed.
+- [x] Create `src/styles/responsive.css` with any additional responsive tweaks needed.
 
 ##### Step 17 Verification Checklist
 
-- [ ] Confirm touch targets are at least 44×44px on mobile.
+- [x] Confirm touch targets are at least 44×44px on mobile. (added CSS rules for buttons, inputs, and mobile nav links; verified in dev server)
 
 #### Step 17 STOP & COMMIT
 

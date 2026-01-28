@@ -16,6 +16,6 @@ export const buildSlices = (sections: WellSection[]): WellSlice[] => {
     depthTop: section.topMd,
     depthBottom: section.shoeMd,
     diameter: section.outerDiameterIn,
-    color: section.type === "production" ? "var(--eq-tubing-green)" : "#90a4b4",
+    color: section.type === "production" ? "var(--eq-tubing-green)" : "var(--eq-section-default)",
   }));
 };

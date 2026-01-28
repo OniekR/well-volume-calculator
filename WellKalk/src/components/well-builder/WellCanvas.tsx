@@ -23,7 +23,7 @@ const WellCanvas = ({ slices }: WellCanvasProps) => {
               width={width}
               height={height}
               fill={slice.color}
-              stroke="#263238"
+              stroke="var(--eq-border)"
               strokeWidth={0.5}
               rx={4}
             />

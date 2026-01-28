@@ -10,6 +10,7 @@
   --eq-warning: #f0ad4e;
   --eq-danger: #c62828;
   --eq-tubing-green: #00a36c;
+  --eq-section-default: #90a4b4;
 }
 
 .dark {
@@ -24,4 +25,5 @@
   --eq-warning: #f6c87c;
   --eq-danger: #ff8a8a;
   --eq-tubing-green: #39d98a;
+  --eq-section-default: #334a56;
 }

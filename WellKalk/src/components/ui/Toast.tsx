@@ -4,7 +4,7 @@ interface ToastProps {
 
 const Toast = ({ message }: ToastProps) => {
   return (
-    <div className="fixed bottom-24 right-6 rounded-2xl bg-[var(--eq-text)] px-4 py-3 text-sm text-white">
+    <div className="fixed bottom-24 right-6 rounded-2xl bg-[var(--eq-text)] px-4 py-3 text-sm text-[var(--eq-surface)]">
       {message}
     </div>
   );
