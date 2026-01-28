@@ -51,9 +51,42 @@ function navigateToSection(sectionName) {
       top: offsetPosition,
       behavior: 'smooth'
     });
+
+    const announcement = `Navigating to ${sectionName} section`;
+    announceToScreenReader(announcement);
+
+    setTimeout(() => {
+      if (targetElement.hasAttribute('tabindex')) {
+        targetElement.focus();
+      } else {
+        targetElement.setAttribute('tabindex', '-1');
+        targetElement.focus();
+        targetElement.addEventListener(
+          'blur',
+          () => {
+            targetElement.removeAttribute('tabindex');
+          },
+          { once: true }
+        );
+      }
+    }, 500);
   } else {
     console.warn(`Section element not found for: ${sectionName}`);
   }
+}
+
+function announceToScreenReader(message) {
+  const announcement = document.createElement('div');
+  announcement.setAttribute('role', 'status');
+  announcement.setAttribute('aria-live', 'polite');
+  announcement.setAttribute('aria-atomic', 'true');
+  announcement.className = 'sr-only';
+  announcement.textContent = message;
+  document.body.appendChild(announcement);
+
+  setTimeout(() => {
+    document.body.removeChild(announcement);
+  }, 1000);
 }
 
 function setActiveButton(activeButton) {
