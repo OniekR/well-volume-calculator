@@ -331,55 +331,6 @@ export function setupTooltips() {
   setup('reservoir_default_info_btn', 'reservoir_default_info_tooltip');
 }
 
-export function setupHideCasingsToggle(deps = {}) {
-  const { calculateVolume } = deps;
-  const btn = el('toggle_hide_casings_btn');
-  const form = document.getElementById('well-form');
-  if (!btn || !form) return;
-
-  const updateSectionsVisibility = (hidden) => {
-    const sections = Array.from(document.querySelectorAll('.casing-input'));
-    sections.forEach((s) => {
-      if (s.classList.contains('no-hide')) return; // opt-out
-      s.classList.toggle('hidden-by-casings-toggle', hidden);
-    });
-  };
-
-  const setState = (hidden) => {
-    form.classList.toggle('casings-hidden', hidden);
-    updateSectionsVisibility(hidden);
-    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-    btn.textContent = hidden ? 'Show casings' : 'Hide casings';
-  };
-
-  // initialize state based on existing class
-  setState(form.classList.contains('casings-hidden'));
-
-  btn.addEventListener('click', () => {
-    const hidden = form.classList.toggle('casings-hidden');
-    updateSectionsVisibility(hidden);
-    btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-    btn.textContent = hidden ? 'Show casings' : 'Hide casings';
-
-    // Ensure the current volume calculation is up-to-date after UI-only toggle
-    try {
-      if (typeof calculateVolume === 'function') calculateVolume();
-    } catch (e) {
-      // Intentionally ignored: non-fatal error during UI-only toggle
-      // Use a no-op to satisfy ESLint 'no-empty' rule.
-      void 0;
-    }
-  });
-
-  // Keyboard accessibility
-  btn.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      btn.click();
-    }
-  });
-}
-
 export function setupSizeIdInputs(deps) {
   const { scheduleSave, calculateVolume } = deps;
   const pairs = [
@@ -1426,7 +1377,6 @@ export function initUI(deps) {
   setupCasingToggles(deps);
   setupButtons(deps);
   setupTooltips(deps);
-  setupHideCasingsToggle(deps);
   setupSizeIdInputs(deps);
   initUpperCompletionChecks(deps);
   setupWellheadSync(deps);
