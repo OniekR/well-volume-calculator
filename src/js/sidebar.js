@@ -1,10 +1,12 @@
-// Sidebar navigation module
-// Handles section navigation, active states, smooth scrolling, and persistence
-
 const STORAGE_KEY = 'volumeCalc_activeSection';
-const SCROLL_OFFSET = 20; // Pixels above target for better visibility
 
-let activeSection = localStorage.getItem(STORAGE_KEY) || 'casings';
+const DEFAULT_SECTION = 'casings';
+const KNOWN_SECTIONS = new Set(['casings', 'completion', 'settings']);
+
+let activeSection = localStorage.getItem(STORAGE_KEY) || DEFAULT_SECTION;
+
+let controlsOriginalParent = undefined;
+let controlsOriginalNextSibling = undefined;
 
 export function initializeSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -17,9 +19,16 @@ export function initializeSidebar() {
 
   try {
     setupNavigationHandlers();
-    setupScrollSpy();
     setupKeyboardNavigation();
     restoreActiveSection();
+
+    const controlsSection = document.querySelector(
+      '.sidebar-section.sidebar-section-controls'
+    );
+    if (controlsSection && !controlsOriginalParent) {
+      controlsOriginalParent = controlsSection.parentElement;
+      controlsOriginalNextSibling = controlsSection.nextElementSibling;
+    }
 
     setTimeout(() => {
       sidebar.classList.remove('sidebar-loading');
@@ -42,55 +51,88 @@ function setupNavigationHandlers() {
       const targetSection = button.getAttribute('data-section');
 
       if (targetSection) {
-        navigateToSection(targetSection);
-        setActiveButton(button);
-        saveActiveSection(targetSection);
+        setSection(targetSection, { focus: true });
       }
     });
   });
 }
 
-function navigateToSection(sectionName) {
-  const sectionMap = {
-    casings: 'casings-section',
-    completion: 'poi-section',
-    settings: 'import-export-container'
-  };
+function normalizeSectionName(sectionName) {
+  return KNOWN_SECTIONS.has(sectionName) ? sectionName : DEFAULT_SECTION;
+}
 
-  const targetId = sectionMap[sectionName];
-  const targetElement = document.getElementById(targetId);
+function setActiveView(sectionName, { focus } = {}) {
+  const normalized = normalizeSectionName(sectionName);
+  const views = Array.from(document.querySelectorAll('.app-view[data-view]'));
 
-  if (targetElement) {
-    const elementPosition =
-      targetElement.getBoundingClientRect().top + window.pageYOffset;
-    const offsetPosition = elementPosition - SCROLL_OFFSET;
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    });
-
-    const announcement = `Navigating to ${sectionName} section`;
-    announceToScreenReader(announcement);
-
-    setTimeout(() => {
-      if (targetElement.hasAttribute('tabindex')) {
-        targetElement.focus();
-      } else {
-        targetElement.setAttribute('tabindex', '-1');
-        targetElement.focus();
-        targetElement.addEventListener(
-          'blur',
-          () => {
-            targetElement.removeAttribute('tabindex');
-          },
-          { once: true }
-        );
-      }
-    }, 500);
-  } else {
-    console.warn(`Section element not found for: ${sectionName}`);
+  if (!views.length) {
+    return;
   }
+
+  views.forEach((viewEl) => {
+    const viewName = viewEl.getAttribute('data-view');
+    viewEl.hidden = viewName !== normalized;
+  });
+
+  moveControlsForView(normalized);
+
+  announceToScreenReader(`Showing ${normalized} section`);
+
+  if (focus) {
+    const activeView = views.find(
+      (viewEl) => viewEl.getAttribute('data-view') === normalized
+    );
+    focusView(activeView);
+  }
+}
+
+function moveControlsForView(sectionName) {
+  const host = document.getElementById('settings-controls-host');
+  const controlsSection = document.querySelector(
+    '.sidebar-section.sidebar-section-controls'
+  );
+  if (!controlsSection) return;
+
+  if (sectionName === 'settings') {
+    if (host && controlsSection.parentElement !== host) {
+      host.appendChild(controlsSection);
+    }
+    return;
+  }
+
+  if (!controlsOriginalParent) return;
+  if (controlsSection.parentElement === controlsOriginalParent) return;
+
+  controlsOriginalParent.insertBefore(
+    controlsSection,
+    controlsOriginalNextSibling || null
+  );
+}
+
+function focusView(viewEl) {
+  if (!viewEl) return;
+  const focusTarget =
+    viewEl.querySelector('h2, h3, input, select, button, [tabindex]') || viewEl;
+
+  if (focusTarget.hasAttribute && focusTarget.hasAttribute('tabindex')) {
+    focusTarget.focus();
+    return;
+  }
+
+  if (focusTarget !== viewEl && focusTarget.focus) {
+    focusTarget.focus();
+    return;
+  }
+
+  viewEl.setAttribute('tabindex', '-1');
+  viewEl.focus();
+  viewEl.addEventListener(
+    'blur',
+    () => {
+      viewEl.removeAttribute('tabindex');
+    },
+    { once: true }
+  );
 }
 
 function announceToScreenReader(message) {
@@ -130,7 +172,8 @@ function restoreActiveSection() {
     );
     if (button) {
       setActiveButton(button);
-      activeSection = savedSection;
+      activeSection = normalizeSectionName(savedSection);
+      setActiveView(activeSection, { focus: false });
     }
   } else {
     const firstButton = document.querySelector(
@@ -138,50 +181,9 @@ function restoreActiveSection() {
     );
     if (firstButton) {
       setActiveButton(firstButton);
+      setActiveView(DEFAULT_SECTION, { focus: false });
     }
   }
-}
-
-function setupScrollSpy() {
-  const sectionMap = {
-    'casings-section': 'casings',
-    'poi-section': 'completion',
-    'import-export-container': 'settings'
-  };
-
-  const observerOptions = {
-    root: null,
-    rootMargin: '-20% 0px -70% 0px',
-    threshold: 0
-  };
-
-  const observerCallback = (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const sectionId = entry.target.id;
-        const sectionName = sectionMap[sectionId];
-
-        if (sectionName) {
-          const button = document.querySelector(
-            `.sidebar-nav-button[data-section="${sectionName}"]`
-          );
-          if (button) {
-            setActiveButton(button);
-            saveActiveSection(sectionName);
-          }
-        }
-      }
-    });
-  };
-
-  const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-  Object.keys(sectionMap).forEach((sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      observer.observe(element);
-    }
-  });
 }
 
 function setupKeyboardNavigation() {
@@ -222,14 +224,14 @@ function setupKeyboardNavigation() {
   });
 }
 
-export function setSection(sectionName) {
+export function setSection(sectionName, { focus } = {}) {
+  const normalized = normalizeSectionName(sectionName);
   const button = document.querySelector(
-    `.sidebar-nav-button[data-section="${sectionName}"]`
+    `.sidebar-nav-button[data-section="${normalized}"]`
   );
-  if (button) {
-    setActiveButton(button);
-    saveActiveSection(sectionName);
-  }
+  if (button) setActiveButton(button);
+  saveActiveSection(normalized);
+  setActiveView(normalized, { focus: !!focus });
 }
 
 export function getActiveSection() {
