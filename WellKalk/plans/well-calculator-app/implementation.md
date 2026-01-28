@@ -2344,8 +2344,8 @@ export default Toast;
 
 #### Step 18: Dark Mode Implementation
 
-- [ ] Add theme persistence and system detection already handled in ThemeToggle.
-- [ ] Adjust any component styles as needed for contrast.
+- [x] Add theme persistence and system detection already handled in ThemeToggle.
+- [x] Adjust any component styles as needed for contrast. (added `--eq-section-default`, adjusted SVG stroke to `--eq-border`, updated toast text color)
 
 ##### Step 18 Verification Checklist
 
