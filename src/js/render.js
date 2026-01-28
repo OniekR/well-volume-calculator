@@ -76,34 +76,27 @@ export function renderResults(result, opts = {}) {
   // - If UC is enabled (default tubing mode): show tubing splits
   // - If UC is NOT enabled: show combined volumes (ignore drill pipe mode flag)
 
-  // First, hide all POI display elements
-  if (plugAboveEl) plugAboveEl.classList.add('hidden');
-  if (plugBelowEl) plugBelowEl.classList.add('hidden');
-  if (plugAboveTubingEl) plugAboveTubingEl.classList.add('hidden');
-  if (plugBelowTubingEl) plugBelowTubingEl.classList.add('hidden');
-  if (plugAboveAnnulusEl) plugAboveAnnulusEl.classList.add('hidden');
-  if (plugBelowAnnulusEl) plugBelowAnnulusEl.classList.add('hidden');
-  if (plugAboveDrillpipeEl) plugAboveDrillpipeEl.classList.add('hidden');
-  if (plugBelowDrillpipeEl) plugBelowDrillpipeEl.classList.add('hidden');
-  if (plugAboveDrillpipeAnnulusEl)
-    plugAboveDrillpipeAnnulusEl.classList.add('hidden');
-  if (plugBelowDrillpipeAnnulusEl)
-    plugBelowDrillpipeAnnulusEl.classList.add('hidden');
-  if (plugBelowDrillpipeCrossingEl)
-    plugBelowDrillpipeCrossingEl.classList.add('hidden');
-  if (plugBelowDrillpipeAnnulusCrossingEl)
-    plugBelowDrillpipeAnnulusCrossingEl.classList.add('hidden');
-  if (plugAboveTubingOpenCasingEl)
-    plugAboveTubingOpenCasingEl.classList.add('hidden');
-  if (plugTotalBelowPOIEl) plugTotalBelowPOIEl.classList.add('hidden');
-  if (plugTotalBelowPoiTubingEl)
-    plugTotalBelowPoiTubingEl.classList.add('hidden');
-  if (plugTotalBelowPoiDrillpipeEl)
-    plugTotalBelowPoiDrillpipeEl.classList.add('hidden');
-  if (plugBelowDrillpipeNoCrossEl)
-    plugBelowDrillpipeNoCrossEl.classList.add('hidden');
-  if (plugBelowDrillpipeAnnulusNoCrossEl)
-    plugBelowDrillpipeAnnulusNoCrossEl.classList.add('hidden');
+  const poiElements = [
+    plugAboveEl,
+    plugBelowEl,
+    plugAboveTubingEl,
+    plugBelowTubingEl,
+    plugAboveAnnulusEl,
+    plugBelowAnnulusEl,
+    plugAboveDrillpipeEl,
+    plugBelowDrillpipeEl,
+    plugAboveDrillpipeAnnulusEl,
+    plugBelowDrillpipeAnnulusEl,
+    plugBelowDrillpipeCrossingEl,
+    plugBelowDrillpipeAnnulusCrossingEl,
+    plugAboveTubingOpenCasingEl,
+    plugTotalBelowPOIEl,
+    plugTotalBelowPoiTubingEl,
+    plugTotalBelowPoiDrillpipeEl,
+    plugBelowDrillpipeNoCrossEl,
+    plugBelowDrillpipeAnnulusNoCrossEl
+  ];
+  poiElements.forEach((element) => element?.classList.add('hidden'));
 
   // Helper function to set element value and show it
   const setAndShow = (el, value) => {
@@ -135,11 +128,6 @@ export function renderResults(result, opts = {}) {
       // Show the total for drill pipe mode in dedicated element
       if (plugTotalBelowPoiDrillpipeEl) {
         const totalBelow = plugBelowVolume;
-        console.log('RENDER: Drill pipe crosses POI - showing total:', {
-          totalBelow,
-          dpAbove: plugAboveDrillpipe,
-          dpBelow: plugBelowDrillpipe
-        });
         const span =
           plugTotalBelowPoiDrillpipeEl.querySelector('span:not(.label)');
         if (span) {
@@ -157,16 +145,6 @@ export function renderResults(result, opts = {}) {
     const ucBottomVal = opts.ucBottom || 0;
     const tubingCrossesPoi =
       ucBottomVal > 0 && plugDepthVal > 0 && ucBottomVal > plugDepthVal;
-
-    console.log('RENDER: Tubing mode check:', {
-      ucBottomVal,
-      plugDepthVal,
-      tubingCrossesPoi,
-      'plugBelowVolume (from result)': plugBelowVolume,
-      plugBelowTubing,
-      plugBelowAnnulus,
-      'expected total': plugBelowTubing + plugBelowAnnulus
-    });
 
     if (tubingCrossesPoi) {
       // Tubing crosses POI - show total casing volume below tubing shoe

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { computeVolumes } from './src/js/logic.js';
+import { computeVolumes } from '../logic.js';
 
 console.log('=== TESTING PRODUCTION EXTENDING INTO RESERVOIR ZONE ===\n');
 

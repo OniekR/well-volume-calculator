@@ -1,5 +1,5 @@
 // Test the exact user scenario: 3200m tubing shoe at 362m POI
-import { computeVolumes } from './src/js/logic.js';
+import { computeVolumes } from '../logic.js';
 
 const casings = [
   {
