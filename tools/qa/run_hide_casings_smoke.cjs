@@ -1,7 +1,9 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-  const url = 'http://localhost:5173/';
+  // Allow overriding base URL from environment for CI or local runs
+  const DEFAULT_URL = 'http://localhost:5173/';
+  const url = process.env.SMOKE_BASE_URL || process.env.BASE_URL || DEFAULT_URL;
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
