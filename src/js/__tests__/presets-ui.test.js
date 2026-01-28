@@ -12,6 +12,7 @@ describe('setupPresetsUI', () => {
     `;
     global.window.__KeinoPresets = {
       savePreset: vi.fn(() => true),
+      loadBuiltinPresets: vi.fn(),
       populatePresetsUI: vi.fn(),
       getPresetState: vi.fn(() => ({ foo: 'bar' })),
       deletePreset: vi.fn()
