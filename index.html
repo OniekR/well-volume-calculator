@@ -229,71 +229,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Sidebar Controls Section -->
-          <div class="sidebar-section sidebar-section-controls">
-            <h3 class="sidebar-section-title" id="controls-section-label">
-              Controls
-            </h3>
-            <div
-              class="sidebar-controls"
-              aria-labelledby="controls-section-label"
-            >
-              <!-- POI Toggle (will be moved here in Step 2) -->
-              <div id="poi-toggle-container">
-                <button
-                  id="poi-toggle-btn"
-                  class="btn-secondary"
-                  type="button"
-                  aria-label="Toggle Point of Interest section"
-                >
-                  <span id="poi-toggle-btn-text">Show POI Section</span>
-                </button>
-              </div>
-
-              <!-- Theme Toggle (will be moved here in Step 2) -->
-              <div id="theme-toggle-container">
-                <span id="theme_label" class="theme-label" aria-live="polite"
-                  >Dark mode</span
-                >
-                <label class="switch" title="Toggle dark mode">
-                  <input
-                    id="theme_toggle"
-                    type="checkbox"
-                    aria-label="Toggle dark mode"
-                  />
-                  <span class="slider" aria-hidden="true"></span>
-                </label>
-              </div>
-
-              <!-- Import/Export Buttons (will be moved here in Step 2) -->
-              <div id="import-export-container">
-                <button
-                  id="import_presets_btn"
-                  class="btn-secondary"
-                  type="button"
-                  aria-label="Import presets from JSON"
-                >
-                  Import JSON
-                </button>
-                <button
-                  id="export_presets_btn"
-                  class="btn-secondary"
-                  type="button"
-                  aria-label="Export presets to JSON"
-                >
-                  Export JSON
-                </button>
-                <input
-                  id="import_presets_input"
-                  type="file"
-                  accept=".json,application/json"
-                  style="display: none"
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </nav>
 
@@ -1413,6 +1348,7 @@
                     name="plug_depth"
                     step="1"
                     placeholder="Optional"
+                    value="0"
                     min="0"
                   />
                 </div>
@@ -1506,8 +1442,77 @@
             aria-label="Settings"
             hidden
           >
-            <h2 style="margin: 0 0 12px 0">Settings</h2>
-            <div id="settings-controls-host"></div>
+            <h2 style="margin: 0 0 20px 0">Settings</h2>
+
+            <div class="settings-controls-section">
+              <!-- POI Toggle -->
+              <div class="settings-control-group">
+                <label class="settings-control-label">Point of Interest</label>
+                <div id="poi-toggle-container">
+                  <button
+                    id="poi-toggle-btn"
+                    class="btn-primary settings-button"
+                    type="button"
+                    aria-label="Toggle Point of Interest section"
+                  >
+                    <span id="poi-toggle-btn-text">Show POI Section</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Theme Toggle -->
+              <div class="settings-control-group">
+                <label class="settings-control-label" for="theme_toggle"
+                  >Theme</label
+                >
+                <div id="theme-toggle-container" class="theme-toggle-group">
+                  <label class="switch" title="Toggle dark mode">
+                    <input
+                      id="theme_toggle"
+                      type="checkbox"
+                      aria-label="Toggle dark mode"
+                    />
+                    <span class="slider" aria-hidden="true"></span>
+                  </label>
+                  <span id="theme_label" class="theme-label" aria-live="polite"
+                    >Dark mode</span
+                  >
+                </div>
+              </div>
+
+              <!-- Import/Export -->
+              <div class="settings-control-group">
+                <label class="settings-control-label">Presets</label>
+                <div
+                  id="import-export-container"
+                  class="settings-buttons-group"
+                >
+                  <button
+                    id="import_presets_btn"
+                    class="btn-primary settings-button"
+                    type="button"
+                    aria-label="Import presets from JSON"
+                  >
+                    Import JSON
+                  </button>
+                  <button
+                    id="export_presets_btn"
+                    class="btn-primary settings-button"
+                    type="button"
+                    aria-label="Export presets to JSON"
+                  >
+                    Export JSON
+                  </button>
+                  <input
+                    id="import_presets_input"
+                    type="file"
+                    accept=".json,application/json"
+                    style="display: none"
+                    aria-hidden="true"
+                  />
+                </div>
+              </div>
+            </div>
           </section>
         </form>
       </main>
