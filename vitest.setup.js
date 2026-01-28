@@ -68,4 +68,17 @@ if (typeof document !== 'undefined' && document && document.body) {
     poiBtn.appendChild(poiText);
     document.body.appendChild(poiBtn);
   }
+
+  // Provide a basic IntersectionObserver mock for Node test environment
+  if (typeof global !== 'undefined' && !global.IntersectionObserver) {
+    class IntersectionObserver {
+      constructor(callback) {
+        this._callback = callback;
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    global.IntersectionObserver = IntersectionObserver;
+  }
 }
