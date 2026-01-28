@@ -364,7 +364,11 @@ export function setupHideCasingsToggle(deps = {}) {
     // Ensure the current volume calculation is up-to-date after UI-only toggle
     try {
       if (typeof calculateVolume === 'function') calculateVolume();
-    } catch (e) {}
+    } catch (e) {
+      // Intentionally ignored: non-fatal error during UI-only toggle
+      // Use a no-op to satisfy ESLint 'no-empty' rule.
+      void 0;
+    }
   });
 
   // Keyboard accessibility
