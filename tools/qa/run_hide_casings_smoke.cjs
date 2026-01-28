@@ -76,10 +76,51 @@ const puppeteer = require('puppeteer');
 
     const beforePer = await waitForInitialPerCasing();
 
+    // Helper: robust click with fallbacks and debug artifact capture
+    async function safeClick(selector, options = {}) {
+      const timeout = options.timeout || 5000;
+      await page.waitForSelector(selector, { timeout });
+      const el = await page.$(selector);
+      if (!el) throw new Error(`Element not found for selector ${selector}`);
+
+      // Ensure element is in view
+      await el.evaluate((e) => e.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' }));
+      await (page.waitForTimeout ? page.waitForTimeout(100) : wait(100));
+
+      try {
+        await el.click();
+      } catch (err) {
+        // Fallback: attempt DOM click
+        try {
+          await el.evaluate((e) => e.click());
+        } catch (err2) {
+          // Capture debug artifacts for CI
+          try {
+            const fs = require('fs');
+            const path = require('path');
+            const outDir = path.resolve(__dirname, 'artifacts');
+            if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+            const screenshotPath = path.join(outDir, `hide-casings-click-fail-${Date.now()}.png`);
+            await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
+            const html = await page.evaluate((sel) => {
+              const el = document.querySelector(sel);
+              return el ? el.outerHTML : document.documentElement.outerHTML;
+            }, selector);
+            fs.writeFileSync(path.join(outDir, `hide-casings-click-fail-${Date.now()}.html`), html || '');
+            console.error('DEBUG: artifacts written to', outDir);
+          } catch (writeErr) {
+            console.error('DEBUG: failed to write artifacts', writeErr && writeErr.message ? writeErr.message : writeErr);
+          }
+
+          throw new Error(`Failed to click selector ${selector}: ${err.message}; fallback error: ${err2 && err2.message ? err2.message : err2}`);
+        }
+      }
+
+      await (page.waitForTimeout ? page.waitForTimeout(options.wait || 300) : wait(options.wait || 300));
+    }
+
     // Click the hide casings button
-    await page.waitForSelector('#toggle_hide_casings_btn', { timeout: 5000 });
-    await page.click('#toggle_hide_casings_btn');
-    await (page.waitForTimeout ? page.waitForTimeout(300) : wait(300));
+    await safeClick('#toggle_hide_casings_btn', { timeout: 5000, wait: 300 });
 
     // Verify casings are visually hidden (computed style)
     const visibleOthers = await page.evaluate(() => {
