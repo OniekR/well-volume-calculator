@@ -138,12 +138,12 @@ let watchdog = setTimeout(() => {
     await page.evaluate(() => {
       const existing = document.getElementById('production_drift');
       if (existing) {
-        existing.value = '6.0';
+        existing.value = '4.0';
       } else {
         const inp = document.createElement('input');
         inp.type = 'number';
         inp.id = 'production_drift';
-        inp.value = '6.0';
+        inp.value = '4.0';
         document.getElementById('well-form').appendChild(inp);
       }
     });

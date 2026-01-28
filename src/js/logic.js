@@ -1,4 +1,97 @@
 /**
+ * Convert inches to meters.
+ * @param {number|string} inches
+ * @returns {number} meters
+ */
+function inchesToMeters(inches) {
+  const n = Number(inches);
+  return isFinite(n) ? n * 0.0254 : 0;
+}
+
+/**
+ * Calculate steel cross-sectional area (m²) for a pipe given OD in inches and lPerM.
+ * Steel area = OD_area - ID_area
+ * Where ID_area = lPerM / 1000 (lPerM is already the ID cross-sectional area in m²)
+ *
+ * @param {number|string} odInches outer diameter in inches
+ * @param {number|string} lPerM liters per meter (ID cross-sectional area as volume per meter)
+ * @returns {number} steel area in square meters
+ */
+function calculatePipeSteelAreaFromLPerM(odInches, lPerM) {
+  const odMeters = inchesToMeters(odInches);
+  if (!isFinite(odMeters) || odMeters <= 0) return 0;
+
+  const lPerMNum = Number(lPerM);
+  if (!isFinite(lPerMNum) || lPerMNum <= 0) return 0;
+
+  const odRadius = odMeters / 2;
+  const odArea = Math.PI * Math.pow(odRadius, 2);
+  const idArea = lPerMNum / 1000; // lPerM is already ID volume per meter in m³, so area in m²
+
+  return Math.max(0, odArea - idArea);
+}
+
+/**
+ * Calculate steel volume (m³) for a pipe given length, OD in inches, and lPerM.
+ * This is the preferred method when lPerM is available but explicit ID is not.
+ *
+ * @param {number|string} lengthMeters length in meters
+ * @param {number|string} odInches outer diameter in inches
+ * @param {number|string} lPerM liters per meter (ID volume per meter)
+ * @returns {number} steel volume in cubic meters
+ */
+function calculatePipeSteelVolumeFromLPerM(lengthMeters, odInches, lPerM) {
+  const L = Number(lengthMeters);
+  if (!isFinite(L) || L <= 0) return 0;
+
+  const area = calculatePipeSteelAreaFromLPerM(odInches, lPerM);
+  return area * L;
+}
+
+/**
+ * Calculate steel cross-sectional area (m²) for a pipe given OD and ID in inches.
+ * Steel area = π * (OD_radius² - ID_radius²)
+ *
+ * @param {number|string} odInches outer diameter in inches
+ * @param {number|string} idInches inner diameter in inches
+ * @returns {number} steel area in square meters
+ */
+function calculatePipeSteelArea(odInches, idInches) {
+  const odMeters = inchesToMeters(odInches);
+  const idMeters = inchesToMeters(idInches);
+  if (!isFinite(odMeters) || !isFinite(idMeters) || odMeters <= idMeters) {
+    return 0;
+  }
+  const odRadius = odMeters / 2;
+  const idRadius = idMeters / 2;
+  return Math.PI * (Math.pow(odRadius, 2) - Math.pow(idRadius, 2));
+}
+
+/**
+ * Calculate steel volume (m³) for a pipe given length (m) and diameters (inches).
+ * Steel volume = steel area × length
+ *
+ * Validates all inputs; returns 0 for invalid inputs.
+ *
+ * @param {number|string} lengthMeters length in meters
+ * @param {number|string} odInches outer diameter in inches
+ * @param {number|string} idInches inner diameter in inches
+ * @returns {number} steel volume in cubic meters
+ */
+export function calculatePipeSteelVolume(lengthMeters, odInches, idInches) {
+  const L = Number(lengthMeters);
+  const od = Number(odInches);
+  const id = Number(idInches);
+
+  // Validate all inputs
+  if (!isFinite(L) || L <= 0) return 0;
+  if (!isFinite(od) || !isFinite(id)) return 0;
+
+  const area = calculatePipeSteelArea(od, id);
+  return area * L;
+}
+
+/**
  * Pure calculation helpers for Well Volume Calculator
  * computeVolumes accepts an array of casing descriptors and options and
  * returns computed volumes and drawing params.
@@ -76,16 +169,25 @@ export function computeVolumes(casingsInput, opts = {}) {
   let totalVolume = 0;
   let plugAboveVolume = 0;
   let plugBelowVolume = 0;
+  let plugBelowVolumeTubing = 0; // Below-POI volume for tubing mode (no DP EOD subtraction)
+  let dpEodDisplacementBelowPOI = 0; // Track DP EOD displacement separately
   let plugAboveTubing = 0;
   let plugBelowTubing = 0;
   let plugAboveAnnulus = 0;
   let plugBelowAnnulus = 0;
+  let plugAboveTubingOpenCasing = 0;
+  let plugBelowTubingOpenCasing = 0; // Volume of hole below the tubing shoe
+  let casingVolumeBelowTubingShoe = 0; // Total casing volume below the tubing shoe
   let plugAboveDrillpipe = 0;
   let plugBelowDrillpipe = 0;
   let plugAboveDrillpipeAnnulus = 0;
   let plugBelowDrillpipeAnnulus = 0;
   let plugAboveDrillpipeOpenCasing = 0;
   let plugBelowDrillpipeOpenCasing = 0;
+
+  // Track how much tubing steel volume has already been subtracted from below-POI
+  // calculations (so we don't double-subtract when applying fallbacks later).
+  let ucSteelSubtractedBelow = 0;
 
   for (let i = 0; i < points.length - 1; i++) {
     const segStart = points[i];
@@ -195,17 +297,38 @@ export function computeVolumes(casingsInput, opts = {}) {
           annulusVolInOverlap = annulusArea * ucOverlapLen;
         }
 
+        const tubingSteelArea = ucOdArea - ucIdArea;
+        const steelVolInOverlap = tubingSteelArea * ucOverlapLen;
+
+        // DEBUG: Log UC steel calculation in segment loop
+        if (ucOverlapLen > 100 && steelVolInOverlap > 5) {
+          console.log('[UC SEGMENT LOOP] Steel calculation:', {
+            ucOdArea: ucOdArea.toFixed(6),
+            ucIdArea: ucIdArea.toFixed(6),
+            tubingSteelArea: tubingSteelArea.toFixed(6),
+            ucOverlapLen,
+            steelVolInOverlap: steelVolInOverlap.toFixed(2),
+            segStart,
+            segEnd,
+            plugDepthVal
+          });
+        }
+
         // Now split the whole segment by POI
         if (segEnd <= plugDepthVal) {
           // Entire segment is above POI
           plugAboveTubing += tubingVolInOverlap;
           plugAboveAnnulus += annulusVolInOverlap;
-          plugAboveVolume += segVol;
+          plugAboveVolume += segVol - steelVolInOverlap;
         } else if (segStart >= plugDepthVal) {
           // Entire segment is below POI
           plugBelowTubing += tubingVolInOverlap;
           plugBelowAnnulus += annulusVolInOverlap;
-          plugBelowVolume += segVol;
+          plugBelowVolume += segVol - steelVolInOverlap;
+
+          // Track how much steel volume we've already subtracted for below-POI
+          // UC segments
+          ucSteelSubtractedBelow += steelVolInOverlap;
         } else {
           // Segment crosses POI - split it
           const aboveLen = Math.max(0, plugDepthVal - segStart);
@@ -224,6 +347,10 @@ export function computeVolumes(casingsInput, opts = {}) {
           const tubingAbove = ucIdArea * aboveUcOverlapLen;
           const tubingBelow = ucIdArea * belowUcOverlapLen;
 
+          const tubingSteelArea = ucOdArea - ucIdArea;
+          const steelAbove = tubingSteelArea * aboveUcOverlapLen;
+          const steelBelow = tubingSteelArea * belowUcOverlapLen;
+
           const annulusAbove =
             annulusVolInOverlap * (aboveUcOverlapLen / ucOverlapLen);
           const annulusBelow =
@@ -236,8 +363,13 @@ export function computeVolumes(casingsInput, opts = {}) {
 
           const volAbove = area * aboveLen;
           const volBelow = area * belowLen;
-          plugAboveVolume += volAbove;
-          plugBelowVolume += volBelow;
+          // Subtract tubing steel from the casing volume to get fluid volumes
+          plugAboveVolume += volAbove - steelAbove;
+          plugBelowVolume += volBelow - steelBelow;
+
+          // Track steel subtracted for the below-POI portion so we can avoid
+          // double-subtracting if a fallback method is applied later
+          ucSteelSubtractedBelow += steelBelow;
         }
       } else {
         // No UC overlap, just split the volume by POI
@@ -253,6 +385,176 @@ export function computeVolumes(casingsInput, opts = {}) {
           plugAboveVolume += volAbove;
           plugBelowVolume += volBelow;
         }
+      }
+    }
+  }
+
+  // Calculate tubing open casing volume: casing volume between tubing shoe and POI
+  // (when tubing is entirely above POI)
+  if (
+    plugEnabled &&
+    ucActive &&
+    !isNaN(plugDepthVal) &&
+    typeof plugDepthVal !== 'undefined' &&
+    ucBottomVal < plugDepthVal
+  ) {
+    // Tubing is entirely above POI, calculate open casing between tubing shoe and POI
+    const openCasingStart = ucBottomVal;
+    const openCasingEnd = plugDepthVal;
+
+    // Find casing volume in this range (excluding UC steel and annulus)
+    // Go through points between tubing shoe and POI
+    const ocPointsSet = new Set([openCasingStart, openCasingEnd]);
+    casingsInput.forEach((c) => {
+      const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+      if (topVal > openCasingStart && topVal < openCasingEnd)
+        ocPointsSet.add(topVal);
+      if (c.depth > openCasingStart && c.depth < openCasingEnd)
+        ocPointsSet.add(c.depth);
+    });
+    const ocPoints = Array.from(ocPointsSet).sort((a, b) => a - b);
+
+    for (let i = 0; i < ocPoints.length - 1; i++) {
+      const segStart = ocPoints[i];
+      const segEnd = ocPoints[i + 1];
+      const segLength = segEnd - segStart;
+      if (segLength <= 0) continue;
+
+      // Find covering casings
+      const covering = casingsInput.filter((c) => {
+        if (!c.use) return false;
+        if (c.depth <= segStart) return false;
+        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+        if (topVal >= segEnd) return false;
+        if (c.role === 'conductor' && surfaceInUse) return false;
+        if (c.role === 'surface' && intermediateInUse) return false;
+        return true;
+      });
+
+      if (covering.length > 0) {
+        // Sort by ID to find innermost
+        covering.sort((a, b) => {
+          const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+          const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+          return ai - bi;
+        });
+        const owner = covering[0];
+
+        // Calculate open casing volume (total casing area - annulus for UC)
+        // In this depth range, tubing is absent, so we get pure casing volume
+        const area = perCasingMap[owner.role].perMeter_m3;
+        const segVol = area * segLength;
+
+        plugAboveTubingOpenCasing += segVol;
+      }
+    }
+  }
+
+  // Calculate volume below tubing shoe: casing volume from tubing shoe to well bottom
+  // (showing what casing volume exists below where the tubing ends)
+  if (ucActive && ucBottomVal > 0) {
+    const belowTubingStart = ucBottomVal;
+    const belowTubingEnd = Math.max(...casingsInput.map((c) => c.depth || 0));
+
+    if (belowTubingEnd > belowTubingStart) {
+      // Find casing volume below tubing shoe
+      const btPointsSet = new Set([belowTubingStart, belowTubingEnd]);
+      casingsInput.forEach((c) => {
+        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+        if (topVal > belowTubingStart && topVal < belowTubingEnd)
+          btPointsSet.add(topVal);
+        if (c.depth > belowTubingStart && c.depth < belowTubingEnd)
+          btPointsSet.add(c.depth);
+      });
+      const btPoints = Array.from(btPointsSet).sort((a, b) => a - b);
+
+      for (let i = 0; i < btPoints.length - 1; i++) {
+        const segStart = btPoints[i];
+        const segEnd = btPoints[i + 1];
+        const segLength = segEnd - segStart;
+        if (segLength <= 0) continue;
+
+        // Find covering casings
+        const covering = casingsInput.filter((c) => {
+          if (!c.use) return false;
+          if (c.depth <= segStart) return false;
+          const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+          if (topVal >= segEnd) return false;
+          if (c.role === 'conductor' && surfaceInUse) return false;
+          if (c.role === 'surface' && intermediateInUse) return false;
+          if (c.role === 'upper_completion') return false; // Exclude UC itself
+          return true;
+        });
+
+        if (covering.length > 0) {
+          // Sort by ID to find innermost
+          covering.sort((a, b) => {
+            const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+            const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+            return ai - bi;
+          });
+          const owner = covering[0];
+          const area = perCasingMap[owner.role].perMeter_m3;
+          const segVol = area * segLength;
+          plugBelowTubingOpenCasing += segVol;
+        }
+      }
+    }
+  }
+
+  // Calculate total casing volume below tubing shoe
+  // Use innermost casing for each depth segment (do not sum overlapping casing annuli)
+  if (ucActive && ucBottomVal > 0) {
+    // Determine bottom-most depth among casings
+    const belowTubingStart = ucBottomVal;
+    const belowTubingEnd = Math.max(...casingsInput.map((c) => c.depth || 0));
+
+    if (belowTubingEnd > belowTubingStart) {
+      // Collect all transition points between start and end
+      const btPointsSet = new Set([belowTubingStart, belowTubingEnd]);
+      casingsInput.forEach((c) => {
+        if (!c.use) return;
+        if (c.role === 'upper_completion') return;
+        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+        if (topVal > belowTubingStart && topVal < belowTubingEnd)
+          btPointsSet.add(topVal);
+        if (c.depth > belowTubingStart && c.depth < belowTubingEnd)
+          btPointsSet.add(c.depth);
+      });
+
+      const btPoints = Array.from(btPointsSet).sort((a, b) => a - b);
+
+      for (let i = 0; i < btPoints.length - 1; i++) {
+        const segStart = btPoints[i];
+        const segEnd = btPoints[i + 1];
+        const segLength = segEnd - segStart;
+        if (segLength <= 0) continue;
+
+        // Find covering casings for this sub-segment
+        const covering = casingsInput.filter((c) => {
+          if (!c.use) return false;
+          if (c.depth <= segStart) return false;
+          const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+          if (topVal >= segEnd) return false;
+          if (c.role === 'conductor' && surfaceInUse) return false;
+          if (c.role === 'surface' && intermediateInUse) return false;
+          if (c.role === 'upper_completion') return false; // Exclude UC itself
+          return true;
+        });
+
+        if (covering.length === 0) continue;
+
+        // Innermost casing (smallest ID) owns this segment
+        covering.sort((a, b) => {
+          const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+          const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+          return ai - bi;
+        });
+
+        const owner = covering[0];
+        const area = perCasingMap[owner.role].perMeter_m3;
+        const segVol = area * segLength;
+        casingVolumeBelowTubingShoe += segVol;
       }
     }
   }
@@ -566,7 +868,6 @@ export function computeVolumes(casingsInput, opts = {}) {
       const openCasingBelowLen = Math.max(0, plugDepthVal - dpBottom);
 
       // Get the casing volume from the hole volume table for the relevant depth range
-      let dpCasingRole = null;
       let openCasingVolAbove = 0;
       let openCasingVolBelow = 0;
 
@@ -575,8 +876,6 @@ export function computeVolumes(casingsInput, opts = {}) {
         if (casing.use && casing.depth > dpBottom) {
           const casingTop = typeof casing.top !== 'undefined' ? casing.top : 0;
           if (casingTop <= dpBottom) {
-            dpCasingRole = casing.role;
-
             // Calculate open casing volume: total casing volume - DP volume - annulus volume
             // for the depth ranges relevant to POI
             const casingPerMeter =
@@ -663,30 +962,20 @@ export function computeVolumes(casingsInput, opts = {}) {
                 // EOD is in L/m, convert to m³
                 segmentEodDisplacement = (dpSeg.eod / 1000) * lengthBelowPOI;
               } else if (dpSeg.od && dpSeg.lPerM) {
-                // Fallback: calculate steel displacement from OD and ID
-                // Steel volume = π * (OD_radius² - ID_radius²) * length
-                // OD and lPerM are available; lPerM represents ID volume per meter
-                // ID in cubic meters per meter = (ID_radius² * π)
-                // From lPerM (L/m), we can get ID volume rate, then back-calculate ID
-
-                // lPerM is internal volume per meter in liters
-                // ID internal volume per meter (m³) = lPerM / 1000
-                // Area = π * r² = lPerM / 1000
-                // r² = (lPerM / 1000) / π
-                // r = sqrt((lPerM / 1000) / π)
-                const idVolPerMeter = dpSeg.lPerM / 1000; // m³
-                const idArea = idVolPerMeter / 1; // already divided by length (1m)
-                const idRadius = Math.sqrt(idArea / Math.PI);
-
-                // OD is in inches, convert to meters
-                const odRadius = (dpSeg.od / 2) * 0.0254; // meters
-
-                // Steel area = π * (OD_radius² - ID_radius²)
-                const steelArea =
-                  Math.PI * (Math.pow(odRadius, 2) - Math.pow(idRadius, 2));
-
-                // Steel volume for this segment
-                segmentEodDisplacement = steelArea * lengthBelowPOI;
+                // Fallback: calculate steel displacement from OD and lPerM (preferred method)
+                // Use lPerM directly as ID cross-sectional area
+                segmentEodDisplacement = calculatePipeSteelVolumeFromLPerM(
+                  lengthBelowPOI,
+                  dpSeg.od,
+                  dpSeg.lPerM
+                );
+              } else if (dpSeg.od && dpSeg.id) {
+                // Fallback 2: calculate steel displacement from OD and ID (in inches)
+                segmentEodDisplacement = calculatePipeSteelVolume(
+                  lengthBelowPOI,
+                  dpSeg.od,
+                  dpSeg.id
+                );
               }
 
               eodDisplacementBelowPOI += segmentEodDisplacement;
@@ -694,12 +983,73 @@ export function computeVolumes(casingsInput, opts = {}) {
           }
         });
 
+        dpEodDisplacementBelowPOI = eodDisplacementBelowPOI; // Save for later use
         plugBelowVolume = Math.max(
           0,
           plugBelowVolume - eodDisplacementBelowPOI
         );
       }
     }
+  }
+
+  // Subtract tubing (UC) steel displacement below POI if tubing crosses POI.
+  // Prefer explicit closed-end (EOD) value if provided, otherwise use OD/ID
+  // geometry to compute steel displacement. Only subtract the amount NOT
+  // already subtracted during segment loop processing to avoid double subtraction.
+  if (
+    plugEnabled &&
+    ucActive &&
+    !isNaN(plugDepthVal) &&
+    typeof plugDepthVal !== 'undefined' &&
+    ucBottomVal > plugDepthVal
+  ) {
+    const lengthBelow = ucBottomVal - Math.max(ucTopVal, plugDepthVal);
+
+    if (lengthBelow > 0) {
+      let totalUcSteelBelow = 0;
+      if (subtractEod && typeof uc.eod !== 'undefined' && uc.eod > 0) {
+        // Use explicit closed-end displacement if provided
+        totalUcSteelBelow = (uc.eod / 1000) * lengthBelow;
+        console.log('[UC FINAL CHECK] Using UC.eod:', {
+          uc_eod: uc.eod,
+          lengthBelow,
+          totalUcSteelBelow: totalUcSteelBelow.toFixed(2)
+        });
+      } else if (uc.od && uc.id) {
+        // Fallback: calculate steel from OD and ID geometry
+        const tubingSteelArea = Math.max(0, ucOdArea - ucIdArea);
+        totalUcSteelBelow = tubingSteelArea * lengthBelow;
+        console.log('[UC FINAL CHECK] Using OD/ID calculation:', {
+          ucOdArea: ucOdArea.toFixed(6),
+          ucIdArea: ucIdArea.toFixed(6),
+          tubingSteelArea: tubingSteelArea.toFixed(6),
+          lengthBelow,
+          totalUcSteelBelow: totalUcSteelBelow.toFixed(2)
+        });
+      }
+
+      // Only subtract the amount NOT already subtracted in the segment loop
+      const remainingToSubtract = Math.max(
+        0,
+        totalUcSteelBelow - ucSteelSubtractedBelow
+      );
+
+      if (remainingToSubtract > 0) {
+        plugBelowVolume = Math.max(0, plugBelowVolume - remainingToSubtract);
+      }
+    }
+  }
+
+  // Save tubing-mode value AFTER UC steel subtraction
+  // This ensures tubing total reflects UC configuration correctly
+  // For DP mode: if DP crossed POI, plugBelowVolume has DP EOD subtracted but we want pre-DP value
+  // For tubing mode: plugBelowVolume has UC steel subtracted, which is what we want
+  if (drillPipeInput && drillPipeInput.mode === 'drillpipe') {
+    // In DP mode: add back the DP EOD to get tubing value (without DP but with UC steel)
+    plugBelowVolumeTubing = plugBelowVolume + dpEodDisplacementBelowPOI;
+  } else {
+    // Not in DP mode: plugBelowVolume is the tubing value (with UC steel subtracted)
+    plugBelowVolumeTubing = plugBelowVolume;
   }
 
   const perCasingVolumes = casingsInput.map((c) => {
@@ -729,10 +1079,14 @@ export function computeVolumes(casingsInput, opts = {}) {
     casingsToDraw,
     plugAboveVolume,
     plugBelowVolume,
+    plugBelowVolumeTubing,
     plugAboveTubing,
     plugBelowTubing,
     plugAboveAnnulus,
     plugBelowAnnulus,
+    plugAboveTubingOpenCasing,
+    plugBelowTubingOpenCasing,
+    casingVolumeBelowTubingShoe,
     plugAboveDrillpipe,
     plugBelowDrillpipe,
     plugAboveDrillpipeAnnulus,

@@ -114,7 +114,7 @@ export function calculateDrillPipeDepths(pipes) {
  * @param {Array} casingsInput - Array of casing descriptors
  * @returns {Object} - { sections: [...], dpIdVolume, annulusVolume, dpIdLength, used: boolean }
  */
-export function computeDrillPipeBreakdown(pipes, casingsInput, dpInput = {}) {
+export function computeDrillPipeBreakdown(pipes, casingsInput, _dpInput = {}) {
   if (!pipes || pipes.length === 0) {
     return {
       used: false,

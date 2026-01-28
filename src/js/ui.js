@@ -41,6 +41,28 @@ export function setupCasingToggles(deps) {
 
     checkbox.addEventListener('change', () => {
       update();
+
+      // Special handling for upper completion checkbox
+      if (checkbox.id === 'use_upper_completion') {
+        const drillpipeSection = el('uc_drillpipe_section');
+        const modeToggle = el('uc_mode_toggle');
+
+        if (!checkbox.checked) {
+          // When disabling upper completion, hide drill pipe section and reset mode to tubing
+          if (drillpipeSection) {
+            drillpipeSection.classList.add('hidden');
+          }
+          if (modeToggle) {
+            modeToggle.checked = false;
+            const sliderEl =
+              modeToggle.nextElementSibling ||
+              (modeToggle.closest &&
+                modeToggle.closest('.switch')?.querySelector('.slider'));
+            if (sliderEl) sliderEl.classList.add('slider--tubing');
+          }
+        }
+      }
+
       calculateVolume();
       scheduleSave();
     });
@@ -718,7 +740,8 @@ function removeUpperCompletionWarning() {
   }
 }
 
-export function initUpperCompletionChecks() {
+export function initUpperCompletionChecks(deps = {}) {
+  const { calculateVolume = () => {} } = deps;
   const ucSelect = el('upper_completion_size');
   const ucId = el('upper_completion_size_id');
   const roles = [
@@ -736,8 +759,30 @@ export function initUpperCompletionChecks() {
   const ucShoeEl = el('depth_uc');
   if (ucSelect) ucSelect.addEventListener('change', schedule);
   if (ucId) ucId.addEventListener('input', schedule);
-  if (ucTopEl) ucTopEl.addEventListener('input', schedule);
-  if (ucShoeEl) ucShoeEl.addEventListener('input', schedule);
+  if (ucTopEl) {
+    ucTopEl.addEventListener('input', () => {
+      // Validate that Top doesn't exceed Shoe
+      const topVal = parseFloat(ucTopEl.value);
+      const shoeVal = ucShoeEl ? parseFloat(ucShoeEl.value) : NaN;
+      if (!isNaN(topVal) && !isNaN(shoeVal) && topVal > shoeVal) {
+        ucTopEl.value = String(shoeVal);
+      }
+      schedule();
+      calculateVolume();
+    });
+  }
+  if (ucShoeEl) {
+    ucShoeEl.addEventListener('input', () => {
+      // Validate that Shoe doesn't go below Top
+      const shoeVal = parseFloat(ucShoeEl.value);
+      const topVal = ucTopEl ? parseFloat(ucTopEl.value) : NaN;
+      if (!isNaN(shoeVal) && !isNaN(topVal) && shoeVal < topVal) {
+        ucShoeEl.value = String(topVal);
+      }
+      schedule();
+      calculateVolume();
+    });
+  }
 
   const topMap = {
     conductor: 'depth_18_top',
@@ -1274,7 +1319,7 @@ export function setupThemeToggle() {
 }
 
 function setupDrillPipeMode(deps) {
-  const { calculateVolume } = deps;
+  const { calculateVolume, scheduleSave } = deps;
   const modeToggle = el('uc_mode_toggle');
   const tubingSection = el('uc_tubing_section');
   const drillpipeSection = el('uc_drillpipe_section');
@@ -1292,6 +1337,12 @@ function setupDrillPipeMode(deps) {
     // Toggle between tubing and drill pipe mode
     modeToggle.addEventListener('change', () => {
       const isDP = modeToggle.checked;
+      // Keep the slider visually green when in tubing mode (unchecked)
+      const sliderEl =
+        modeToggle.nextElementSibling ||
+        (modeToggle.closest &&
+          modeToggle.closest('.switch')?.querySelector('.slider'));
+      if (sliderEl) sliderEl.classList.toggle('slider--tubing', !isDP);
       if (isDP) {
         if (tubingSection) tubingSection.classList.add('hidden');
         drillpipeSection.classList.remove('hidden');
@@ -1336,6 +1387,7 @@ function setupDrillPipeMode(deps) {
         }
       }
       calculateVolume();
+      if (scheduleSave) scheduleSave();
     });
 
     // Update drill pipe count via buttons
@@ -1356,6 +1408,7 @@ function setupDrillPipeMode(deps) {
         updateDrillPipeDepthDisplays();
         attachDrillPipeListeners();
         calculateVolume();
+        if (scheduleSave) scheduleSave();
       });
     });
 
@@ -1376,6 +1429,7 @@ function setupDrillPipeMode(deps) {
           sizeSelect.addEventListener('change', () => {
             updateDrillPipeDepthDisplays();
             calculateVolume();
+            if (scheduleSave) scheduleSave();
           });
         }
 
@@ -1383,6 +1437,7 @@ function setupDrillPipeMode(deps) {
           lengthInput.addEventListener('input', () => {
             updateDrillPipeDepthDisplays();
             calculateVolume();
+            if (scheduleSave) scheduleSave();
           });
         }
       });
@@ -1398,7 +1453,7 @@ export function initUI(deps) {
   setupTooltips(deps);
   setupHideCasingsToggle(deps);
   setupSizeIdInputs(deps);
-  initUpperCompletionChecks();
+  initUpperCompletionChecks(deps);
   setupWellheadSync(deps);
   setupTiebackBehavior(deps);
   setupProductionToggleButtons(deps);

@@ -7,11 +7,23 @@ export const OD = {
   tieback: { 8.535: 9.625, 8.921: 9.625, 9.66: 11.5 },
   reservoir: { 6.184: 7, 6.276: 7, 4.778: 5.5 },
   small_liner: { 4.276: 5, 3.958: 4.5 },
-  upper_completion: { 4.892: 5.5 }
+  upper_completion: { 4.892: 5.5, 3.958: 4.5 }
 };
 
 export const TJ = {
-  upper_completion: { 4.892: 6.098 }
+  upper_completion: { 4.892: 6.098, 3.958: 4.967 },
+  // TJ entry for 4 1/2" 12.6# L-80 tubing (Nom ID 3.958)
+  small_liner: { 3.958: 4.967 }
+};
+
+// Human-friendly labels used by dropdowns. Add new labels here as needed.
+export const SIZE_LABELS = {
+  small_liner: {
+    3.958: '4 1/2" 12.6# L-80'
+  },
+  upper_completion: {
+    3.958: '4 1/2" 12.6# L-80'
+  }
 };
 
 export const DRIFT = {

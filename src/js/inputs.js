@@ -1,26 +1,39 @@
 import { el } from './dom.js';
 import { OD, DRIFT } from './constants.js';
 
-const clampNumber = (v) => (isNaN(v) ? undefined : Number(v));
+/**
+ * Parse user numeric input tolerant of common locale formatting (commas for decimals,
+ * and spaces as thousand separators). Returns a Number or undefined for invalid input.
+ */
+const clampNumber = (raw) => {
+  if (raw === null || typeof raw === 'undefined') return undefined;
+  // If already a number, return it if valid
+  if (typeof raw === 'number') return isNaN(raw) ? undefined : raw;
+
+  // Normalize string: trim, remove grouping spaces, replace comma with dot
+  const s = String(raw).trim().replace(/\s+/g, '').replace(',', '.');
+  const n = Number(s);
+  return isNaN(n) ? undefined : n;
+};
 
 function sizeIdValue(selectId, fallbackValue) {
   const idInput = el(`${selectId}_id`);
   if (!idInput) return fallbackValue;
-  const v = clampNumber(Number(idInput.value));
+  const v = clampNumber(idInput.value);
   return typeof v !== 'undefined' && !isNaN(v) ? v : fallbackValue;
 }
 
 export function gatherInputs() {
   // Read common values
   const riserTypeVal = el('riser_type')?.value;
-  const riserID = sizeIdValue('riser_type', clampNumber(Number(riserTypeVal)));
+  const riserID = sizeIdValue('riser_type', clampNumber(riserTypeVal));
   const riserOD = riserTypeVal === 'none' ? 0 : OD.riser[riserTypeVal] || 20;
 
-  const riserDepthVal = clampNumber(Number(el('depth_riser')?.value));
-  const wellheadDepthVal = clampNumber(Number(el('wellhead_depth')?.value));
+  const riserDepthVal = clampNumber(el('depth_riser')?.value);
+  const wellheadDepthVal = clampNumber(el('wellhead_depth')?.value);
 
-  const surfaceBottomVal = clampNumber(Number(el('depth_13')?.value));
-  const intermediateBottomVal = clampNumber(Number(el('depth_9')?.value));
+  const surfaceBottomVal = clampNumber(el('depth_13')?.value);
+  const intermediateBottomVal = clampNumber(el('depth_9')?.value);
 
   const surfaceInUse = el('use_13')?.checked;
   const intermediateInUse = el('use_9')?.checked;
@@ -28,66 +41,66 @@ export function gatherInputs() {
   // per-casing
   const conductorID = sizeIdValue(
     'conductor_size',
-    clampNumber(Number(el('conductor_size')?.value))
+    clampNumber(el('conductor_size')?.value)
   );
   const conductorOD = OD.conductor[conductorID] || 30;
-  const conductorTopInputVal = clampNumber(Number(el('depth_18_top')?.value));
+  const conductorTopInputVal = clampNumber(el('depth_18_top')?.value);
 
   const surfaceID = sizeIdValue(
     'surface_size',
-    clampNumber(Number(el('surface_size')?.value))
+    clampNumber(el('surface_size')?.value)
   );
   const surfaceOD = OD.surface[surfaceID] || 20;
 
   const intermediateID = sizeIdValue(
     'intermediate_size',
-    clampNumber(Number(el('intermediate_size')?.value))
+    clampNumber(el('intermediate_size')?.value)
   );
   const intermediateOD = OD.intermediate[intermediateID] || 13.375;
 
   const productionID = sizeIdValue(
     'production_size',
-    clampNumber(Number(el('production_size')?.value))
+    clampNumber(el('production_size')?.value)
   );
   const productionOD = OD.production[productionID] || 9.625;
 
   const reservoirID = sizeIdValue(
     'reservoir_size',
-    clampNumber(Number(el('reservoir_size')?.value))
+    clampNumber(el('reservoir_size')?.value)
   );
   const reservoirOD = OD.reservoir[reservoirID] || 5.5;
 
   const smallLinerID = sizeIdValue(
     'small_liner_size',
-    clampNumber(Number(el('small_liner_size')?.value))
+    clampNumber(el('small_liner_size')?.value)
   );
   const smallLinerOD = OD.small_liner[smallLinerID] || 5;
 
   const upperCompletionID = sizeIdValue(
     'upper_completion_size',
-    clampNumber(Number(el('upper_completion_size')?.value))
+    clampNumber(el('upper_completion_size')?.value)
   );
   const upperCompletionOD = OD.upper_completion[upperCompletionID] || 5.5;
 
   const openHoleID = sizeIdValue(
     'open_hole_size',
-    clampNumber(Number(el('open_hole_size')?.value))
+    clampNumber(el('open_hole_size')?.value)
   );
   const openHoleOD =
     typeof openHoleID !== 'undefined' && !isNaN(openHoleID) ? openHoleID : 0;
 
   const tiebackID = sizeIdValue(
     'tieback_size',
-    clampNumber(Number(el('tieback_size')?.value))
+    clampNumber(el('tieback_size')?.value)
   );
   const tiebackOD = OD.tieback[tiebackID] || productionOD;
 
-  const plugDepthVal = clampNumber(Number(el('plug_depth')?.value));
+  const plugDepthVal = clampNumber(el('plug_depth')?.value);
   const plugEnabled = !!el('use_plug')?.checked;
 
   // compute auto tops
   let surfaceTopFinal;
-  const surfaceTopInputVal = clampNumber(Number(el('depth_13_top')?.value));
+  const surfaceTopInputVal = clampNumber(el('depth_13_top')?.value);
   if (!isNaN(surfaceTopInputVal)) surfaceTopFinal = surfaceTopInputVal;
   else if (
     el('use_riser')?.checked &&
@@ -99,7 +112,7 @@ export function gatherInputs() {
   }
 
   let intermediateTopFinal;
-  const intermediateTopInputVal = clampNumber(Number(el('depth_9_top')?.value));
+  const intermediateTopInputVal = clampNumber(el('depth_9_top')?.value);
   if (!isNaN(intermediateTopInputVal))
     intermediateTopFinal = intermediateTopInputVal;
   else if (
@@ -114,11 +127,11 @@ export function gatherInputs() {
 
   // Open Hole Top: always connect to the deepest casing shoe (across existing casings)
   let openTopFinal;
-  const conductorBottomVal = clampNumber(Number(el('depth_18_bottom')?.value));
-  const productionBottomVal = clampNumber(Number(el('depth_7')?.value));
-  const reservoirBottomVal = clampNumber(Number(el('depth_5')?.value));
-  const smallLinerBottomVal = clampNumber(Number(el('depth_small')?.value));
-  const tiebackBottomVal = clampNumber(Number(el('depth_tb')?.value));
+  const conductorBottomVal = clampNumber(el('depth_18_bottom')?.value);
+  const productionBottomVal = clampNumber(el('depth_7')?.value);
+  const reservoirBottomVal = clampNumber(el('depth_5')?.value);
+  const smallLinerBottomVal = clampNumber(el('depth_small')?.value);
+  const tiebackBottomVal = clampNumber(el('depth_tb')?.value);
 
   const useConductorFlag = !!el('use_18')?.checked;
   const useSurfaceFlag = !!el('use_13')?.checked;
@@ -162,15 +175,16 @@ export function gatherInputs() {
     {
       role: 'riser',
       id: riserID,
-      depth: clampNumber(Number(el('depth_riser')?.value)),
+      depth: clampNumber(el('depth_riser')?.value),
       use: !!el('use_riser')?.checked,
       od: riserOD
     },
+
     {
       role: 'conductor',
       id: conductorID,
       top: !isNaN(conductorTopInputVal) ? conductorTopInputVal : undefined,
-      depth: clampNumber(Number(el('depth_18_bottom')?.value)),
+      depth: clampNumber(el('depth_18_bottom')?.value),
       use: !!el('use_18')?.checked,
       od: conductorOD
     },
@@ -178,7 +192,7 @@ export function gatherInputs() {
       role: 'surface',
       id: surfaceID,
       top: surfaceTopFinal,
-      depth: clampNumber(Number(el('depth_13')?.value)),
+      depth: clampNumber(el('depth_13')?.value),
       use: !!el('use_13')?.checked,
       od: surfaceOD
     },
@@ -186,67 +200,67 @@ export function gatherInputs() {
       role: 'intermediate',
       id: intermediateID,
       top: intermediateTopFinal,
-      depth: clampNumber(Number(el('depth_9')?.value)),
+      depth: clampNumber(el('depth_9')?.value),
       use: !!el('use_9')?.checked,
       od: intermediateOD
     },
     {
       role: 'production',
       id: productionID,
-      top: !isNaN(clampNumber(Number(el('depth_7_top')?.value)))
-        ? clampNumber(Number(el('depth_7_top')?.value))
+      top: !isNaN(clampNumber(el('depth_7_top')?.value))
+        ? clampNumber(el('depth_7_top')?.value)
         : undefined,
-      depth: clampNumber(Number(el('depth_7')?.value)),
+      depth: clampNumber(el('depth_7')?.value),
       use: !!el('use_7')?.checked,
       od: productionOD
     },
     {
       role: 'tieback',
       id: tiebackID,
-      top: !isNaN(clampNumber(Number(el('depth_tb_top')?.value)))
-        ? clampNumber(Number(el('depth_tb_top')?.value))
+      top: !isNaN(clampNumber(el('depth_tb_top')?.value))
+        ? clampNumber(el('depth_tb_top')?.value)
         : undefined,
-      depth: clampNumber(Number(el('depth_tb')?.value)),
+      depth: clampNumber(el('depth_tb')?.value),
       use: !!el('use_tieback')?.checked,
       od: tiebackOD
     },
     {
       role: 'reservoir',
       id: reservoirID,
-      top: !isNaN(clampNumber(Number(el('depth_5_top')?.value)))
-        ? clampNumber(Number(el('depth_5_top')?.value))
+      top: !isNaN(clampNumber(el('depth_5_top')?.value))
+        ? clampNumber(el('depth_5_top')?.value)
         : undefined,
-      depth: clampNumber(Number(el('depth_5')?.value)),
+      depth: clampNumber(el('depth_5')?.value),
       use: !!el('use_5')?.checked,
       od: reservoirOD
     },
     {
       role: 'small_liner',
       id: smallLinerID,
-      top: !isNaN(clampNumber(Number(el('depth_small_top')?.value)))
-        ? clampNumber(Number(el('depth_small_top')?.value))
+      top: !isNaN(clampNumber(el('depth_small_top')?.value))
+        ? clampNumber(el('depth_small_top')?.value)
         : undefined,
-      depth: clampNumber(Number(el('depth_small')?.value)),
+      depth: clampNumber(el('depth_small')?.value),
       use: !!el('use_small_liner')?.checked,
       od: smallLinerOD
     },
     {
       role: 'upper_completion',
       id: upperCompletionID,
-      top: !isNaN(clampNumber(Number(el('depth_uc_top')?.value)))
-        ? clampNumber(Number(el('depth_uc_top')?.value))
+      top: !isNaN(clampNumber(el('depth_uc_top')?.value))
+        ? clampNumber(el('depth_uc_top')?.value)
         : undefined,
-      depth: clampNumber(Number(el('depth_uc')?.value)),
+      depth: clampNumber(el('depth_uc')?.value),
       use: !!el('use_upper_completion')?.checked,
       od: upperCompletionOD
     },
     {
       role: 'open_hole',
       id: openHoleID,
-      top: !isNaN(clampNumber(Number(el('depth_open_top')?.value)))
-        ? clampNumber(Number(el('depth_open_top')?.value))
+      top: !isNaN(clampNumber(el('depth_open_top')?.value))
+        ? clampNumber(el('depth_open_top')?.value)
         : undefined,
-      depth: clampNumber(Number(el('depth_open')?.value)),
+      depth: clampNumber(el('depth_open')?.value),
       use: !!el('use_open_hole')?.checked,
       od: openHoleOD,
       z: -1
@@ -257,7 +271,7 @@ export function gatherInputs() {
   casingsInput.forEach((c) => {
     const driftEl = el(`${c.role}_drift`);
     if (driftEl) {
-      const v = clampNumber(Number(driftEl.value));
+      const v = clampNumber(driftEl.value);
       if (!isNaN(v)) c.drift = v;
     }
   });

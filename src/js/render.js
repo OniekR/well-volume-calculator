@@ -22,12 +22,13 @@ export function renderResults(result, opts = {}) {
     plugBelowTubing,
     plugAboveAnnulus,
     plugBelowAnnulus,
+    plugAboveTubingOpenCasing,
+    casingVolumeBelowTubingShoe,
     plugAboveDrillpipe,
     plugBelowDrillpipe,
     plugAboveDrillpipeAnnulus,
     plugBelowDrillpipeAnnulus,
     plugAboveDrillpipeOpenCasing,
-    plugBelowDrillpipeOpenCasing,
     ucActive,
     dpMode,
     dpTotalDepth,
@@ -57,7 +58,14 @@ export function renderResults(result, opts = {}) {
   const plugBelowDrillpipeAnnulusCrossingEl = el(
     'plugBelowDrillpipeAnnulusCrossing'
   );
+  const plugAboveTubingOpenCasingEl = el('plugAboveTubingOpenCasing');
   const plugTotalBelowPOIEl = el('plugTotalBelowPOI');
+  const plugTotalBelowPoiTubingEl = el('plugTotalBelowPOITubing');
+  const plugTotalBelowPoiDrillpipeEl = el('plugTotalBelowPOIDrillpipe');
+  const plugBelowDrillpipeNoCrossEl = el('plugBelowDrillpipeNoCross');
+  const plugBelowDrillpipeAnnulusNoCrossEl = el(
+    'plugBelowDrillpipeAnnulusNoCross'
+  );
 
   // Determine if DP crosses POI (DP bottom > POI depth)
   const dpCrossesPOI =
@@ -85,160 +93,107 @@ export function renderResults(result, opts = {}) {
     plugBelowDrillpipeCrossingEl.classList.add('hidden');
   if (plugBelowDrillpipeAnnulusCrossingEl)
     plugBelowDrillpipeAnnulusCrossingEl.classList.add('hidden');
+  if (plugAboveTubingOpenCasingEl)
+    plugAboveTubingOpenCasingEl.classList.add('hidden');
   if (plugTotalBelowPOIEl) plugTotalBelowPOIEl.classList.add('hidden');
+  if (plugTotalBelowPoiTubingEl)
+    plugTotalBelowPoiTubingEl.classList.add('hidden');
+  if (plugTotalBelowPoiDrillpipeEl)
+    plugTotalBelowPoiDrillpipeEl.classList.add('hidden');
+  if (plugBelowDrillpipeNoCrossEl)
+    plugBelowDrillpipeNoCrossEl.classList.add('hidden');
+  if (plugBelowDrillpipeAnnulusNoCrossEl)
+    plugBelowDrillpipeAnnulusNoCrossEl.classList.add('hidden');
 
-  // Then show only the relevant ones for the current mode
+  // Helper function to set element value and show it
+  const setAndShow = (el, value) => {
+    if (el) {
+      const span = el.querySelector('span:not(.label)');
+      if (span) {
+        span.textContent =
+          typeof value === 'undefined'
+            ? '— m³'
+            : (value || 0).toFixed(2) + ' m³';
+      }
+      el.classList.remove('hidden');
+    }
+  };
+
+  // Display logic based on mode
   if (ucEnabled && dpModeActive) {
-    // Drill pipe mode: show drill pipe and annulus splits
-
-    if (plugAboveDrillpipeEl) {
-      plugAboveDrillpipeEl.classList.remove('hidden');
-      const span = plugAboveDrillpipeEl.querySelector('span:not(.label)');
-      if (span) {
-        span.textContent =
-          typeof plugAboveDrillpipe === 'undefined'
-            ? '— m³'
-            : (plugAboveDrillpipe || 0).toFixed(2) + ' m³';
-      }
-    }
-    if (plugAboveDrillpipeAnnulusEl) {
-      plugAboveDrillpipeAnnulusEl.classList.remove('hidden');
-      const span =
-        plugAboveDrillpipeAnnulusEl.querySelector('span:not(.label)');
-      if (span) {
-        span.textContent =
-          typeof plugAboveDrillpipeAnnulus === 'undefined'
-            ? '— m³'
-            : (plugAboveDrillpipeAnnulus || 0).toFixed(2) + ' m³';
-      }
-    }
+    // Drill pipe mode
+    setAndShow(plugAboveDrillpipeEl, plugAboveDrillpipe);
+    setAndShow(plugAboveDrillpipeAnnulusEl, plugAboveDrillpipeAnnulus);
 
     if (dpCrossesPOI) {
-      // DP crosses POI: show rows 3, 4, 5
-      // Row 3: Vol below POI in DP
-      if (plugBelowDrillpipeCrossingEl) {
-        plugBelowDrillpipeCrossingEl.classList.remove('hidden');
+      // DP crosses POI - show components and total
+      setAndShow(plugBelowDrillpipeCrossingEl, plugBelowDrillpipe);
+      setAndShow(
+        plugBelowDrillpipeAnnulusCrossingEl,
+        plugBelowDrillpipeAnnulus
+      );
+      // Show the total for drill pipe mode in dedicated element
+      if (plugTotalBelowPoiDrillpipeEl) {
+        const totalBelow = plugBelowVolume;
+        console.log('RENDER: Drill pipe crosses POI - showing total:', {
+          totalBelow,
+          dpAbove: plugAboveDrillpipe,
+          dpBelow: plugBelowDrillpipe
+        });
         const span =
-          plugBelowDrillpipeCrossingEl.querySelector('span:not(.label)');
+          plugTotalBelowPoiDrillpipeEl.querySelector('span:not(.label)');
         if (span) {
-          span.textContent =
-            typeof plugBelowDrillpipe === 'undefined'
-              ? '— m³'
-              : (plugBelowDrillpipe || 0).toFixed(2) + ' m³';
+          span.textContent = (totalBelow || 0).toFixed(2) + ' m³';
         }
-      }
-      // Row 4: Vol below POI in annulus
-      if (plugBelowDrillpipeAnnulusCrossingEl) {
-        plugBelowDrillpipeAnnulusCrossingEl.classList.remove('hidden');
-        const span =
-          plugBelowDrillpipeAnnulusCrossingEl.querySelector('span:not(.label)');
-        if (span) {
-          span.textContent =
-            typeof plugBelowDrillpipeAnnulus === 'undefined'
-              ? '— m³'
-              : (plugBelowDrillpipeAnnulus || 0).toFixed(2) + ' m³';
-        }
-      }
-      // Row 5: Total vol below POI
-      if (plugTotalBelowPOIEl) {
-        plugTotalBelowPOIEl.classList.remove('hidden');
-        const span = plugTotalBelowPOIEl.querySelector('span:not(.label)');
-        if (span) {
-          span.textContent =
-            typeof plugBelowVolume === 'undefined'
-              ? '— m³'
-              : (plugBelowVolume || 0).toFixed(2) + ' m³';
-        }
+        plugTotalBelowPoiDrillpipeEl.classList.remove('hidden');
       }
     } else {
-      // DP does not cross POI (entire DP above POI): show rows 3, 4
-      // Row 3: Casing vol between DP and POI
-      if (plugBelowDrillpipeEl) {
-        plugBelowDrillpipeEl.classList.remove('hidden');
-        const span = plugBelowDrillpipeEl.querySelector('span:not(.label)');
-        if (span) {
-          span.textContent =
-            typeof plugAboveDrillpipeOpenCasing === 'undefined'
-              ? '— m³'
-              : (plugAboveDrillpipeOpenCasing || 0).toFixed(2) + ' m³';
-        }
-      }
-      // Row 4: Casing volume below POI
-      if (plugBelowDrillpipeAnnulusEl) {
-        plugBelowDrillpipeAnnulusEl.classList.remove('hidden');
-        const span =
-          plugBelowDrillpipeAnnulusEl.querySelector('span:not(.label)');
-        if (span) {
-          span.textContent =
-            typeof plugBelowVolume === 'undefined'
-              ? '— m³'
-              : (plugBelowVolume || 0).toFixed(2) + ' m³';
-        }
-      }
+      // DP does not cross POI
+      setAndShow(plugBelowDrillpipeNoCrossEl, plugAboveDrillpipeOpenCasing);
+      setAndShow(plugBelowDrillpipeAnnulusNoCrossEl, plugBelowVolume);
     }
   } else if (ucEnabled) {
-    // Tubing mode: show tubing and annulus splits
+    // Tubing mode
+    const ucBottomVal = opts.ucBottom || 0;
+    const tubingCrossesPoi =
+      ucBottomVal > 0 && plugDepthVal > 0 && ucBottomVal > plugDepthVal;
 
-    if (plugAboveTubingEl) {
-      plugAboveTubingEl.classList.remove('hidden');
-      const span = plugAboveTubingEl.querySelector('span');
-      if (span) {
-        span.textContent =
-          typeof plugAboveTubing === 'undefined'
-            ? '— m³'
-            : (plugAboveTubing || 0).toFixed(2) + ' m³';
+    console.log('RENDER: Tubing mode check:', {
+      ucBottomVal,
+      plugDepthVal,
+      tubingCrossesPoi,
+      'plugBelowVolume (from result)': plugBelowVolume,
+      plugBelowTubing,
+      plugBelowAnnulus,
+      'expected total': plugBelowTubing + plugBelowAnnulus
+    });
+
+    if (tubingCrossesPoi) {
+      // Tubing crosses POI - show total casing volume below tubing shoe
+      setAndShow(plugAboveTubingEl, plugAboveTubing);
+      setAndShow(plugAboveAnnulusEl, plugAboveAnnulus);
+      setAndShow(plugBelowTubingEl, plugBelowTubing);
+      setAndShow(plugBelowAnnulusEl, plugBelowAnnulus);
+      if (plugTotalBelowPoiTubingEl) {
+        const totalBelow = casingVolumeBelowTubingShoe;
+        const span =
+          plugTotalBelowPoiTubingEl.querySelector('span:not(.label)');
+        if (span) {
+          span.textContent = (totalBelow || 0).toFixed(2) + ' m³';
+        }
+        plugTotalBelowPoiTubingEl.classList.remove('hidden');
       }
-    }
-    if (plugBelowTubingEl) {
-      plugBelowTubingEl.classList.remove('hidden');
-      const span = plugBelowTubingEl.querySelector('span');
-      if (span) {
-        span.textContent =
-          typeof plugBelowTubing === 'undefined'
-            ? '— m³'
-            : (plugBelowTubing || 0).toFixed(2) + ' m³';
-      }
-    }
-    if (plugAboveAnnulusEl) {
-      plugAboveAnnulusEl.classList.remove('hidden');
-      const span = plugAboveAnnulusEl.querySelector('span');
-      if (span) {
-        span.textContent =
-          typeof plugAboveAnnulus === 'undefined'
-            ? '— m³'
-            : (plugAboveAnnulus || 0).toFixed(2) + ' m³';
-      }
-    }
-    if (plugBelowAnnulusEl) {
-      plugBelowAnnulusEl.classList.remove('hidden');
-      const span = plugBelowAnnulusEl.querySelector('span');
-      if (span) {
-        span.textContent =
-          typeof plugBelowAnnulus === 'undefined'
-            ? '— m³'
-            : (plugBelowAnnulus || 0).toFixed(2) + ' m³';
-      }
+    } else {
+      // Tubing entirely above POI - show total casing volume below tubing shoe
+      setAndShow(plugAboveTubingEl, plugAboveTubing);
+      setAndShow(plugAboveAnnulusEl, plugAboveAnnulus);
+      setAndShow(plugAboveTubingOpenCasingEl, plugAboveTubingOpenCasing);
+      setAndShow(plugTotalBelowPOIEl, casingVolumeBelowTubingShoe);
     }
   } else {
-    // Show combined volumes (when UC is not enabled)
-    if (plugAboveEl) {
-      plugAboveEl.classList.remove('hidden');
-      const valueSpan = plugAboveEl.querySelector('span:not(.label)');
-      const value =
-        typeof plugAboveVolume === 'undefined'
-          ? '— m³'
-          : (plugAboveVolume || 0).toFixed(2) + ' m³';
-      if (valueSpan) valueSpan.textContent = value;
-    }
-    if (plugBelowEl) {
-      plugBelowEl.classList.remove('hidden');
-      const valueSpan = plugBelowEl.querySelector('span:not(.label)');
-      const value =
-        typeof plugBelowVolume === 'undefined'
-          ? '— m³'
-          : (plugBelowVolume || 0).toFixed(2) + ' m³';
-      if (valueSpan) valueSpan.textContent = value;
-    }
+    // UC disabled - show combined volumes
+    setAndShow(plugAboveEl, plugAboveVolume);
+    setAndShow(plugBelowEl, plugBelowVolume);
   }
 
   // Render per-casing volume table

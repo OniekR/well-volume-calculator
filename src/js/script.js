@@ -175,6 +175,11 @@ const VolumeCalc = (() => {
     const subtractEodToggle = document.getElementById('subtract_eod_toggle');
     const subtractEod = subtractEodToggle ? subtractEodToggle.checked : true;
 
+    // Check if upper completion is enabled
+    const ucEnabled = casingsInput.find(
+      (c) => c.role === 'upper_completion'
+    )?.use;
+
     // For hole volume calculations, always treat upper_completion as not in use
     // (so the hole volume table does not include tubing volumes). For drawing
     // we still use the original casingsInput so UC is shown when in tubing mode.
@@ -182,7 +187,7 @@ const VolumeCalc = (() => {
       c.role === 'upper_completion' ? { ...c, use: false } : c
     );
 
-    // Compute volumes using UC excluded
+    // Compute volumes using UC excluded (for hole volume table)
     const result = computeVolumes(effectiveCasingsInput, {
       plugEnabled,
       plugDepthVal,
@@ -191,6 +196,44 @@ const VolumeCalc = (() => {
       drillPipe: dpInput,
       subtractEod
     });
+
+    // Also compute with UC enabled to get tubing/annulus POI values
+    const resultWithUc = computeVolumes(casingsInput, {
+      plugEnabled,
+      plugDepthVal,
+      surfaceInUse,
+      intermediateInUse,
+      drillPipe: dpInput,
+      subtractEod
+    });
+
+    // Merge UC-specific POI values into the result for rendering
+    // Tubing mode values come from resultWithUc (includes UC)
+    result.plugAboveTubing = resultWithUc.plugAboveTubing;
+    result.plugBelowTubing = resultWithUc.plugBelowTubing;
+    result.plugAboveAnnulus = resultWithUc.plugAboveAnnulus;
+    result.plugBelowAnnulus = resultWithUc.plugBelowAnnulus;
+    result.plugAboveTubingOpenCasing = resultWithUc.plugAboveTubingOpenCasing;
+    result.plugBelowVolumeTubing = resultWithUc.plugBelowVolumeTubing; // Tubing mode total below POI
+
+    // Total casing volume below tubing shoe should reflect UC-included casings
+    // (used by the POI display when tubing crosses the POI)
+    result.casingVolumeBelowTubingShoe =
+      resultWithUc.casingVolumeBelowTubingShoe;
+    // Drill pipe mode values come from result (UC excluded) because DP is independent of tubing
+    // Note: result already has the DP values calculated without UC interference
+    // We only override plugBelowVolume for tubing mode context
+    if (dpInput.mode === 'drillpipe') {
+      // Keep DP values from result (UC excluded) - they're already correct
+      // Only override plugDepthVal and ucActive for context
+      result.plugDepthVal = resultWithUc.plugDepthVal;
+      result.ucActive = resultWithUc.ucActive;
+    } else {
+      // In tubing mode, use UC-included values
+      result.plugBelowVolume = resultWithUc.plugBelowVolume;
+      result.plugDepthVal = resultWithUc.plugDepthVal;
+      result.ucActive = resultWithUc.ucActive;
+    }
 
     // Compute draw entries using original casings so UC is still drawn in tubing mode
     const drawResult = computeVolumes(casingsInput, {
@@ -203,13 +246,14 @@ const VolumeCalc = (() => {
     });
     let { casingsToDraw } = drawResult;
 
-    // Check if upper completion is enabled
-    const ucEnabled = casingsInput.find(
-      (c) => c.role === 'upper_completion'
-    )?.use;
-
-    // Render results to DOM (volumes exclude UC)
-    renderResults(result, { ucEnabled, dpMode: dpInput.mode === 'drillpipe' });
+    // Render results to DOM (volumes exclude UC, but tubing POI includes it)
+    const ucBottom =
+      casingsInput.find((c) => c.role === 'upper_completion')?.depth || 0;
+    renderResults(result, {
+      ucEnabled,
+      dpMode: dpInput.mode === 'drillpipe',
+      ucBottom
+    });
 
     // Render upper completion breakdown (tubing or drill pipe)
     if (dpInput.mode === 'drillpipe') {
