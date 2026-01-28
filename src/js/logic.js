@@ -300,20 +300,6 @@ export function computeVolumes(casingsInput, opts = {}) {
         const tubingSteelArea = ucOdArea - ucIdArea;
         const steelVolInOverlap = tubingSteelArea * ucOverlapLen;
 
-        // DEBUG: Log UC steel calculation in segment loop
-        if (ucOverlapLen > 100 && steelVolInOverlap > 5) {
-          console.log('[UC SEGMENT LOOP] Steel calculation:', {
-            ucOdArea: ucOdArea.toFixed(6),
-            ucIdArea: ucIdArea.toFixed(6),
-            tubingSteelArea: tubingSteelArea.toFixed(6),
-            ucOverlapLen,
-            steelVolInOverlap: steelVolInOverlap.toFixed(2),
-            segStart,
-            segEnd,
-            plugDepthVal
-          });
-        }
-
         // Now split the whole segment by POI
         if (segEnd <= plugDepthVal) {
           // Entire segment is above POI
@@ -1010,22 +996,10 @@ export function computeVolumes(casingsInput, opts = {}) {
       if (subtractEod && typeof uc.eod !== 'undefined' && uc.eod > 0) {
         // Use explicit closed-end displacement if provided
         totalUcSteelBelow = (uc.eod / 1000) * lengthBelow;
-        console.log('[UC FINAL CHECK] Using UC.eod:', {
-          uc_eod: uc.eod,
-          lengthBelow,
-          totalUcSteelBelow: totalUcSteelBelow.toFixed(2)
-        });
       } else if (uc.od && uc.id) {
         // Fallback: calculate steel from OD and ID geometry
         const tubingSteelArea = Math.max(0, ucOdArea - ucIdArea);
         totalUcSteelBelow = tubingSteelArea * lengthBelow;
-        console.log('[UC FINAL CHECK] Using OD/ID calculation:', {
-          ucOdArea: ucOdArea.toFixed(6),
-          ucIdArea: ucIdArea.toFixed(6),
-          tubingSteelArea: tubingSteelArea.toFixed(6),
-          lengthBelow,
-          totalUcSteelBelow: totalUcSteelBelow.toFixed(2)
-        });
       }
 
       // Only subtract the amount NOT already subtracted in the segment loop

@@ -1,0 +1,84 @@
+import { vi } from 'vitest';
+
+const shouldLog = process.env.VITEST_DEBUG_LOGS === '1';
+const originalWarn = console.warn.bind(console);
+const originalError = console.error.bind(console);
+
+if (!shouldLog) {
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.spyOn(console, 'debug').mockImplementation(() => {});
+  vi.spyOn(console, 'info').mockImplementation(() => {});
+  vi.spyOn(console, 'warn').mockImplementation((...args) => {
+    const message = args[0] ? String(args[0]) : '';
+    if (message.includes('requestSubmit() method')) return;
+    originalWarn(...args);
+  });
+  vi.spyOn(console, 'error').mockImplementation((...args) => {
+    const message = args[0] ? String(args[0]) : '';
+    if (message.includes('requestSubmit() method')) return;
+    originalError(...args);
+  });
+}
+
+const requestSubmitShim = function requestSubmit() {
+  const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+  if (this.dispatchEvent(submitEvent) && typeof this.submit === 'function') {
+    this.submit();
+  }
+};
+
+try {
+  Object.defineProperty(HTMLFormElement.prototype, 'requestSubmit', {
+    configurable: true,
+    writable: true,
+    value: requestSubmitShim
+  });
+} catch (e) {
+  HTMLFormElement.prototype.requestSubmit = requestSubmitShim;
+}
+
+// Provide minimal DOM stubs to prevent noisy warnings from UI init code during tests
+if (typeof document !== 'undefined' && document && document.body) {
+  // Ensure a sidebar with at least one nav button exists
+  let sidebar = document.getElementById('sidebar');
+  if (!sidebar) {
+    sidebar = document.createElement('nav');
+    sidebar.id = 'sidebar';
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-nav-button';
+    btn.setAttribute('data-section', 'casings');
+    btn.textContent = 'Casings';
+    sidebar.appendChild(btn);
+    document.body.appendChild(sidebar);
+  }
+
+  // Ensure POI toggle elements exist
+  if (!document.getElementById('poi-section')) {
+    const poi = document.createElement('section');
+    poi.id = 'poi-section';
+    document.body.appendChild(poi);
+  }
+
+  if (!document.getElementById('poi-toggle-btn')) {
+    const poiBtn = document.createElement('button');
+    poiBtn.id = 'poi-toggle-btn';
+    const poiText = document.createElement('span');
+    poiText.id = 'poi-toggle-btn-text';
+    poiText.textContent = 'Show POI Section';
+    poiBtn.appendChild(poiText);
+    document.body.appendChild(poiBtn);
+  }
+
+  // Provide a basic IntersectionObserver mock for Node test environment
+  if (typeof global !== 'undefined' && !global.IntersectionObserver) {
+    class IntersectionObserver {
+      constructor(callback) {
+        this._callback = callback;
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    global.IntersectionObserver = IntersectionObserver;
+  }
+}

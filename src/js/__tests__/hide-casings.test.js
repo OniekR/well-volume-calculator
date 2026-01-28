@@ -8,7 +8,7 @@ describe('Hide casings toggle', () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <form id="well-form">
-        <button id="toggle_hide_casings_btn">Hide casings</button>
+        <button id="toggle_hide_casings_btn" type="button">Hide casings</button>
         <div class="casing-input" id="c1"></div>
         <div class="casing-input no-hide" id="uc"></div>
         <div class="casing-input" id="c2"></div>

@@ -1,4 +1,4 @@
-import { computeVolumes } from './src/js/logic.js';
+import { computeVolumes } from '../logic.js';
 
 // Test user's exact scenario:
 // DP1: 5 7/8" (5.875"), Length: 362m

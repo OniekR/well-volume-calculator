@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="src/css/style.css" />
   </head>
   <body>
+    <a href="#volume-form" class="skip-link">Skip to main content</a>
     <header>
       <div class="headerWrapper">
         <div>
@@ -32,25 +33,284 @@
               >Volume / pressure</a
             >
           </div>
-          <div class="header-controls">
-            <span id="theme_label" class="theme-label" aria-live="polite"
-              >Dark mode</span
-            >
-            <label class="switch" title="Toggle dark mode">
-              <input
-                id="theme_toggle"
-                type="checkbox"
-                aria-label="Toggle dark mode"
-              />
-              <span class="slider" aria-hidden="true"></span>
-            </label>
-          </div>
         </nav>
       </div>
     </header>
 
-    <div class="container">
-      <main class="left-panel" id="main" aria-labelledby="main-title">
+    <div id="app">
+      <!-- Desktop Sidebar / Mobile Bottom Navigation -->
+      <nav
+        id="sidebar"
+        class="sidebar"
+        aria-label="Main navigation"
+        role="navigation"
+      >
+        <div class="sidebar-content">
+          <!-- Main Navigation Sections -->
+          <div class="sidebar-section">
+            <h3 class="sidebar-section-title" id="nav-section-label">
+              Navigation
+            </h3>
+            <ul
+              class="sidebar-nav-list"
+              role="list"
+              aria-labelledby="nav-section-label"
+            >
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="casings"
+                  aria-label="Navigate to Casings section"
+                  role="button"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Casings</span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="completion"
+                  aria-label="Navigate to Completion and Drillpipe section"
+                  role="button"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Completion</span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="settings"
+                  aria-label="Navigate to Settings section"
+                  role="button"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Settings</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Future Features Section -->
+          <div class="sidebar-section sidebar-section-future">
+            <h3 class="sidebar-section-title" id="future-section-label">
+              Coming Soon
+            </h3>
+            <ul
+              class="sidebar-nav-list"
+              role="list"
+              aria-labelledby="future-section-label"
+            >
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="flow"
+                  aria-label="Flow velocity calculator (coming soon)"
+                  disabled
+                  aria-disabled="true"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-4-4h3V9h2v4h3l-4 4z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Flow Velocity</span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="pressure"
+                  aria-label="Volume pressure calculator (coming soon)"
+                  disabled
+                  aria-disabled="true"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Pressure</span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="lift"
+                  aria-label="String lift calculator (coming soon)"
+                  disabled
+                  aria-disabled="true"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">String Lift</span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
+                  data-section="cement"
+                  aria-label="Cement displacement calculator (coming soon)"
+                  disabled
+                  aria-disabled="true"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7V7h2v10zm4 0h-2V7h2v10zm4 0h-2V7h2v10z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Cement</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Sidebar Controls Section -->
+          <div class="sidebar-section sidebar-section-controls">
+            <h3 class="sidebar-section-title" id="controls-section-label">
+              Controls
+            </h3>
+            <div
+              class="sidebar-controls"
+              aria-labelledby="controls-section-label"
+            >
+              <!-- Hide Casings Button (will be moved here in Step 2) -->
+              <div id="hide-casings-container">
+                <button
+                  id="toggle_hide_casings_btn"
+                  class="default-top-btn"
+                  type="button"
+                  aria-pressed="false"
+                  aria-label="Toggle hide all casings (UI only)"
+                >
+                  Hide casings
+                </button>
+              </div>
+
+              <!-- POI Toggle (will be moved here in Step 2) -->
+              <div id="poi-toggle-container">
+                <button
+                  id="poi-toggle-btn"
+                  class="btn-secondary"
+                  type="button"
+                  aria-label="Toggle Point of Interest section"
+                >
+                  <span id="poi-toggle-btn-text">Show POI Section</span>
+                </button>
+              </div>
+
+              <!-- Theme Toggle (will be moved here in Step 2) -->
+              <div id="theme-toggle-container">
+                <span id="theme_label" class="theme-label" aria-live="polite"
+                  >Dark mode</span
+                >
+                <label class="switch" title="Toggle dark mode">
+                  <input
+                    id="theme_toggle"
+                    type="checkbox"
+                    aria-label="Toggle dark mode"
+                  />
+                  <span class="slider" aria-hidden="true"></span>
+                </label>
+              </div>
+
+              <!-- Import/Export Buttons (will be moved here in Step 2) -->
+              <div id="import-export-container">
+                <button
+                  id="import_presets_btn"
+                  class="btn-secondary"
+                  type="button"
+                  aria-label="Import presets from JSON"
+                >
+                  Import JSON
+                </button>
+                <button
+                  id="export_presets_btn"
+                  class="btn-secondary"
+                  type="button"
+                  aria-label="Export presets to JSON"
+                >
+                  Export JSON
+                </button>
+                <input
+                  id="import_presets_input"
+                  type="file"
+                  accept=".json,application/json"
+                  style="display: none"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="left-panel" id="volume-form" aria-labelledby="main-title">
         <h1 id="main-title">Well Volume Calculator</h1>
         <form id="well-form" novalidate>
           <div class="input-row">
@@ -91,22 +351,7 @@
             </div>
           </div>
 
-          <!-- Toggle: hide all casings (UI-only) -->
-          <div class="input-row">
-            <div class="input-inline" style="display: flex; gap: 8px">
-              <button
-                id="toggle_hide_casings_btn"
-                class="default-top-btn"
-                type="button"
-                aria-pressed="false"
-                aria-label="Toggle hide all casings (UI only)"
-              >
-                Hide casings
-              </button>
-            </div>
-          </div>
-
-          <div class="casing-input">
+          <div class="casing-input" id="casings-section">
             <div class="casing-header">
               <input
                 type="checkbox"
@@ -1095,116 +1340,122 @@
             </div>
           </section>
 
-          <div class="plug-toggle" aria-hidden="false">
-            <label class="inline-checkbox">
-              <input
-                type="checkbox"
-                id="use_plug"
-                checked
-                aria-controls="plug-panel"
-              />
-              Point of interest
-            </label>
-          </div>
-
-          <div id="plug-panel" class="plug-panel" aria-labelledby="plug-title">
-            <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
-              Point of interest
-            </h3>
-
-            <div class="plug-control">
-              <label for="plug_depth">depth (m):</label>
-              <input
-                type="number"
-                id="plug_depth"
-                name="plug_depth"
-                step="1"
-                placeholder="Optional"
-                min="0"
-              />
+          <div id="poi-section">
+            <div class="plug-toggle" aria-hidden="false">
+              <label class="inline-checkbox">
+                <input
+                  type="checkbox"
+                  id="use_plug"
+                  checked
+                  aria-controls="plug-panel"
+                />
+                Point of interest
+              </label>
             </div>
 
-            <div class="plug-volumes">
-              <div id="plugAboveVolume" class="hidden">
-                <span class="label">Volume above point of interest:</span>
-                <span>— m³</span>
-              </div>
-              <!-- Tubing mode POI values -->
-              <div id="plugAboveTubing" class="hidden">
-                <span class="label">Vol above POI in tubing:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugAboveAnnulus" class="hidden">
-                <span class="label">Vol above POI in annulus:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugAboveTubingOpenCasing" class="hidden">
-                <span class="label">Casing vol between tubing and POI:</span>
-                <span>— m³</span>
+            <div
+              id="plug-panel"
+              class="plug-panel"
+              aria-labelledby="plug-title"
+            >
+              <h3 id="plug-title" style="margin: 0 0 6px 0; text-align: center">
+                Point of interest
+              </h3>
+
+              <div class="plug-control">
+                <label for="plug_depth">depth (m):</label>
+                <input
+                  type="number"
+                  id="plug_depth"
+                  name="plug_depth"
+                  step="1"
+                  placeholder="Optional"
+                  min="0"
+                />
               </div>
 
-              <div id="plugBelowTubing" class="hidden">
-                <span class="label">Vol below POI in tubing:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugBelowAnnulus" class="hidden">
-                <span class="label">Vol below POI in annulus:</span>
-                <span>— m³</span>
-              </div>
+              <div class="plug-volumes">
+                <div id="plugAboveVolume" class="hidden">
+                  <span class="label">Volume above point of interest:</span>
+                  <span>— m³</span>
+                </div>
+                <!-- Tubing mode POI values -->
+                <div id="plugAboveTubing" class="hidden">
+                  <span class="label">Vol above POI in tubing:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugAboveAnnulus" class="hidden">
+                  <span class="label">Vol above POI in annulus:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugAboveTubingOpenCasing" class="hidden">
+                  <span class="label">Casing vol between tubing and POI:</span>
+                  <span>— m³</span>
+                </div>
 
-              <!-- Drill pipe mode POI values -->
-              <div id="plugAboveDrillpipe" class="hidden">
-                <span class="label">Vol above POI in DP:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugAboveDrillpipeAnnulus" class="hidden">
-                <span class="label">Vol above POI in annulus:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugBelowDrillpipeCrossing" class="hidden">
-                <span class="label">Vol below POI in DP:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugBelowDrillpipeAnnulusCrossing" class="hidden">
-                <span class="label">Vol below POI in annulus:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugBelowDrillpipeNoCross" class="hidden">
-                <span class="label">Casing vol between DP and POI:</span>
-                <span>— m³</span>
-              </div>
-              <div id="plugBelowDrillpipeAnnulusNoCross" class="hidden">
-                <span class="label">Casing volume below POI:</span>
-                <span>— m³</span>
-              </div>
-              <!-- Generic POI values -->
+                <div id="plugBelowTubing" class="hidden">
+                  <span class="label">Vol below POI in tubing:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugBelowAnnulus" class="hidden">
+                  <span class="label">Vol below POI in annulus:</span>
+                  <span>— m³</span>
+                </div>
 
-              <div id="plugBelowVolume" class="hidden">
-                <span class="label">Volume below point of interest:</span>
-                <span>— m³</span>
-              </div>
+                <!-- Drill pipe mode POI values -->
+                <div id="plugAboveDrillpipe" class="hidden">
+                  <span class="label">Vol above POI in DP:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugAboveDrillpipeAnnulus" class="hidden">
+                  <span class="label">Vol above POI in annulus:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugBelowDrillpipeCrossing" class="hidden">
+                  <span class="label">Vol below POI in DP:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugBelowDrillpipeAnnulusCrossing" class="hidden">
+                  <span class="label">Vol below POI in annulus:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugBelowDrillpipeNoCross" class="hidden">
+                  <span class="label">Casing vol between DP and POI:</span>
+                  <span>— m³</span>
+                </div>
+                <div id="plugBelowDrillpipeAnnulusNoCross" class="hidden">
+                  <span class="label">Casing volume below POI:</span>
+                  <span>— m³</span>
+                </div>
+                <!-- Generic POI values -->
 
-              <!-- Totals: show after all component volumes -->
-              <div id="plugTotalBelowPOIDrillpipe" class="hidden">
-                <span class="label">Total vol below POI: (DP version)</span>
-                <span>— m³</span>
-              </div>
+                <div id="plugBelowVolume" class="hidden">
+                  <span class="label">Volume below point of interest:</span>
+                  <span>— m³</span>
+                </div>
 
-              <div id="plugTotalBelowPOITubing" class="hidden">
-                <span class="label">Total vol below tubing:</span>
-                <span>— m³</span>
-              </div>
+                <!-- Totals: show after all component volumes -->
+                <div id="plugTotalBelowPOIDrillpipe" class="hidden">
+                  <span class="label">Total vol below POI: (DP version)</span>
+                  <span>— m³</span>
+                </div>
 
-              <div id="plugTotalBelowPOI" class="hidden">
-                <span class="label">Total vol below tubing:</span>
-                <span>— m³</span>
+                <div id="plugTotalBelowPOITubing" class="hidden">
+                  <span class="label">Total vol below tubing:</span>
+                  <span>— m³</span>
+                </div>
+
+                <div id="plugTotalBelowPOI" class="hidden">
+                  <span class="label">Total vol below tubing:</span>
+                  <span>— m³</span>
+                </div>
               </div>
             </div>
           </div>
         </form>
       </main>
 
-      <div class="right-panel">
+      <div class="right-panel results-container">
         <h1>Well Schematic</h1>
         <canvas
           id="wellSchematic"
@@ -1271,27 +1522,6 @@
               <input type="text" id="preset_name" placeholder="Preset name" />
               <div style="display: flex; gap: 8px; align-items: center">
                 <button type="button" id="save_preset_btn">Save</button>
-                <button
-                  type="button"
-                  id="export_presets_btn"
-                  title="Download presets as JSON"
-                >
-                  Export
-                </button>
-                <button
-                  type="button"
-                  id="import_presets_btn"
-                  title="Upload presets JSON"
-                >
-                  Import
-                </button>
-                <input
-                  id="import_presets_input"
-                  type="file"
-                  accept=".json,application/json"
-                  style="display: none"
-                  aria-hidden="true"
-                />
               </div>
               <div
                 style="

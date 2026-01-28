@@ -1,4 +1,4 @@
-import { computeVolumes } from './src/js/logic.js';
+import { computeVolumes } from '../logic.js';
 
 // Test case from user scenario:
 // Tubing mode: shoe at 363m

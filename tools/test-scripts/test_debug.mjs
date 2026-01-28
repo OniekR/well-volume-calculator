@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { computeVolumes } from './src/js/logic.js';
+import { computeVolumes } from '../logic.js';
 
 const state1 = [
   { role: 'conductor', id: 17.5, top: 0, depth: 362, use: true, od: 19 },
