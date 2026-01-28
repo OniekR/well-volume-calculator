@@ -36,3 +36,36 @@ try {
 } catch (e) {
   HTMLFormElement.prototype.requestSubmit = requestSubmitShim;
 }
+
+// Provide minimal DOM stubs to prevent noisy warnings from UI init code during tests
+if (typeof document !== 'undefined' && document && document.body) {
+  // Ensure a sidebar with at least one nav button exists
+  let sidebar = document.getElementById('sidebar');
+  if (!sidebar) {
+    sidebar = document.createElement('nav');
+    sidebar.id = 'sidebar';
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-nav-button';
+    btn.setAttribute('data-section', 'casings');
+    btn.textContent = 'Casings';
+    sidebar.appendChild(btn);
+    document.body.appendChild(sidebar);
+  }
+
+  // Ensure POI toggle elements exist
+  if (!document.getElementById('poi-section')) {
+    const poi = document.createElement('section');
+    poi.id = 'poi-section';
+    document.body.appendChild(poi);
+  }
+
+  if (!document.getElementById('poi-toggle-btn')) {
+    const poiBtn = document.createElement('button');
+    poiBtn.id = 'poi-toggle-btn';
+    const poiText = document.createElement('span');
+    poiText.id = 'poi-toggle-btn-text';
+    poiText.textContent = 'Show POI Section';
+    poiBtn.appendChild(poiText);
+    document.body.appendChild(poiBtn);
+  }
+}
