@@ -2290,7 +2290,7 @@ export default ExportMenu;
 
 #### Step 16: Form Validation & Error Handling
 
-- [ ] Create `src/components/ui/ErrorMessage.tsx`:
+- [x] Create `src/components/ui/ErrorMessage.tsx`:
 
 ```tsx
 interface ErrorMessageProps {
@@ -2304,7 +2304,7 @@ const ErrorMessage = ({ message }: ErrorMessageProps) => {
 export default ErrorMessage;
 ```
 
-- [ ] Create `src/components/ui/Toast.tsx`:
+- [x] Create `src/components/ui/Toast.tsx`:
 
 ```tsx
 interface ToastProps {
@@ -2324,7 +2324,7 @@ export default Toast;
 
 ##### Step 16 Verification Checklist
 
-- [ ] Enter invalid values and confirm error messages appear.
+- [x] Enter invalid values and confirm error messages appear. (Added basic validation to `WellSectionForm` and a toast on add; verified in dev server)
 
 #### Step 16 STOP & COMMIT
 
