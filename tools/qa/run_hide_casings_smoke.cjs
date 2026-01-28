@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer');
   // Allow overriding base URL from environment for CI or local runs
   const DEFAULT_URL = 'http://localhost:5173/';
   const url = process.env.SMOKE_BASE_URL || process.env.BASE_URL || DEFAULT_URL;
+  console.error('SMOKE: running hide-casings smoke test against', url);
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
