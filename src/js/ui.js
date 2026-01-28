@@ -356,23 +356,6 @@ export function setupHideCasingsToggle(deps = {}) {
   setState(form.classList.contains('casings-hidden'));
 
   btn.addEventListener('click', () => {
-    // capture a quick snapshot before toggling so we can see what changes
-    try {
-      if (typeof calculateVolume === 'function') calculateVolume();
-      const before = Array.from(
-        document.querySelectorAll('#casingVolumes tbody tr')
-      ).map((tr) => ({
-        name: tr.children[0] && tr.children[0].textContent.trim(),
-        volume: tr.children[1] && tr.children[1].textContent.trim()
-      }));
-      console.debug('hide-casings: before', before);
-    } catch (e) {
-      console.debug(
-        'hide-casings: before capture failed',
-        (e && e.message) || e
-      );
-    }
-
     const hidden = form.classList.toggle('casings-hidden');
     updateSectionsVisibility(hidden);
     btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
@@ -381,19 +364,7 @@ export function setupHideCasingsToggle(deps = {}) {
     // Ensure the current volume calculation is up-to-date after UI-only toggle
     try {
       if (typeof calculateVolume === 'function') calculateVolume();
-      const after = Array.from(
-        document.querySelectorAll('#casingVolumes tbody tr')
-      ).map((tr) => ({
-        name: tr.children[0] && tr.children[0].textContent.trim(),
-        volume: tr.children[1] && tr.children[1].textContent.trim()
-      }));
-      console.debug('hide-casings: after', after);
-    } catch (e) {
-      console.debug(
-        'hide-casings: after capture failed',
-        (e && e.message) || e
-      );
-    }
+    } catch (e) {}
   });
 
   // Keyboard accessibility
@@ -1464,4 +1435,30 @@ export function initUI(deps) {
   setupDrillPipeMode(deps);
   setupNavActive();
   setupThemeToggle();
+}
+
+export function initPOIToggle() {
+  const poiToggleBtn = document.getElementById('poi-toggle-btn');
+  const poiToggleBtnText = document.getElementById('poi-toggle-btn-text');
+  const poiSection = document.getElementById('poi-section');
+
+  if (!poiToggleBtn || !poiToggleBtnText || !poiSection) {
+    console.warn('POI toggle elements not found');
+    return;
+  }
+
+  const updatePOIToggleButton = () => {
+    const isHidden = poiSection.style.display === 'none';
+    poiToggleBtnText.textContent = isHidden
+      ? 'Show POI Section'
+      : 'Hide POI Section';
+  };
+
+  poiToggleBtn.addEventListener('click', () => {
+    const isCurrentlyHidden = poiSection.style.display === 'none';
+    poiSection.style.display = isCurrentlyHidden ? '' : 'none';
+    updatePOIToggleButton();
+  });
+
+  updatePOIToggleButton();
 }
