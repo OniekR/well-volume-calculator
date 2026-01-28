@@ -7,10 +7,28 @@ const SCROLL_OFFSET = 20; // Pixels above target for better visibility
 let activeSection = localStorage.getItem(STORAGE_KEY) || 'casings';
 
 export function initializeSidebar() {
-  setupNavigationHandlers();
-  setupScrollSpy();
-  setupKeyboardNavigation();
-  restoreActiveSection();
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) {
+    console.warn('Sidebar element not found');
+    return;
+  }
+
+  sidebar.classList.add('sidebar-loading');
+
+  try {
+    setupNavigationHandlers();
+    setupScrollSpy();
+    setupKeyboardNavigation();
+    restoreActiveSection();
+
+    setTimeout(() => {
+      sidebar.classList.remove('sidebar-loading');
+      sidebar.classList.add('sidebar-loaded');
+    }, 100);
+  } catch (error) {
+    console.error('Error initializing sidebar:', error);
+    sidebar.classList.remove('sidebar-loading');
+  }
 }
 
 function setupNavigationHandlers() {
