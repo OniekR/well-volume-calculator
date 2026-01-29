@@ -200,17 +200,17 @@ export function computeVolumes(casingsInput, opts = {}) {
     if (segLength <= 0) continue;
 
     const covering = casingsInput.filter((c) => {
-        if (!c.use) return false;
-        if (c.role === 'upper_completion') return false;
-        if (c.depth <= segStart) return false;
-        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
-        // Treat a top value equal to segEnd as covering the preceding segment so inner casings
-        // that start at the same depth as a segment end claim the volume for that segment.
-        if (topVal > segEnd) return false;
-        if (c.role === 'conductor' && surfaceInUse) return false;
-        if (c.role === 'surface' && intermediateInUse) return false;
-        return true;
-      });
+      if (!c.use) return false;
+      if (c.role === 'upper_completion') return false;
+      if (c.depth <= segStart) return false;
+      const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+      // Treat a top value equal to segEnd as covering the preceding segment so inner casings
+      // that start at the same depth as a segment end claim the volume for that segment.
+      if (topVal > segEnd) return false;
+      if (c.role === 'conductor' && surfaceInUse) return false;
+      if (c.role === 'surface' && intermediateInUse) return false;
+      return true;
+    });
 
     // If there are existing coverings and a casing starts exactly at segEnd,
     // include it as an extra coverage candidate only if it is innermost
@@ -1107,7 +1107,9 @@ export function computeVolumes(casingsInput, opts = {}) {
       // Consider boundary-start casings (same extra logic as above)
       if (covering.length > 0) {
         const minCoveringId = Math.min(
-          ...covering.map((c) => (isNaN(Number(c.id)) ? Infinity : Number(c.id)))
+          ...covering.map((c) =>
+            isNaN(Number(c.id)) ? Infinity : Number(c.id)
+          )
         );
         const extras = casingsInput.filter((c) => {
           if (!c.use) return false;
