@@ -1553,4 +1553,3 @@ export function initUI(deps) {
   setupNavActive();
   setupThemeToggle();
 }
-
