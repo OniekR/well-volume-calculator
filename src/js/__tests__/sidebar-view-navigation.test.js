@@ -15,12 +15,7 @@ describe('Sidebar view navigation', () => {
               <button class="sidebar-nav-button" data-section="completion">Completion</button>
               <button class="sidebar-nav-button" data-section="settings">Settings</button>
             </div>
-            <div class="sidebar-section sidebar-section-controls" id="controls-section">
-              <h3 class="sidebar-section-title" id="controls-section-label">Controls</h3>
-              <div class="sidebar-controls" aria-labelledby="controls-section-label">
-                <button id="poi-toggle-btn" type="button"><span id="poi-toggle-btn-text">Show POI Section</span></button>
-              </div>
-            </div>
+
           </div>
         </nav>
         <form id="well-form">

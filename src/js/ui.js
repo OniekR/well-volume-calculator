@@ -1554,28 +1554,3 @@ export function initUI(deps) {
   setupThemeToggle();
 }
 
-export function initPOIToggle() {
-  const poiToggleBtn = document.getElementById('poi-toggle-btn');
-  const poiToggleBtnText = document.getElementById('poi-toggle-btn-text');
-  const poiSection = document.getElementById('poi-section');
-
-  if (!poiToggleBtn || !poiToggleBtnText || !poiSection) {
-    console.warn('POI toggle elements not found');
-    return;
-  }
-
-  const updatePOIToggleButton = () => {
-    const isHidden = poiSection.style.display === 'none';
-    poiToggleBtnText.textContent = isHidden
-      ? 'Show POI Section'
-      : 'Hide POI Section';
-  };
-
-  poiToggleBtn.addEventListener('click', () => {
-    const isCurrentlyHidden = poiSection.style.display === 'none';
-    poiSection.style.display = isCurrentlyHidden ? '' : 'none';
-    updatePOIToggleButton();
-  });
-
-  updatePOIToggleButton();
-}

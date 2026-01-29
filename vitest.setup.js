@@ -52,22 +52,7 @@ if (typeof document !== 'undefined' && document && document.body) {
     document.body.appendChild(sidebar);
   }
 
-  // Ensure POI toggle elements exist
-  if (!document.getElementById('poi-section')) {
-    const poi = document.createElement('section');
-    poi.id = 'poi-section';
-    document.body.appendChild(poi);
-  }
 
-  if (!document.getElementById('poi-toggle-btn')) {
-    const poiBtn = document.createElement('button');
-    poiBtn.id = 'poi-toggle-btn';
-    const poiText = document.createElement('span');
-    poiText.id = 'poi-toggle-btn-text';
-    poiText.textContent = 'Show POI Section';
-    poiBtn.appendChild(poiText);
-    document.body.appendChild(poiBtn);
-  }
 
   // Provide a basic IntersectionObserver mock for Node test environment
   if (typeof global !== 'undefined' && !global.IntersectionObserver) {
