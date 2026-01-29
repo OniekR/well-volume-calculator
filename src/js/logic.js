@@ -114,6 +114,10 @@ export function computeVolumes(casingsInput, opts = {}) {
     }))
     .sort((a, b) => a.top - b.top);
   const ucActive = ucSegments.length > 0;
+  const ucTopVal = ucActive ? Math.min(...ucSegments.map((s) => s.top)) : 0;
+  const ucBottomVal = ucActive
+    ? Math.max(...ucSegments.map((s) => s.depth || 0))
+    : 0;
 
   // prepare draw entries and per-casing map
   const perCasingMap = {};
