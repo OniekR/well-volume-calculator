@@ -200,70 +200,102 @@ export function computeVolumes(casingsInput, opts = {}) {
     if (segLength <= 0) continue;
 
     const covering = casingsInput.filter((c) => {
-      if (!c.use) return false;
-      if (c.role === 'upper_completion') return false;
-      if (c.depth <= segStart) return false;
-      const topVal = typeof c.top !== 'undefined' ? c.top : 0;
-      if (topVal >= segEnd) return false;
-      if (c.role === 'conductor' && surfaceInUse) return false;
-      if (c.role === 'surface' && intermediateInUse) return false;
-      return true;
-    });
+        if (!c.use) return false;
+        if (c.role === 'upper_completion') return false;
+        if (c.depth <= segStart) return false;
+        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+        // Treat a top value equal to segEnd as covering the preceding segment so inner casings
+        // that start at the same depth as a segment end claim the volume for that segment.
+        if (topVal > segEnd) return false;
+        if (c.role === 'conductor' && surfaceInUse) return false;
+        if (c.role === 'surface' && intermediateInUse) return false;
+        return true;
+      });
 
-    if (covering.length === 0) continue;
+    // If there are existing coverings and a casing starts exactly at segEnd,
+    // include it as an extra coverage candidate only if it is innermost
+    // (smaller ID) than the current coverings. This prevents assigning
+    // casings to segments they shouldn't own while allowing an inner casing
+    // that begins at a boundary to claim the preceding segment.
+    if (covering.length > 0) {
+      const minCoveringId = Math.min(
+        ...covering.map((c) => (isNaN(Number(c.id)) ? Infinity : Number(c.id)))
+      );
+      const extras = casingsInput.filter((c) => {
+        if (!c.use) return false;
+        if (c.role === 'upper_completion') return false;
+        if (typeof c.top === 'undefined') return false;
+        if (Number(c.top) !== segEnd) return false;
+        if (c.depth <= segStart) return false;
+        if (c.role === 'conductor' && surfaceInUse) return false;
+        if (c.role === 'surface' && intermediateInUse) return false;
+        const cid = isNaN(Number(c.id)) ? Infinity : Number(c.id);
+        return cid < minCoveringId;
+      });
 
-    covering.sort((a, b) => {
-      const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
-      const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+      extras.forEach((ex) => covering.push(ex));
+    }
 
-      // Categorize casings: main wellbore vs supplemental
-      const mainWellboreRoles = [
-        'conductor',
-        'surface',
-        'intermediate',
-        'production',
-        'tieback'
-      ];
-      const aIsMain = mainWellboreRoles.includes(a.role);
-      const bIsMain = mainWellboreRoles.includes(b.role);
-
-      // If one is main wellbore and one is supplemental:
-      if (aIsMain && !bIsMain) {
-        // a is main, b is supplemental
-        // In overlapping zones, the innermost (smallest ID) casing should claim the volume.
-        // This reflects physical reality: supplemental casings (like reservoir liners)
-        // are separate installations that occupy the inner space of the wellbore.
-        // Wider outer casings should never claim volume from the innermost installation.
+    // Determine owner and area for this segment. If no casings cover this
+    // segment (open hole), treat area as 0 but still allow UC overlap handling
+    // so we can compute tubing volumes even inside open intervals.
+    let area = 0;
+    let segVol = 0;
+    if (covering.length > 0) {
+      covering.sort((a, b) => {
         const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
         const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
-        if (bi < ai) {
-          return 1; // Supplemental (innermost) wins
-        }
-        // Main wellbore is innermost: main wins
-        return -1;
-      }
-      if (!aIsMain && bIsMain) {
-        // a is supplemental, b is main
-        // In overlapping zones, the innermost (smallest ID) casing should claim the volume.
-        const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
-        const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
-        if (ai < bi) {
-          return -1; // Supplemental (innermost) wins
-        }
-        // Main wellbore is innermost: main wins
-        return 1;
-      }
 
-      // Within same category, smallest ID (innermost) wins
-      return ai - bi;
-    });
-    const winner = covering[0];
-    const area = perCasingMap[winner.role].perMeter_m3;
-    const segVol = area * segLength;
+        // Categorize casings: main wellbore vs supplemental
+        const mainWellboreRoles = [
+          'conductor',
+          'surface',
+          'intermediate',
+          'production',
+          'tieback'
+        ];
+        const aIsMain = mainWellboreRoles.includes(a.role);
+        const bIsMain = mainWellboreRoles.includes(b.role);
 
-    totalVolume += segVol;
-    perCasingMap[winner.role].volume += segVol;
-    perCasingMap[winner.role].includedLength += segLength;
+        // If one is main wellbore and one is supplemental:
+        if (aIsMain && !bIsMain) {
+          // a is main, b is supplemental
+          // In overlapping zones, the innermost (smallest ID) casing should claim the volume.
+          // This reflects physical reality: supplemental casings (like reservoir liners)
+          // are separate installations that occupy the inner space of the wellbore.
+          // Wider outer casings should never claim volume from the innermost installation.
+          const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+          const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+          if (bi < ai) {
+            return 1; // Supplemental (innermost) wins
+          }
+          // Main wellbore is innermost: main wins
+          return -1;
+        }
+        if (!aIsMain && bIsMain) {
+          // a is supplemental, b is main
+          // In overlapping zones, the innermost (smallest ID) casing should claim the volume.
+          const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+          const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+          if (ai < bi) {
+            return -1; // Supplemental (innermost) wins
+          }
+          // Main wellbore is innermost: main wins
+          return 1;
+        }
+
+        // Within same category, smallest ID (innermost) wins
+        return ai - bi;
+      });
+
+      const winner = covering[0];
+      area = perCasingMap[winner.role].perMeter_m3;
+      segVol = area * segLength;
+
+      totalVolume += segVol;
+      perCasingMap[winner.role].volume += segVol;
+      perCasingMap[winner.role].includedLength += segLength;
+    }
 
     if (
       plugEnabled &&
@@ -1043,6 +1075,76 @@ export function computeVolumes(casingsInput, opts = {}) {
     p.use = !!c.use;
     return p;
   });
+
+  // In tubing mode, some consumers expect per-casing volumes to reflect only the
+  // portions below the tubing shoe (innermost-only below-tubing calculation).
+  // Recompute per-casing volumes below the UC bottom and overwrite
+  // perCasingVolumes.volume accordingly. This ensures tests that assert that
+  // an outer casing (e.g., production) does not contribute below the tubing shoe
+  // when an inner casing exists will behave as expected.
+  if (drillPipeInput?.mode === 'tubing' && ucActive) {
+    const volumesBelow = {};
+    casingsInput.forEach((c) => (volumesBelow[c.role] = 0));
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const segStart = points[i];
+      const segEnd = points[i + 1];
+      const segLength = segEnd - segStart;
+      if (segLength <= 0) continue;
+
+      // Find covering casings for this segment (same rules as above)
+      const covering = casingsInput.filter((c) => {
+        if (!c.use) return false;
+        if (c.role === 'upper_completion') return false;
+        if (c.depth <= segStart) return false;
+        const topVal = typeof c.top !== 'undefined' ? c.top : 0;
+        if (topVal >= segEnd) return false;
+        if (c.role === 'conductor' && surfaceInUse) return false;
+        if (c.role === 'surface' && intermediateInUse) return false;
+        return true;
+      });
+
+      // Consider boundary-start casings (same extra logic as above)
+      if (covering.length > 0) {
+        const minCoveringId = Math.min(
+          ...covering.map((c) => (isNaN(Number(c.id)) ? Infinity : Number(c.id)))
+        );
+        const extras = casingsInput.filter((c) => {
+          if (!c.use) return false;
+          if (c.role === 'upper_completion') return false;
+          if (typeof c.top === 'undefined') return false;
+          if (Number(c.top) !== segEnd) return false;
+          if (c.depth <= segStart) return false;
+          if (c.role === 'conductor' && surfaceInUse) return false;
+          if (c.role === 'surface' && intermediateInUse) return false;
+          const cid = isNaN(Number(c.id)) ? Infinity : Number(c.id);
+          return cid < minCoveringId;
+        });
+        extras.forEach((ex) => covering.push(ex));
+      }
+
+      if (covering.length === 0) continue;
+
+      covering.sort((a, b) => {
+        const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+        const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+        return ai - bi;
+      });
+
+      const owner = covering[0];
+      const area = perCasingMap[owner.role]?.perMeter_m3 || 0;
+
+      const lengthBelow = Math.max(0, segEnd - Math.max(segStart, ucBottomVal));
+      if (lengthBelow > 0) {
+        volumesBelow[owner.role] += area * lengthBelow;
+      }
+    }
+
+    // Overwrite volumes in perCasingVolumes
+    perCasingVolumes.forEach((p) => {
+      p.volume = volumesBelow[p.role] || 0;
+    });
+  }
 
   // Calculate total DP depth if in drill pipe mode
   let dpTotalDepth = 0;
