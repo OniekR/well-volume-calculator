@@ -21,6 +21,7 @@ All notable changes to this project are documented in this file.
 ### Removed
 
 - Remove large Total Volume display and the UI-only **Hide total** toggle. Hole volume table in the sidebar remains the canonical total volume display. A deprecation note has been added to the `README.md`.
+- Removed Point of Interest (POI) toggle from the Settings tab — the POI panel is now always available and the toggle was purely decorative.
 
 ### Notes
 
