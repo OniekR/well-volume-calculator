@@ -327,4 +327,70 @@ export function drawSchematic(casings, opts = {}) {
       );
     });
   }
+
+  // Draw tapered tubing segments if provided
+  if (opts.tubingSegments && opts.tubingSegments.length > 0) {
+    const tubingCatalog = [
+      { name: '4 1/2" 12.6#', id: 3.958, od: 4.5 },
+      { name: '5 1/2" 17#', id: 4.892, od: 5.5 }
+    ];
+    const tubingColors = ['#4169E1', '#6495ED']; // blues for tubing
+
+    opts.tubingSegments.forEach((tubing, idx) => {
+      const sizeData = tubingCatalog[tubing.size];
+      if (!sizeData) return;
+
+      const startDepth = (tubing.top || 0) * scale + startY;
+      const endDepth = tubing.shoe * scale + startY;
+
+      const tubingOD = sizeData.od;
+      const tubingID = sizeData.id;
+
+      const width = (tubingOD / maxOD) * 80;
+      const innerWidth = (tubingID / maxOD) * 80;
+
+      // Draw tubing body
+      ctx.fillStyle = tubingColors[idx % tubingColors.length];
+      ctx.fillRect(
+        centerX - width / 2,
+        startDepth,
+        width,
+        endDepth - startDepth
+      );
+
+      // Draw tubing inner (hollow)
+      ctx.fillStyle = '#e6e6e6';
+      ctx.fillRect(
+        centerX - innerWidth / 2,
+        startDepth,
+        innerWidth,
+        endDepth - startDepth
+      );
+
+      // Draw borders
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX - width / 2, startDepth);
+      ctx.lineTo(centerX - width / 2, endDepth);
+      ctx.moveTo(centerX + width / 2, startDepth);
+      ctx.lineTo(centerX + width / 2, endDepth);
+      ctx.stroke();
+
+      // Draw label with size and depth
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px Arial';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(
+        sizeData.name,
+        centerX - width / 2 - 40,
+        (startDepth + endDepth) / 2
+      );
+      ctx.fillText(
+        tubing.length.toFixed(1) + 'm',
+        centerX + width / 2 + 10,
+        endDepth - 5
+      );
+    });
+  }
 }

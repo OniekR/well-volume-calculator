@@ -1,6 +1,7 @@
 import { el, qs } from './dom.js';
 import { getUpperCompletionTJ } from './validation.js';
 import { DRIFT, OD, TJ } from './constants.js';
+import { TUBING_CATALOG } from './tubing.js';
 
 export function setupEventDelegation(deps) {
   const { calculateVolume, scheduleSave } = deps;
@@ -530,21 +531,13 @@ export function checkUpperCompletionFit() {
       return;
     }
 
-    const ucIdEl = el('upper_completion_size_id');
-    if (!ucIdEl) return;
-    const ucKey = ucIdEl.value;
-    if (!ucKey) return removeUpperCompletionWarning();
-    const ucOd =
-      (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
-      (OD && OD.upper_completion && OD.upper_completion[Number(ucKey)]);
-    const ucTj =
-      (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
-      (TJ && TJ.upper_completion && TJ.upper_completion[Number(ucKey)]);
+    const ucUse = el('use_upper_completion');
+    if (ucUse && !ucUse.checked) {
+      removeUpperCompletionWarning();
+      return;
+    }
 
-    // prefer TJ for fit-checks if available (TJ is the tool-joint dimension)
-    const ucCompareValue = typeof ucTj !== 'undefined' ? ucTj : ucOd;
-    if (typeof ucCompareValue === 'undefined')
-      return removeUpperCompletionWarning();
+    const tubingRows = document.querySelectorAll('.tubing-input-row');
 
     // map role -> top/shoe field ids in the form
     const topMap = {
@@ -572,6 +565,105 @@ export function checkUpperCompletionFit() {
       'surface',
       'conductor'
     ];
+
+    if (tubingRows.length > 0) {
+      const segments = [];
+      let cumulativeDepth = 0;
+
+      tubingRows.forEach((row) => {
+        const sizeSelect = row.querySelector('select[id^="tubing_size_"]');
+        const lengthInput = row.querySelector('input[id^="tubing_length_"]');
+        if (!sizeSelect || !lengthInput) return;
+
+        const idx = parseInt(sizeSelect.value, 10);
+        const tubing = TUBING_CATALOG[idx];
+        if (!tubing) return;
+
+        const length = Number(lengthInput.value) || 0;
+        const ucTop = cumulativeDepth;
+        const ucShoe = cumulativeDepth + length;
+        cumulativeDepth = ucShoe;
+
+        const ucKey = tubing.id;
+        const ucOd =
+          (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
+          tubing.od;
+        const ucTj =
+          (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
+          undefined;
+
+        const ucCompareValue = typeof ucTj !== 'undefined' ? ucTj : ucOd;
+        if (typeof ucCompareValue === 'undefined') return;
+
+        segments.push({ ucCompareValue, ucTop, ucShoe, ucTj, ucOd });
+      });
+
+      if (!segments.length) return removeUpperCompletionWarning();
+
+      for (const seg of segments) {
+        for (const role of roles) {
+          const driftEl = el(role + '_drift');
+          if (!driftEl) continue;
+
+          const casingSection = driftEl.closest('.casing-input');
+          if (casingSection) {
+            const useCheckbox = casingSection.querySelector('.use-checkbox');
+            if (useCheckbox && !useCheckbox.checked) continue;
+          }
+
+          const topEl = el(topMap[role]);
+          const shoeEl = el(shoeMap[role]);
+          if (!topEl || !shoeEl) continue;
+          const casingTop = Number(topEl.value);
+          const casingShoe = Number(shoeEl.value);
+          if (isNaN(casingTop) || isNaN(casingShoe)) continue;
+          if (casingShoe <= casingTop) continue;
+
+          let overlaps = false;
+          if (!isNaN(seg.ucTop) && !isNaN(seg.ucShoe)) {
+            overlaps = seg.ucTop < casingShoe && seg.ucShoe > casingTop;
+          } else if (!isNaN(seg.ucShoe)) {
+            overlaps = seg.ucShoe > casingTop;
+          } else {
+            continue;
+          }
+
+          if (!overlaps) continue;
+
+          const driftVal = Number(driftEl.value);
+          if (isNaN(driftVal)) continue;
+
+          if (seg.ucCompareValue > driftVal) {
+            const what = typeof seg.ucTj !== 'undefined' ? 'TJ' : 'OD';
+            showUpperCompletionWarning(
+              role,
+              what,
+              seg.ucCompareValue,
+              driftVal
+            );
+            return;
+          }
+        }
+      }
+
+      removeUpperCompletionWarning();
+      return;
+    }
+
+    const ucIdEl = el('upper_completion_size_id');
+    if (!ucIdEl) return;
+    const ucKey = ucIdEl.value;
+    if (!ucKey) return removeUpperCompletionWarning();
+    const ucOd =
+      (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
+      (OD && OD.upper_completion && OD.upper_completion[Number(ucKey)]);
+    const ucTj =
+      (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
+      (TJ && TJ.upper_completion && TJ.upper_completion[Number(ucKey)]);
+
+    const ucCompareValue = typeof ucTj !== 'undefined' ? ucTj : ucOd;
+    if (typeof ucCompareValue === 'undefined')
+      return removeUpperCompletionWarning();
 
     const ucTopEl = el('depth_uc_top');
     const ucShoeEl = el('depth_uc');
@@ -685,6 +777,9 @@ export function initUpperCompletionChecks(deps = {}) {
   const ucShoeEl = el('depth_uc');
   if (ucSelect) ucSelect.addEventListener('change', schedule);
   if (ucId) ucId.addEventListener('input', schedule);
+  document
+    .querySelectorAll('.tubing-count-btn')
+    .forEach((btn) => btn.addEventListener('click', schedule));
   if (ucTopEl) {
     ucTopEl.addEventListener('input', () => {
       // Validate that Top doesn't exceed Shoe
@@ -1371,6 +1466,73 @@ function setupDrillPipeMode(deps) {
   })();
 }
 
+function setupTubingMode(deps) {
+  const { calculateVolume, scheduleSave } = deps;
+  const tubingCountBtns = document.querySelectorAll('.tubing-count-btn');
+  const tubingContainer = el('tubing_inputs_container');
+
+  if (!tubingContainer) return;
+
+  // Dynamic async import for tubing functions
+  (async () => {
+    const tubingModule = await import('./tubing.js');
+    const { renderTubingInputs, updateTubingDepthDisplays } = tubingModule;
+
+    // Initialize tubing inputs on page load
+    const activeBtn = document.querySelector('.tubing-count-btn.active');
+    const count = parseInt(activeBtn?.dataset.count, 10) || 1;
+    renderTubingInputs(count);
+    attachTubingListeners();
+
+    // Update tubing count via buttons
+    tubingCountBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const count = parseInt(btn.dataset.count, 10) || 1;
+
+        // Update active button
+        tubingCountBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+
+        // Re-render tubing inputs
+        renderTubingInputs(count);
+        attachTubingListeners();
+        calculateVolume();
+        if (scheduleSave) scheduleSave();
+        checkUpperCompletionFit();
+      });
+    });
+
+    function attachTubingListeners() {
+      const rows = tubingContainer.querySelectorAll('.tubing-input-row');
+      rows.forEach((row) => {
+        const sizeSelect = row.querySelector('select[id^="tubing_size_"]');
+        const lengthInput = row.querySelector('input[id^="tubing_length_"]');
+
+        if (sizeSelect) {
+          sizeSelect.addEventListener('change', () => {
+            calculateVolume();
+            if (scheduleSave) scheduleSave();
+            checkUpperCompletionFit();
+          });
+        }
+
+        if (lengthInput) {
+          lengthInput.addEventListener('input', () => {
+            updateTubingDepthDisplays();
+            calculateVolume();
+            if (scheduleSave) scheduleSave();
+            checkUpperCompletionFit();
+          });
+        }
+      });
+    }
+  })();
+}
+
 export function initUI(deps) {
   // deps: { calculateVolume, scheduleSave, captureStateObject, applyStateObject, initDraw }
   setupEventDelegation(deps);
@@ -1387,6 +1549,7 @@ export function initUI(deps) {
   setupEodToggle(deps);
   setupPlugToggle(deps);
   setupDrillPipeMode(deps);
+  setupTubingMode(deps);
   setupNavActive();
   setupThemeToggle();
 }

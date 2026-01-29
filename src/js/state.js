@@ -109,7 +109,13 @@ export function applyStateObject(state, callbacks = {}) {
         'upper_completion_size',
         'upper_completion_size_id',
         'depth_uc_top',
-        'depth_uc'
+        'depth_uc',
+        'tubing_size_0',
+        'tubing_length_0',
+        'tubing_size_1',
+        'tubing_length_1',
+        'tubing_size_2',
+        'tubing_length_2'
       ]
     }
   ];
@@ -144,6 +150,44 @@ export function applyStateObject(state, callbacks = {}) {
               } catch (e) {
                 /* ignore invalid value */
               }
+            }
+          }
+        });
+      }, 0);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
+  // Restore tapered tubing inputs if present in state
+  try {
+    const tubingKeys = Object.keys(state || {}).filter((k) =>
+      /^tubing_(size|length)_\d+$/.test(k)
+    );
+    if (tubingKeys.length > 0) {
+      const maxIdx = Math.max(
+        ...tubingKeys.map((k) => parseInt(k.match(/\d+$/)?.[0] || '0', 10))
+      );
+      const count = Math.min(3, Math.max(1, maxIdx + 1));
+      const tubingBtn = el(`tubing_count_${count}`);
+      if (tubingBtn) {
+        tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
+      }
+
+      setTimeout(() => {
+        tubingKeys.forEach((id) => {
+          const field = el(id);
+          if (field && state[id] && typeof state[id].value !== 'undefined') {
+            try {
+              field.value = state[id].value;
+              field.dispatchEvent(
+                new Event(
+                  field.tagName.toLowerCase() === 'select' ? 'change' : 'input',
+                  { bubbles: true }
+                )
+              );
+            } catch (e) {
+              /* ignore invalid value */
             }
           }
         });

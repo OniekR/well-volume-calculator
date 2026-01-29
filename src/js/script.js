@@ -16,6 +16,7 @@ import {
   gatherDrillPipeInput,
   computeDrillPipeBreakdown
 } from './drillpipe.js';
+import { gatherTubingInput } from './tubing.js';
 
 /*
  * Refactored module for the Well Volume Calculator
@@ -248,8 +249,10 @@ const VolumeCalc = (() => {
     let { casingsToDraw } = drawResult;
 
     // Render results to DOM (volumes exclude UC, but tubing POI includes it)
-    const ucBottom =
-      casingsInput.find((c) => c.role === 'upper_completion')?.depth || 0;
+    const ucBottomValues = casingsInput
+      .filter((c) => c.role === 'upper_completion')
+      .map((c) => c.depth || 0);
+    const ucBottom = ucBottomValues.length ? Math.max(...ucBottomValues) : 0;
     renderResults(result, {
       ucEnabled,
       dpMode: dpInput.mode === 'drillpipe',
@@ -287,6 +290,21 @@ const VolumeCalc = (() => {
       waterDepth = riserDepthVal;
     }
 
+    // Get tapered tubing for visualization
+    const tubingInput = gatherTubingInput();
+    const tubingSegments =
+      dpInput.mode !== 'drillpipe' &&
+      tubingInput.count > 0 &&
+      tubingInput.tubings.length > 0
+        ? tubingInput.tubings
+        : undefined;
+
+    if (tubingSegments && tubingSegments.length > 0) {
+      casingsToDraw = casingsToDraw.filter(
+        (c) => c.role !== 'upper_completion'
+      );
+    }
+
     scheduleDraw(casingsToDraw, {
       showWater,
       waterDepth,
@@ -299,7 +317,8 @@ const VolumeCalc = (() => {
       drillPipeSegments:
         dpInput.mode === 'drillpipe' && dpInput.pipes.length > 0
           ? dpInput.pipes
-          : undefined
+          : undefined,
+      tubingSegments
     });
 
     // Upper completion fit warnings are handled by the UI module (initUpperCompletionChecks)
