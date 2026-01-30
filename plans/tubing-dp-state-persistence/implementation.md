@@ -126,9 +126,9 @@ if (tubingCountValue != null) {
 #### Step 2 Verification Checklist
 
 - [x] No syntax errors in persistence.js
-- [ ] Manual test: Select "2 Tubings", reload page → verify "2 Tubings" button is still active
-- [ ] Manual test: Select "3 Tubings", reload page → verify "3 Tubings" button is still active
-- [ ] Verify drillpipe count persistence still works
+- [x] Manual test: Select "2 Tubings", reload page → verify "2 Tubings" button is still active
+- [x] Manual test: Select "3 Tubings", reload page → verify "3 Tubings" button is still active
+- [x] Verify drillpipe count persistence still works
 
 #### Step 2 STOP & COMMIT
 
@@ -138,10 +138,10 @@ if (tubingCountValue != null) {
 
 ### Step 3: Enable slider when completion checkbox is unchecked (preference only)
 
-- [ ] Open `src/js/ui.js`
-- [ ] Find the `toggleSectionByCheckbox` function (starts around line 24)
-- [ ] Find the special handling for `use_upper_completion` checkbox (around line 52-93)
-- [ ] Remove the line that disables the mode toggle
+- [x] Open `src/js/ui.js`
+- [x] Find the `toggleSectionByCheckbox` function (starts around line 24)
+- [x] Find the special handling for `use_upper_completion` checkbox (around line 52-93)
+- [x] Remove the line that disables the mode toggle
 
 **Current code to find (around lines 52-70):**
 

@@ -58,10 +58,7 @@ export function setupCasingToggles(deps) {
         const modeToggle = el('uc_mode_toggle');
         const isEnabled = checkbox.checked;
 
-        // Disable/enable mode toggle
-        if (modeToggle) {
-          modeToggle.disabled = !isEnabled;
-        }
+        // Mode toggle remains enabled so user can set preference even when section is disabled
 
         // Disable/enable tubing section inputs
         if (tubingSection) {
