@@ -264,6 +264,9 @@ export function applyStateObject(state, callbacks = {}) {
       /* ignore */
     }
 
+    const dpRows = document.querySelectorAll('.drillpipe-input-row');
+    if (dpRows.length === 0) return false;
+
     setTimeout(() => {
       Object.keys(state || {}).forEach((id) => {
         if (/^drillpipe_(size|length)_\d+$/.test(id)) {

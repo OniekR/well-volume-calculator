@@ -172,11 +172,11 @@ if (tubingCountValue != null) {
 
 #### Step 3 Verification Checklist
 
-- [ ] No syntax errors in ui.js
-- [ ] Manual test: Uncheck "Upper completion/Drill pipe string" checkbox
-- [ ] Verify the "Tubing - Drill pipe" slider is still clickable (not grayed out)
-- [ ] Toggle the slider while checkbox is unchecked → verify NO visual change to sections (tubing section should stay visible)
-- [ ] Re-check the checkbox → verify the currently selected mode's section becomes visible and enabled
+- [x] No syntax errors in ui.js
+- [x] Manual test: Uncheck "Upper completion/Drill pipe string" checkbox
+- [x] Verify the "Tubing - Drill pipe" slider is still clickable (not grayed out)
+- [x] Toggle the slider while checkbox is unchecked → verify NO visual change to sections (tubing section should stay visible)
+- [x] Re-check the checkbox → verify the currently selected mode's section becomes visible and enabled
 
 #### Step 3 STOP & COMMIT
 
@@ -184,102 +184,23 @@ if (tubingCountValue != null) {
 
 ---
 
-### Step 4: Modify mode toggle handler to respect checkbox state
+### Step 4: Allow mode switch while unchecked and re-enable correctly
 
-- [ ] Open `src/js/ui.js`
-- [ ] Find the `setupCompletionModeToggle` function (around line 1383)
-- [ ] Find the mode toggle change handler (around line 1410-1480)
-- [ ] Modify the handler to check if UC checkbox is enabled before doing visual changes
-
-**Current mode toggle handler code (around lines 1410-1480):**
-
-```javascript
-  modeToggle.addEventListener('change', () => {
-    const isDrillPipeMode = modeToggle.checked;
-
-    if (isDrillPipeMode) {
-      // Switch to drill pipe mode
-      tubingSection?.classList.add('hidden');
-      drillpipeSection?.classList.remove('hidden');
-      // Disable tubing inputs
-      qs('#uc_tubing_section input, #uc_tubing_section select').forEach((input) => {
-        input.disabled = true;
-      });
-      // Enable drillpipe inputs
-      qs('#uc_drillpipe_section input, #uc_drillpipe_section select').forEach(
-        (input) => {
-          input.disabled = false;
-        }
-      );
-    } else {
-      // Switch to tubing mode
-      drillpipeSection?.classList.add('hidden');
-      tubingSection?.classList.remove('hidden');
-      // Disable drillpipe inputs
-      qs('#uc_drillpipe_section input, #uc_drillpipe_section select').forEach(
-        (input) => {
-          input.disabled = true;
-        }
-      );
-      // Enable tubing inputs
-      qs('#uc_tubing_section input, #uc_tubing_section select').forEach((input) => {
-        input.disabled = false;
-      });
-    }
-```
-
-**Replace with:**
-
-```javascript
-  modeToggle.addEventListener('change', () => {
-    const isDrillPipeMode = modeToggle.checked;
-    const ucCheckbox = el('use_upper_completion');
-    const isSectionEnabled = ucCheckbox?.checked ?? true;
-
-    // Only apply visual changes if the UC section is enabled
-    if (!isSectionEnabled) {
-      // Just save state preference, no visual changes
-      if (scheduleSave) scheduleSave();
-      return;
-    }
-
-    if (isDrillPipeMode) {
-      // Switch to drill pipe mode
-      tubingSection?.classList.add('hidden');
-      drillpipeSection?.classList.remove('hidden');
-      // Disable tubing inputs
-      qs('#uc_tubing_section input, #uc_tubing_section select').forEach((input) => {
-        input.disabled = true;
-      });
-      // Enable drillpipe inputs
-      qs('#uc_drillpipe_section input, #uc_drillpipe_section select').forEach(
-        (input) => {
-          input.disabled = false;
-        }
-      );
-    } else {
-      // Switch to tubing mode
-      drillpipeSection?.classList.add('hidden');
-      tubingSection?.classList.remove('hidden');
-      // Disable drillpipe inputs
-      qs('#uc_drillpipe_section input, #uc_drillpipe_section select').forEach(
-        (input) => {
-          input.disabled = true;
-        }
-      );
-      // Enable tubing inputs
-      qs('#uc_tubing_section input, #uc_tubing_section select').forEach((input) => {
-        input.disabled = false;
-      });
-    }
-```
+- [x] Open `src/js/ui.js`
+- [x] In the mode toggle handler, keep switching the visible section even when Upper completion is unchecked
+- [x] Ensure UC inputs remain disabled while unchecked
+- [x] When Upper completion is re-checked, enable inputs for the current mode and keep the other mode disabled
 
 #### Step 4 Verification Checklist
 
 - [ ] No syntax errors in ui.js
-- [ ] Manual test: With checkbox unchecked, toggle slider → verify NO visual change to sections
-- [ ] Manual test: With checkbox unchecked, toggle slider, reload page → verify slider state persisted
-- [ ] Manual test: Check checkbox → verify the correct section (based on slider) becomes visible
+- [ ] Manual test full flow:
+  1. Start with checkbox checked, tubing mode active, enter some tubing values
+  2. Uncheck checkbox → inputs disabled
+  3. Toggle slider to drill pipe mode → section switches, inputs stay disabled
+  4. Re-check checkbox → verify drill pipe section is visible and enabled
+  5. Verify tubing values are still preserved (switch back to tubing mode to check)
+- [ ] Reload page and verify all states persisted correctly
 
 #### Step 4 STOP & COMMIT
 
@@ -287,82 +208,7 @@ if (tubingCountValue != null) {
 
 ---
 
-### Step 5: Update checkbox handler to apply mode toggle state when re-enabled
-
-- [ ] Open `src/js/ui.js`
-- [ ] Find the special handling for `use_upper_completion` in `toggleSectionByCheckbox` (around line 52)
-- [ ] After the existing logic, add code to apply the mode toggle state when checkbox becomes checked
-
-**Find the end of the use_upper_completion special handling block (around lines 88-93):**
-
-```javascript
-        }
-      );
-    }
-
-    calculateVolume();
-  }
-```
-
-**Replace with (add mode toggle application before calculateVolume):**
-
-```javascript
-        }
-      );
-    }
-
-    // When re-enabling, apply the current mode toggle state
-    if (isEnabled && modeToggle) {
-      const isDrillPipeMode = modeToggle.checked;
-      if (isDrillPipeMode) {
-        tubingSection?.classList.add('hidden');
-        drillpipeSection?.classList.remove('hidden');
-        // Enable drillpipe inputs, disable tubing inputs
-        qs('#uc_drillpipe_section input, #uc_drillpipe_section select').forEach(
-          (input) => {
-            input.disabled = false;
-          }
-        );
-        qs('#uc_tubing_section input, #uc_tubing_section select').forEach((input) => {
-          input.disabled = true;
-        });
-      } else {
-        drillpipeSection?.classList.add('hidden');
-        tubingSection?.classList.remove('hidden');
-        // Enable tubing inputs, disable drillpipe inputs
-        qs('#uc_tubing_section input, #uc_tubing_section select').forEach((input) => {
-          input.disabled = false;
-        });
-        qs('#uc_drillpipe_section input, #uc_drillpipe_section select').forEach(
-          (input) => {
-            input.disabled = true;
-          }
-        );
-      }
-    }
-
-    calculateVolume();
-  }
-```
-
-#### Step 5 Verification Checklist
-
-- [ ] No syntax errors in ui.js
-- [ ] Manual test full flow:
-  1. Start with checkbox checked, tubing mode active, enter some tubing values
-  2. Uncheck checkbox → sections disabled, no visual change
-  3. Toggle slider to drill pipe mode → NO visual change
-  4. Re-check checkbox → verify drill pipe section is now visible and enabled
-  5. Verify tubing values are still preserved (switch back to tubing mode to check)
-- [ ] Reload page and verify all states persisted correctly
-
-#### Step 5 STOP & COMMIT
-
-**STOP & COMMIT:** Agent must stop here and wait for the user to test, stage, and commit the change.
-
----
-
-### Step 6: Add unit tests
+### Step 5: Add unit tests
 
 - [ ] Create or update test file `src/js/__tests__/tubing-state-persistence.test.js`
 - [ ] Add tests for tubing count capture and restoration
@@ -536,13 +382,13 @@ describe('Mode Toggle with Checkbox Unchecked', () => {
 });
 ```
 
-#### Step 6 Verification Checklist
+#### Step 5 Verification Checklist
 
 - [ ] Run `npm test -- src/js/__tests__/tubing-state-persistence.test.js` → all tests pass
 - [ ] Run `npm test` → all existing tests still pass
 - [ ] No lint errors
 
-#### Step 6 STOP & COMMIT
+#### Step 5 STOP & COMMIT
 
 **STOP & COMMIT:** Agent must stop here and wait for the user to test, stage, and commit the change.
 
