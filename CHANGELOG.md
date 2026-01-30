@@ -6,6 +6,13 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- Pressure test calculator for determining fluid volumes required to pressurize well sections
+
+  - Selectable well sections (drill pipe, tubing, annulus volumes)
+  - Two-stage pressure testing (low: 0→20 bar, high: 20→345 bar)
+  - Fluid type presets with compressibility constants (k values)
+  - Real-time calculation updates
+
 - Plug feature: add `plug` panel with depth input and a `Plug` toggle. App now computes and displays volumes above and below the plug and draws a plug line on the schematic.
 - UI/UX: moved the plug toggle, added `plug-panel` and `plug-toggle`, improved styling for the Total Volume area and plug panel.
 - Styling: nudged casing headings to better align with inline checkboxes and hide inline header controls (e.g., `Tie-back`, `Dummy hanger`) when sections are collapsed.

@@ -130,6 +130,34 @@
               <li class="sidebar-nav-item" role="listitem">
                 <button
                   class="sidebar-nav-button"
+                  data-section="pressure"
+                  aria-label="Navigate to Pressure Test section"
+                  role="button"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                    />
+                  </svg>
+                  <!-- Badge indicates Pressure feature is under development; remove when implemented -->
+                  <span class="sidebar-nav-text">
+                    Pressure
+                    <span class="badge badge--construction"
+                      >🚧 Under Construction</span
+                    >
+                  </span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
                   data-section="settings"
                   aria-label="Navigate to Settings section"
                   role="button"
@@ -162,29 +190,6 @@
               role="list"
               aria-labelledby="future-section-label"
             >
-              <li class="sidebar-nav-item" role="listitem">
-                <button
-                  class="sidebar-nav-button"
-                  data-section="pressure"
-                  aria-label="Volume pressure calculator (coming soon)"
-                  disabled
-                  aria-disabled="true"
-                >
-                  <svg
-                    class="sidebar-icon"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-                    />
-                  </svg>
-                  <span class="sidebar-nav-text">Pressure</span>
-                </button>
-              </li>
               <li class="sidebar-nav-item" role="listitem">
                 <button
                   class="sidebar-nav-button"
@@ -1656,6 +1661,159 @@
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="view-pressure"
+            class="app-view"
+            data-view="pressure"
+            aria-label="Pressure Test Calculator"
+            hidden
+          >
+            <div class="pressure-header">
+              <h2>Pressure Test</h2>
+              <p class="small-note">
+                Calculate volume required to pressurize selected well sections.
+              </p>
+            </div>
+
+            <div class="pressure-card">
+              <div class="pressure-section-selector">
+                <label class="pressure-label">Select Well Sections</label>
+                <div
+                  id="pressure-section-buttons"
+                  class="pressure-section-buttons"
+                >
+                  <p class="small-note">Loading sections...</p>
+                </div>
+                <div class="pressure-total-row">
+                  <span>Total selected volume:</span>
+                  <strong id="pressure-total-volume">0.00 m³</strong>
+                </div>
+              </div>
+
+              <div class="input-row three-cols pressure-input-row">
+                <div class="input-inline">
+                  <label for="pressure_low">Low test pressure</label>
+                  <div class="input-with-unit">
+                    <input
+                      type="number"
+                      id="pressure_low"
+                      name="pressure_low"
+                      step="1"
+                      min="0"
+                      max="1035"
+                      value="20"
+                      placeholder="20"
+                    />
+                    <span class="input-unit">bar</span>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="pressure_high">High test pressure</label>
+                  <div class="input-with-unit">
+                    <input
+                      type="number"
+                      id="pressure_high"
+                      name="pressure_high"
+                      step="1"
+                      min="0"
+                      max="1035"
+                      value="345"
+                      placeholder="345"
+                    />
+                    <span class="input-unit">bar</span>
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label for="pressure_k_value">Compressibility (k)</label>
+                  <input
+                    type="number"
+                    id="pressure_k_value"
+                    name="pressure_k_value"
+                    step="1"
+                    min="1"
+                    value="18"
+                    placeholder="18"
+                  />
+                </div>
+              </div>
+
+              <div class="pressure-quick-row">
+                <label>Fluid type presets:</label>
+                <div class="pressure-quick-buttons">
+                  <button
+                    type="button"
+                    class="pressure-quick-btn"
+                    data-pressure-k="wbm_brine"
+                  >
+                    WBM/Brine (21)
+                  </button>
+                  <button
+                    type="button"
+                    class="pressure-quick-btn"
+                    data-pressure-k="obm"
+                  >
+                    OBM (18)
+                  </button>
+                  <button
+                    type="button"
+                    class="pressure-quick-btn"
+                    data-pressure-k="base_oil"
+                  >
+                    Base Oil (14)
+                  </button>
+                  <button
+                    type="button"
+                    class="pressure-quick-btn"
+                    data-pressure-k="kfls"
+                  >
+                    KFLS (35)
+                  </button>
+                </div>
+              </div>
+
+              <div
+                id="pressure-error"
+                class="small-note warning hidden"
+                role="alert"
+              ></div>
+            </div>
+
+            <div id="pressure-results-empty" class="pressure-empty-state">
+              <p class="small-note">
+                Select well sections and enter pressure values to calculate
+                required fluid volumes.
+              </p>
+            </div>
+
+            <div
+              id="pressure-results"
+              class="pressure-results hidden"
+              aria-live="polite"
+            >
+              <div class="pressure-results-grid">
+                <div class="pressure-result-card">
+                  <h3>Low Pressure Test</h3>
+                  <p class="pressure-range">
+                    0 → <span id="pressure-low-target">20</span> bar
+                  </p>
+                  <p class="pressure-volume" id="pressure-low-result">— L</p>
+                </div>
+                <div class="pressure-result-card">
+                  <h3>High Pressure Test</h3>
+                  <p class="pressure-range">
+                    <span id="pressure-high-from">20</span> →
+                    <span id="pressure-high-target">345</span> bar
+                  </p>
+                  <p class="pressure-volume" id="pressure-high-result">— L</p>
+                </div>
+              </div>
+              <div class="pressure-formula-note small-note">
+                Formula: V<sub>liters</sub> = (V<sub>m³</sub> ×
+                ΔP<sub>bar</sub>) / k
               </div>
             </div>
           </section>

@@ -17,6 +17,17 @@ export function captureStateObject(getInputsFn) {
         value: input.value
       };
   });
+  try {
+    const activeDpBtn = document.querySelector('.drillpipe-count-btn.active');
+    if (activeDpBtn?.dataset?.count) {
+      state.drillpipe_count = {
+        type: 'input',
+        value: String(activeDpBtn.dataset.count)
+      };
+    }
+  } catch (e) {
+    /* ignore */
+  }
   return state;
 }
 
@@ -120,45 +131,6 @@ export function applyStateObject(state, callbacks = {}) {
     }
   ];
 
-  // After key population and UI collapse/expand, ensure drill pipe inputs are
-  // restored when present in the state. This handles the case where drill pipe
-  // inputs are dynamically rendered when drill pipe mode is active.
-  try {
-    const dpHasKeys = Object.keys(state || {}).some((k) =>
-      /^drillpipe_(size|length)_\d+$/.test(k)
-    );
-    const dpCount = el('drillpipe_count');
-    if (dpHasKeys && dpCount) {
-      // dispatch change to render drill pipe inputs (handler attached during initUI)
-      dpCount.dispatchEvent(new Event('change', { bubbles: true }));
-      // schedule population slightly after render to ensure fields exist
-      setTimeout(() => {
-        Object.keys(state).forEach((id) => {
-          if (/^drillpipe_(size|length)_\d+$/.test(id)) {
-            const field = el(id);
-            if (field && state[id] && typeof state[id].value !== 'undefined') {
-              try {
-                field.value = state[id].value;
-                field.dispatchEvent(
-                  new Event(
-                    field.tagName.toLowerCase() === 'select'
-                      ? 'change'
-                      : 'input',
-                    { bubbles: true }
-                  )
-                );
-              } catch (e) {
-                /* ignore invalid value */
-              }
-            }
-          }
-        });
-      }, 0);
-    }
-  } catch (e) {
-    /* ignore */
-  }
-
   // Restore tapered tubing inputs if present in state
   try {
     const tubingKeys = Object.keys(state || {}).filter((k) =>
@@ -220,6 +192,65 @@ export function applyStateObject(state, callbacks = {}) {
     const ucModeToggle = el('uc_mode_toggle');
     if (ucModeToggle)
       ucModeToggle.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch (e) {
+    /* ignore */
+  }
+
+  // After mode toggle, ensure drill pipe inputs are restored when present.
+  const restoreDrillPipe = () => {
+    const dpHasKeys = Object.keys(state || {}).some((k) =>
+      /^drillpipe_(size|length)_\d+$/.test(k)
+    );
+    const dpCountValue = state?.drillpipe_count?.value;
+    if (!dpHasKeys && dpCountValue == null) return true;
+
+    const dpCount = el('drillpipe_count');
+    const dpBtn =
+      dpCountValue != null ? el(`drillpipe_count_${dpCountValue}`) : null;
+
+    if (!dpCount && !dpBtn) return false;
+
+    try {
+      if (dpCount && dpCountValue != null) {
+        dpCount.value = String(dpCountValue);
+        dpCount.dispatchEvent(new Event('change', { bubbles: true }));
+      } else if (dpBtn) {
+        dpBtn.dispatchEvent(new Event('click', { bubbles: true }));
+      }
+    } catch (e) {
+      /* ignore */
+    }
+
+    setTimeout(() => {
+      Object.keys(state || {}).forEach((id) => {
+        if (/^drillpipe_(size|length)_\d+$/.test(id)) {
+          const field = el(id);
+          if (field && state[id] && typeof state[id].value !== 'undefined') {
+            try {
+              field.value = state[id].value;
+              field.dispatchEvent(
+                new Event(
+                  field.tagName.toLowerCase() === 'select' ? 'change' : 'input',
+                  { bubbles: true }
+                )
+              );
+            } catch (e) {
+              /* ignore invalid value */
+            }
+          }
+        }
+      });
+    }, 0);
+
+    return true;
+  };
+
+  try {
+    if (!restoreDrillPipe()) {
+      document.addEventListener('keino:drillpipe-ui-ready', restoreDrillPipe, {
+        once: true
+      });
+    }
   } catch (e) {
     /* ignore */
   }

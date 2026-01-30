@@ -36,3 +36,27 @@ export const DRIFT = {
 };
 
 export const MINIMUM_HOLE_CLEANING_VELOCITY = 0.8;
+
+/**
+ * Fluid compressibility constants (k values) for pressure test calculations.
+ * Formula: V_liters = (V_m³ × ΔP_bar) / k
+ */
+export const FLUID_COMPRESSIBILITY = {
+  wbm_brine: 21,
+  obm: 18,
+  base_oil: 14,
+  kfls: 35
+};
+
+export const FLUID_COMPRESSIBILITY_LABELS = {
+  wbm_brine: 'WBM / Brine',
+  obm: 'OBM',
+  base_oil: 'Base Oil',
+  kfls: 'KFLS'
+};
+
+export const PRESSURE_DEFAULTS = {
+  lowPressure: 20,
+  highPressure: 345,
+  maxPressure: 1035
+};
