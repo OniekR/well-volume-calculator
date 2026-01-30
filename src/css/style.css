@@ -1138,6 +1138,14 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 10px;
+  position: relative;
+}
+
+#flow_help_info_tooltip {
+  left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 240px;
 }
 
 .flow-empty-state {

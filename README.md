@@ -13,7 +13,7 @@ Project structure
 - `dist/` - build output
 
 - Flow Velocity: calculates pipe and annulus velocities across casing transitions.
-	Supports L/min, GPM, m³/h, and BPM inputs.
+  Supports L/min, GPM, m³/h, and BPM inputs.
 
 Deprecations
 

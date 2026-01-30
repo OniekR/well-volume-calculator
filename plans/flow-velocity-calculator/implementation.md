@@ -1684,9 +1684,9 @@ function drawArrow(x, y, height, direction, color) {
 
 ##### Step 6 Verification Checklist
 
-- [ ] Flow tab shows velocity arrows on the main well schematic.
-- [ ] Values update when flow rate or depth mode changes.
-- [ ] No visual overlap issues with existing canvas content.
+- [x] Flow tab shows velocity arrows on the main well schematic.
+- [x] Values update when flow rate or depth mode changes.
+- [x] No visual overlap issues with existing canvas content.
 
 #### Step 6 STOP & COMMIT
 
