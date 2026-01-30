@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'volumeCalc_activeSection';
 
 const DEFAULT_SECTION = 'casings';
-const KNOWN_SECTIONS = new Set(['casings', 'completion', 'settings']);
+const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 
 let activeSection = localStorage.getItem(STORAGE_KEY) || DEFAULT_SECTION;
 
@@ -232,6 +232,14 @@ export function setSection(sectionName, { focus } = {}) {
   if (button) setActiveButton(button);
   saveActiveSection(normalized);
   setActiveView(normalized, { focus: !!focus });
+
+  try {
+    document.dispatchEvent(
+      new CustomEvent('keino:sectionchange', { detail: normalized })
+    );
+  } catch (error) {
+    console.warn('Unable to broadcast section change:', error);
+  }
 }
 
 export function getActiveSection() {
