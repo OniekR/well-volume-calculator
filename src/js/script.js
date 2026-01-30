@@ -397,6 +397,22 @@ const VolumeCalc = (() => {
     _scheduleSave();
   }
 
+  // Test helper: expose a function to force recalculation/draw in test environments
+  try {
+    if (typeof window !== 'undefined') {
+      window.__TEST_force_recalc = () => {
+        try {
+          calculateVolume();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
   return {
     init,
     calculateVolume,

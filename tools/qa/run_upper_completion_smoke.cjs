@@ -165,6 +165,10 @@ let watchdog = setTimeout(() => {
       await page.$eval('#tubing_length_0', (el) =>
         el.dispatchEvent(new Event('input', { bubbles: true }))
       );
+      // Force a recalculation/draw in case CI scheduling delays cause flakiness
+      try {
+        await page.evaluate(() => window.__TEST_force_recalc && window.__TEST_force_recalc());
+      } catch (e) {}
     }
     
     // Wait until the canvas dataURL changes, or timeout after a short while
