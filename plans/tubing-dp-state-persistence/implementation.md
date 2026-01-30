@@ -193,14 +193,14 @@ if (tubingCountValue != null) {
 
 #### Step 4 Verification Checklist
 
-- [ ] No syntax errors in ui.js
-- [ ] Manual test full flow:
+- [x] No syntax errors in ui.js
+- [x] Manual test full flow:
   1. Start with checkbox checked, tubing mode active, enter some tubing values
   2. Uncheck checkbox → inputs disabled
   3. Toggle slider to drill pipe mode → section switches, inputs stay disabled
   4. Re-check checkbox → verify drill pipe section is visible and enabled
   5. Verify tubing values are still preserved (switch back to tubing mode to check)
-- [ ] Reload page and verify all states persisted correctly
+- [x] Reload page and verify all states persisted correctly
 
 #### Step 4 STOP & COMMIT
 
@@ -210,9 +210,9 @@ if (tubingCountValue != null) {
 
 ### Step 5: Add unit tests
 
-- [ ] Create or update test file `src/js/__tests__/tubing-state-persistence.test.js`
-- [ ] Add tests for tubing count capture and restoration
-- [ ] Add tests for slider behavior when checkbox is unchecked
+- [x] Create or update test file `src/js/__tests__/tubing-state-persistence.test.js`
+- [x] Add tests for tubing count capture and restoration
+- [x] Add tests for slider behavior when checkbox is unchecked
 
 **Create new test file `src/js/__tests__/tubing-state-persistence.test.js`:**
 
@@ -384,9 +384,9 @@ describe('Mode Toggle with Checkbox Unchecked', () => {
 
 #### Step 5 Verification Checklist
 
-- [ ] Run `npm test -- src/js/__tests__/tubing-state-persistence.test.js` → all tests pass
-- [ ] Run `npm test` → all existing tests still pass
-- [ ] No lint errors
+- [x] Run `npm test -- src/js/__tests__/tubing-state-persistence.test.js` → all tests pass
+- [x] Run `npm test` → all existing tests still pass
+- [x] No lint errors
 
 #### Step 5 STOP & COMMIT
 
