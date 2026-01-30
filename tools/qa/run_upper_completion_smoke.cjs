@@ -209,7 +209,7 @@ let watchdog = setTimeout(() => {
 
       // Gather extra debug info to help investigate flaky failures on CI
       try {
-        const extra = await page.evaluate(() => {
+        const extra = await page.evaluate((prev, aft) => {
           const c = document.getElementById('wellSchematic');
           return {
             forceRecalcAvailable: !!window.__TEST_force_recalc,
@@ -223,9 +223,14 @@ let watchdog = setTimeout(() => {
                 : null,
             canvasWidth: c ? c.width : null,
             canvasHeight: c ? c.height : null,
-            dataURLSample: c ? c.toDataURL().slice(0, 200) : null
+            dataURLSample: c ? c.toDataURL().slice(0, 200) : null,
+            beforeSample: prev ? String(prev).slice(0, 200) : null,
+            beforeLength: prev ? String(prev).length : null,
+            afterSample: aft ? String(aft).slice(0, 200) : null,
+            afterLength: aft ? String(aft).length : null,
+            lastDrawArgs: typeof window.__TEST_last_draw_args !== 'undefined' ? window.__TEST_last_draw_args : null
           };
-        });
+        }, before, after);
 
         const fs = require('fs');
         const path = require('path');
