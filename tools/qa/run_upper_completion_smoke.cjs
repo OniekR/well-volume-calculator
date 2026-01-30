@@ -90,8 +90,30 @@ let watchdog = setTimeout(() => {
     }
 
     // Set top and depth and ensure table includes row
-    await page.$eval('#depth_uc_top', (el) => (el.value = '10'));
-    await page.$eval('#depth_uc', (el) => (el.value = '60'));
+    // If we detected the legacy inputs, set them directly. If the new tubing
+    // inputs are present, set tubing length to achieve a shoe depth (top is
+    // typically 0 for a single tubing) so the UC is present in the well.
+    if (foundSizeSelector === '#upper_completion_size') {
+      await page.$eval('#depth_uc_top', (el) => (el.value = '10'));
+      await page.$eval('#depth_uc', (el) => (el.value = '60'));
+    } else if (foundSizeSelector === '#tubing_size_0') {
+      // Ensure single tubing configuration if count buttons exist
+      try {
+        await page.$eval('#tubing_count_1', (el) => el.click());
+      } catch (e) {
+        // ignore if count button not present
+      }
+      // Select a tubing size (prefer index 1 if available) and set length to 60m
+      try {
+        await page.$eval('#tubing_size_0', (el) => {
+          if (el.options && el.options.length > 1) el.value = String(Math.min(1, el.options.length - 1));
+        });
+      } catch (e) {}
+      try {
+        await page.$eval('#tubing_length_0', (el) => (el.value = '60'));
+        await page.$eval('#tubing_length_0', (el) => el.dispatchEvent(new Event('input', { bubbles: true })));
+      } catch (e) {}
+    }
     await page.$eval('#use_upper_completion', (el) => (el.checked = true));
     await (page.waitForTimeout ? page.waitForTimeout(300) : wait(300));
 
@@ -124,12 +146,25 @@ let watchdog = setTimeout(() => {
     const before = await page.evaluate(() =>
       document.getElementById('wellSchematic').toDataURL()
     );
-    flog('Setting depth_uc to 80');
-    await page.$eval('#depth_uc', (el) => (el.value = '80'));
-    flog('Dispatching input event for depth_uc');
-    await page.$eval('#depth_uc', (el) =>
-      el.dispatchEvent(new Event('input', { bubbles: true }))
-    );
+    flog('Setting depth_uc to 80 (or tubing length when tubing UI present)');
+    try {
+      await page.$eval('#depth_uc', (el) => (el.value = '80'));
+      flog('Dispatching input event for depth_uc');
+      await page.$eval('#depth_uc', (el) =>
+        el.dispatchEvent(new Event('input', { bubbles: true }))
+      );
+    } catch (e) {
+      // Fallback: set tubing length if using tubing UI
+      try {
+        await page.$eval('#tubing_length_0', (el) => (el.value = '80'));
+        await page.$eval('#tubing_length_0', (el) =>
+          el.dispatchEvent(new Event('input', { bubbles: true }))
+        );
+        flog('Dispatched input event for #tubing_length_0 fallback');
+      } catch (e2) {
+        // give up silently; later checks will surface failures
+      }
+    }
     await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
     flog('Capturing canvas after change');
     const after = await page.evaluate(() =>
