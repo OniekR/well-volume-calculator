@@ -1,0 +1,223 @@
+{
+  "forceRecalcAvailable": true,
+  "forceRecalcResult": true,
+  "dumpState": {
+    "inputs": {
+      "casingsInput": [
+        {
+          "role": "riser",
+          "id": 17.5,
+          "depth": 0,
+          "use": true,
+          "od": 20
+        },
+        {
+          "role": "conductor",
+          "id": 28,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 30,
+          "drift": 27.813
+        },
+        {
+          "role": "surface",
+          "id": 17.8,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 18.625,
+          "drift": 17.168
+        },
+        {
+          "role": "intermediate",
+          "id": 12.415,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 13.375,
+          "drift": 12.259
+        },
+        {
+          "role": "production",
+          "id": 8.535,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 8.508,
+          "drift": 8.508
+        },
+        {
+          "role": "tieback",
+          "id": 8.535,
+          "top": 0,
+          "depth": 0,
+          "use": false,
+          "od": 9.625
+        },
+        {
+          "role": "reservoir",
+          "id": 6.184,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 7,
+          "drift": 6.102
+        },
+        {
+          "role": "small_liner",
+          "id": 3.958,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 4.5,
+          "drift": 3.833
+        },
+        {
+          "role": "upper_completion",
+          "id": 4.892,
+          "top": 0,
+          "depth": 80,
+          "use": true,
+          "od": 5.5,
+          "lPerM": 11.803,
+          "_tubingIndex": 0
+        },
+        {
+          "role": "open_hole",
+          "id": 17.5,
+          "top": 0,
+          "depth": 0,
+          "use": true,
+          "od": 17.5,
+          "z": -1
+        }
+      ],
+      "plugEnabled": true,
+      "plugDepthVal": 0,
+      "surfaceInUse": true,
+      "intermediateInUse": true,
+      "riserTypeVal": "17.5",
+      "riserDepthVal": 0,
+      "wellheadDepthVal": 0
+    },
+    "volumes": {
+      "totalVolume": 0,
+      "perCasingVolumes": [
+        {
+          "role": "riser",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.1551791654736087,
+          "use": true
+        },
+        {
+          "role": "conductor",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.39725866361243817,
+          "physicalLength": 0,
+          "use": true
+        },
+        {
+          "role": "surface",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.1605451976772512,
+          "physicalLength": 0,
+          "use": true
+        },
+        {
+          "role": "intermediate",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.07809995117743831,
+          "physicalLength": 0,
+          "use": true
+        },
+        {
+          "role": "production",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.03691172703151911,
+          "physicalLength": 0,
+          "use": true
+        },
+        {
+          "role": "tieback",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.03691172703151911,
+          "physicalLength": 0,
+          "use": false
+        },
+        {
+          "role": "reservoir",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.01937743444976952,
+          "physicalLength": 0,
+          "use": true
+        },
+        {
+          "role": "small_liner",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.007937959784576332,
+          "physicalLength": 0,
+          "use": true
+        },
+        {
+          "role": "upper_completion",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.012126353136048339,
+          "physicalLength": 80,
+          "use": true
+        },
+        {
+          "role": "open_hole",
+          "includedLength": 0,
+          "volume": 0,
+          "perMeter_m3": 0.1551791654736087,
+          "physicalLength": 0,
+          "use": true
+        }
+      ],
+      "casingsToDraw": [
+        {
+          "role": "upper_completion",
+          "id": 4.892,
+          "od": 5.5,
+          "depth": 80,
+          "prevDepth": 0,
+          "index": 0,
+          "z": 6
+        }
+      ],
+      "plugAboveVolume": 0,
+      "plugBelowVolume": 0,
+      "plugBelowVolumeTubing": 0,
+      "plugAboveTubing": 0,
+      "plugBelowTubing": 0.9701082508838671,
+      "plugAboveAnnulus": 0,
+      "plugBelowAnnulus": 0,
+      "plugAboveTubingOpenCasing": 0,
+      "plugBelowTubingOpenCasing": 0,
+      "casingVolumeBelowTubingShoe": 0,
+      "plugAboveDrillpipe": 0,
+      "plugBelowDrillpipe": 0,
+      "plugAboveDrillpipeAnnulus": 0,
+      "plugBelowDrillpipeAnnulus": 0,
+      "plugAboveDrillpipeOpenCasing": 0,
+      "plugBelowDrillpipeOpenCasing": 0,
+      "ucActive": true,
+      "dpMode": false,
+      "dpTotalDepth": 0,
+      "plugDepthVal": 0
+    }
+  },
+  "canvasWidth": 732,
+  "canvasHeight": 360,
+  "dataURLSample": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAtwAAAFoCAYAAABkGiyXAAAQAElEQVR4Aey9C2LjSBM0l409vH06+x7+77BwZlU3icZwvn3Ng5KCC7JQaI1EBqIKDZDSHv/X//P/nf/3//N/fHf8f//PSW4O8MCH1AX1QD+IB/QD+kE8oB/QD+IB/YB+EA"
+}

@@ -1127,6 +1127,34 @@
             aria-label="Completion"
             hidden
           >
+            <!-- Toggle between Tubing and Drill Pipe -->
+            <div class="completion-mode-toggle-container">
+              <div class="toggle-inline">
+                <span
+                  id="uc_mode_label"
+                  class="small-note-inline toggle-label-left"
+                  >Tubing</span
+                >
+                <label
+                  class="switch"
+                  title="Switch between tubing and drill pipe"
+                >
+                  <input
+                    type="checkbox"
+                    id="uc_mode_toggle"
+                    class="toggle-input"
+                    aria-label="Switch to drill pipe mode"
+                  />
+                  <span class="slider round" aria-hidden="true"></span>
+                </label>
+                <span
+                  id="uc_mode_label_dp"
+                  class="small-note-inline toggle-label-right"
+                  >Drill pipe</span
+                >
+              </div>
+            </div>
+
             <!-- Upper completion: placed inside casings and drawn on top -->
             <div class="casing-input no-hide" id="upper_completion_section">
               <div class="casing-header">
@@ -1137,33 +1165,6 @@
                   checked
                 />
                 <h3>Completion or DP</h3>
-                <div class="header-inline">
-                  <!-- Toggle between Tubing and Drill Pipe -->
-                  <div class="toggle-inline">
-                    <span
-                      id="uc_mode_label"
-                      class="small-note-inline toggle-label-left"
-                      >Tubing</span
-                    >
-                    <label
-                      class="switch"
-                      title="Switch between tubing and drill pipe"
-                    >
-                      <input
-                        type="checkbox"
-                        id="uc_mode_toggle"
-                        class="toggle-input"
-                        aria-label="Switch to drill pipe mode"
-                      />
-                      <span class="slider round" aria-hidden="true"></span>
-                    </label>
-                    <span
-                      id="uc_mode_label_dp"
-                      class="small-note-inline toggle-label-right"
-                      >Drill pipe</span
-                    >
-                  </div>
-                </div>
               </div>
               <div class="casing-body">
                 <!-- Tubing section (hidden when drill pipe mode active) -->
@@ -1422,21 +1423,6 @@
             <h2 style="margin: 0 0 20px 0">Settings</h2>
 
             <div class="settings-controls-section">
-              <!-- POI Toggle -->
-              <div class="settings-control-group">
-                <label class="settings-control-label">Point of Interest</label>
-                <div id="poi-toggle-container">
-                  <button
-                    id="poi-toggle-btn"
-                    class="btn-primary settings-button"
-                    type="button"
-                    aria-label="Toggle Point of Interest section"
-                  >
-                    <span id="poi-toggle-btn-text">Show POI Section</span>
-                  </button>
-                </div>
-              </div>
-
               <!-- Theme Toggle -->
               <div class="settings-control-group">
                 <label class="settings-control-label" for="theme_toggle"

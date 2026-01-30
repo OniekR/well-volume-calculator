@@ -51,6 +51,13 @@ export function updateTubingDepthDisplays() {
  * @returns {Object} - { count: number, tubings: [{size, length, top, shoe}, ...] }
  */
 export function gatherTubingInput() {
+  const ucCheckbox = document.getElementById('use_upper_completion');
+
+  // If upper completion checkbox is unchecked, return empty data
+  if (ucCheckbox && !ucCheckbox.checked) {
+    return { count: 0, tubings: [] };
+  }
+
   // Get count from active button (1, 2, or 3 tubings)
   const activeBtn = document.querySelector('.tubing-count-btn.active');
   const count = activeBtn ? parseInt(activeBtn.dataset.count, 10) : 1;
@@ -119,7 +126,10 @@ export function renderTubingInputs(count) {
     const row = document.createElement('div');
     row.className = 'input-row tubing-input-row three-cols';
 
-    // Size selector
+    // Size selector wrapper (label + select stacked vertically)
+    const sizeWrapper = document.createElement('div');
+    sizeWrapper.className = 'tubing-size-wrapper';
+
     const sizeLabel = document.createElement('label');
     sizeLabel.htmlFor = `tubing_size_${i}`;
     sizeLabel.textContent = `Tubing ${i + 1}`;
@@ -143,6 +153,13 @@ export function renderTubingInputs(count) {
     }
     sizeSelect.value = String(defaultIndex);
 
+    sizeWrapper.appendChild(sizeLabel);
+    sizeWrapper.appendChild(sizeSelect);
+
+    // Length input wrapper (label + input stacked vertically)
+    const lengthWrapper = document.createElement('div');
+    lengthWrapper.className = 'tubing-length-wrapper';
+
     // Length input
     const lengthLabel = document.createElement('label');
     lengthLabel.htmlFor = `tubing_length_${i}`;
@@ -159,6 +176,13 @@ export function renderTubingInputs(count) {
       'aria-label',
       `Length of tubing ${i + 1} in meters`
     );
+
+    lengthWrapper.appendChild(lengthLabel);
+    lengthWrapper.appendChild(lengthInput);
+
+    // Top depth display wrapper (label + input stacked vertically)
+    const topWrapper = document.createElement('div');
+    topWrapper.className = 'tubing-top-wrapper';
 
     // Top depth display (read-only, calculated)
     const topLabel = document.createElement('label');
@@ -177,13 +201,13 @@ export function renderTubingInputs(count) {
       `Top depth of tubing ${i + 1} (calculated) in meters`
     );
 
+    topWrapper.appendChild(topLabel);
+    topWrapper.appendChild(topDisplay);
+
     // Append to row
-    row.appendChild(sizeLabel);
-    row.appendChild(sizeSelect);
-    row.appendChild(lengthLabel);
-    row.appendChild(lengthInput);
-    row.appendChild(topLabel);
-    row.appendChild(topDisplay);
+    row.appendChild(sizeWrapper);
+    row.appendChild(topWrapper);
+    row.appendChild(lengthWrapper);
 
     container.appendChild(row);
   }

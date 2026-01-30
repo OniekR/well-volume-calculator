@@ -178,7 +178,7 @@ let watchdog = setTimeout(() => {
               window.__TEST_force_recalc();
             }
             // Also flush any requestAnimationFrame callbacks by giving the event loop a chance
-            return new Promise(resolve => setTimeout(resolve, 50));
+            return new Promise((resolve) => setTimeout(resolve, 50));
           });
         }
       } catch (e) {
@@ -209,28 +209,35 @@ let watchdog = setTimeout(() => {
 
       // Gather extra debug info to help investigate flaky failures on CI
       try {
-        const extra = await page.evaluate((prev, aft) => {
-          const c = document.getElementById('wellSchematic');
-          return {
-            forceRecalcAvailable: !!window.__TEST_force_recalc,
-            forceRecalcResult:
-              typeof window.__TEST_force_recalc === 'function'
-                ? window.__TEST_force_recalc()
-                : null,
-            dumpState:
-              typeof window.__TEST_dumpState === 'function'
-                ? window.__TEST_dumpState()
-                : null,
-            canvasWidth: c ? c.width : null,
-            canvasHeight: c ? c.height : null,
-            dataURLSample: c ? c.toDataURL().slice(0, 200) : null,
-            beforeSample: prev ? String(prev).slice(0, 200) : null,
-            beforeLength: prev ? String(prev).length : null,
-            afterSample: aft ? String(aft).slice(0, 200) : null,
-            afterLength: aft ? String(aft).length : null,
-            lastDrawArgs: typeof window.__TEST_last_draw_args !== 'undefined' ? window.__TEST_last_draw_args : null
-          };
-        }, before, after);
+        const extra = await page.evaluate(
+          (prev, aft) => {
+            const c = document.getElementById('wellSchematic');
+            return {
+              forceRecalcAvailable: !!window.__TEST_force_recalc,
+              forceRecalcResult:
+                typeof window.__TEST_force_recalc === 'function'
+                  ? window.__TEST_force_recalc()
+                  : null,
+              dumpState:
+                typeof window.__TEST_dumpState === 'function'
+                  ? window.__TEST_dumpState()
+                  : null,
+              canvasWidth: c ? c.width : null,
+              canvasHeight: c ? c.height : null,
+              dataURLSample: c ? c.toDataURL().slice(0, 200) : null,
+              beforeSample: prev ? String(prev).slice(0, 200) : null,
+              beforeLength: prev ? String(prev).length : null,
+              afterSample: aft ? String(aft).slice(0, 200) : null,
+              afterLength: aft ? String(aft).length : null,
+              lastDrawArgs:
+                typeof window.__TEST_last_draw_args !== 'undefined'
+                  ? window.__TEST_last_draw_args
+                  : null
+            };
+          },
+          before,
+          after
+        );
 
         const fs = require('fs');
         const path = require('path');
