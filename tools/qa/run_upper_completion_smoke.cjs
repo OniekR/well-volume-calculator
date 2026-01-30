@@ -62,12 +62,27 @@ let watchdog = setTimeout(() => {
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 20000 });
     console.log('SMOKE: page.goto succeeded');
     flog('SMOKE: page.goto succeeded');
-    await page.waitForSelector('#upper_completion_size', { timeout: 10000 });
-    console.log('SMOKE: found #upper_completion_size');
-    flog('SMOKE: found #upper_completion_size');
+    // Wait for the Upper Completion section and then for a size control.
+    // New UI uses dynamic tubing inputs (#tubing_size_0) while older UI used
+    // a legacy select (#upper_completion_size). Accept either.
+    await page.waitForSelector('#upper_completion_section', { timeout: 10000 });
+
+    let foundSizeSelector = null;
+    try {
+      await page.waitForSelector('#upper_completion_size', { timeout: 3000 });
+      foundSizeSelector = '#upper_completion_size';
+      console.log('SMOKE: found legacy #upper_completion_size');
+      flog('SMOKE: found legacy #upper_completion_size');
+    } catch (e) {
+      // Fallback to new tubing inputs
+      await page.waitForSelector('#tubing_size_0', { timeout: 10000 });
+      foundSizeSelector = '#tubing_size_0';
+      console.log('SMOKE: found #tubing_size_0');
+      flog('SMOKE: found #tubing_size_0');
+    }
 
     // ensure UI present
-    const exists = await page.$eval('#upper_completion_size', (el) => !!el);
+    const exists = await page.$eval(foundSizeSelector, (el) => !!el);
     if (!exists) {
       console.error('FAIL: Upper completion UI not found');
       await browser.close();

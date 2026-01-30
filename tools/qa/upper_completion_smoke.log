@@ -161,3 +161,10 @@
 2026-01-21T12:39:52.173Z Triggering recalculation after setting production drift
 2026-01-21T12:39:52.691Z PASS: Upper completion UI present and drift warning shown
 2026-01-21T12:39:52.692Z TEST_END
+2026-01-30T06:52:39.454Z SCRIPT_INVOKED
+2026-01-30T06:52:42.784Z SMOKE: Starting upper completion smoke test
+2026-01-30T06:52:42.785Z SMOKE: entering main IIFE
+2026-01-30T06:52:42.785Z SMOKE: launching puppeteer
+2026-01-30T06:52:43.284Z SMOKE: puppeteer launched
+2026-01-30T06:52:43.324Z SMOKE: new page created
+2026-01-30T06:52:43.324Z SMOKE: going to http://localhost:5173/
