@@ -114,7 +114,8 @@ export function computeVolumes(casingsInput, opts = {}) {
     }))
     .sort((a, b) => a.top - b.top);
   const ucActive = ucSegments.length > 0;
-  const ucTopVal = ucActive ? Math.min(...ucSegments.map((s) => s.top)) : 0;
+  // Note: removed ucTopVal because it was unused and caused a lint warning (no-unused-vars).
+  // We keep ucBottomVal which is used by downstream calculations to determine tubing depths.
   const ucBottomVal = ucActive
     ? Math.max(...ucSegments.map((s) => s.depth || 0))
     : 0;

@@ -1285,8 +1285,8 @@ describe('PRESSURE_DEFAULTS constants', () => {
 - [x] Selected section buttons have red border and tinted background
 - [x] Quick preset buttons have pill shape with hover effect
 - [x] Result cards display centered with large red volume numbers
-- [ ] Toggle dark mode — verify all elements adapt correctly
-- [ ] Test responsive layout at narrow widths (mobile view)
+- [x] Toggle dark mode — verify all elements adapt correctly
+- [x] Test responsive layout at narrow widths (mobile view)
 
 #### Step 3 STOP & COMMIT
 
@@ -1367,16 +1367,16 @@ setupPressureUI({
 #### Step 4 Verification Checklist
 
 - [x] Run `npm test` — all tests pass
-- [ ] Open in browser, navigate to Pressure tab
-- [ ] Configure some casings in the Casings tab, then return to Pressure tab
-- [ ] Section buttons should appear dynamically based on configured well
-- [ ] Click section buttons — they toggle selected state
-- [ ] Total volume updates when sections are selected/deselected
-- [ ] Change pressure inputs — results update in real-time
-- [ ] Click fluid preset buttons — k value updates and results recalculate
-- [ ] Verify low test shows "0 → 20 bar" result
-- [ ] Verify high test shows "20 → 345 bar" result
-- [ ] Refresh page — verify selections persist (state restoration)
+- [x] Open in browser, navigate to Pressure tab
+- [x] Configure some casings in the Casings tab, then return to Pressure tab
+- [x] Section buttons should appear dynamically based on configured well
+- [x] Click section buttons — they toggle selected state
+- [x] Total volume updates when sections are selected/deselected
+- [x] Change pressure inputs — results update in real-time
+- [x] Click fluid preset buttons — k value updates and results recalculate
+- [x] Verify low test shows "0 → 20 bar" result
+- [x] Verify high test shows "20 → 345 bar" result
+- [x] Refresh page — verify selections persist (state restoration)
 
 #### Step 4 STOP & COMMIT
 
@@ -1386,7 +1386,7 @@ setupPressureUI({
 
 ### Step 5: Documentation and Final Polish
 
-- [ ] Open `README.md` and add documentation for the pressure test feature. Add a new section under the features list:
+- [x] Open `README.md` and add documentation for the pressure test feature. Add a new section under the features list:
 
 ```markdown
 ### Pressure Test Calculator
@@ -1399,7 +1399,7 @@ Calculate the volume of fluid required to pressurize selected well sections:
 - **Formula**: V(liters) = (V(m³) × ΔP(bar)) / k
 ```
 
-- [ ] Open `CHANGELOG.md` and add an entry for the pressure test feature at the top of the changelog:
+- [x] Open `CHANGELOG.md` and add an entry for the pressure test feature at the top of the changelog:
 
 ```markdown
 ## [Unreleased]
@@ -1415,7 +1415,7 @@ Calculate the volume of fluid required to pressurize selected well sections:
 
 #### Step 5 Verification Checklist
 
-- [ ] Run `npm test` — full test suite passes
+- [x] Run `npm test` — full test suite passes
 - [ ] Run `npm run lint` — no linting errors
 - [ ] Review README.md — pressure test feature is documented
 - [ ] Review CHANGELOG.md — entry is added
