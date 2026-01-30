@@ -168,3 +168,24 @@
 2026-01-30T06:52:43.284Z SMOKE: puppeteer launched
 2026-01-30T06:52:43.324Z SMOKE: new page created
 2026-01-30T06:52:43.324Z SMOKE: going to http://localhost:5173/
+2026-01-30T07:37:20.515Z SCRIPT_INVOKED
+2026-01-30T07:37:23.056Z SMOKE: Starting upper completion smoke test
+2026-01-30T07:37:23.057Z SMOKE: entering main IIFE
+2026-01-30T07:37:23.058Z SMOKE: launching puppeteer
+2026-01-30T07:37:23.599Z SMOKE: puppeteer launched
+2026-01-30T07:37:23.645Z SMOKE: new page created
+2026-01-30T07:37:23.645Z SMOKE: going to http://localhost:5173/
+2026-01-30T07:37:57.992Z SCRIPT_INVOKED
+2026-01-30T07:37:58.181Z SMOKE: Starting upper completion smoke test
+2026-01-30T07:37:58.181Z SMOKE: entering main IIFE
+2026-01-30T07:37:58.182Z SMOKE: launching puppeteer
+2026-01-30T07:37:58.458Z SMOKE: puppeteer launched
+2026-01-30T07:37:58.501Z SMOKE: new page created
+2026-01-30T07:37:58.502Z SMOKE: going to http://localhost:5173/
+2026-01-30T07:38:30.999Z SCRIPT_INVOKED
+2026-01-30T07:38:31.185Z SMOKE: Starting upper completion smoke test
+2026-01-30T07:38:31.186Z SMOKE: entering main IIFE
+2026-01-30T07:38:31.186Z SMOKE: launching puppeteer
+2026-01-30T07:38:31.488Z SMOKE: puppeteer launched
+2026-01-30T07:38:31.527Z SMOKE: new page created
+2026-01-30T07:38:31.528Z SMOKE: going to http://localhost:5173/

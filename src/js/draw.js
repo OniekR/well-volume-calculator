@@ -56,6 +56,16 @@ export function scheduleDraw(casings, opts = {}) {
   });
 }
 
+// Test helper: immediately draw with the last scheduled args, flushing any pending requestAnimationFrame
+export function __TEST_flush_draw() {
+  if (!lastDrawArgs) return false;
+  const args = lastDrawArgs;
+  lastDrawArgs = null;
+  drawScheduled = false;
+  drawSchematic(args.casings, args.opts);
+  return true;
+}
+
 export function drawSchematic(casings, opts = {}) {
   if (!ctx || !canvasEl) return;
   ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);

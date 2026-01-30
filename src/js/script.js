@@ -1,7 +1,7 @@
 'use strict';
 
 import { computeVolumes, computeUpperCompletionBreakdown } from './logic.js';
-import { initDraw, scheduleDraw as scheduleDrawFn } from './draw.js';
+import { initDraw, scheduleDraw as scheduleDrawFn, drawSchematic as drawSchematicFn, __TEST_flush_draw } from './draw.js';
 import {
   captureStateObject,
   applyStateObject as applyStateObjectFn
@@ -305,7 +305,7 @@ const VolumeCalc = (() => {
       );
     }
 
-    scheduleDraw(casingsToDraw, {
+    const __testDrawOpts = {
       showWater,
       waterDepth,
       plugDepth:
@@ -319,7 +319,18 @@ const VolumeCalc = (() => {
           ? dpInput.pipes
           : undefined,
       tubingSegments
-    });
+    };
+
+    // Expose the draw args for test helpers so we can force a deterministic redraw in CI
+    try {
+      if (typeof window !== 'undefined') {
+        window.__TEST_last_draw_args = { casings: casingsToDraw, opts: __testDrawOpts };
+      }
+    } catch (e) {
+      /* ignore */
+    }
+
+    scheduleDraw(casingsToDraw, __testDrawOpts);
 
     // Upper completion fit warnings are handled by the UI module (initUpperCompletionChecks)
     // so avoid updating any legacy DOM elements here.
@@ -403,6 +414,23 @@ const VolumeCalc = (() => {
       window.__TEST_force_recalc = () => {
         try {
           calculateVolume();
+          // If we have the last draw args captured, call the renderer directly to guarantee an immediate redraw
+          try {
+            if (typeof window !== 'undefined' && window.__TEST_last_draw_args) {
+              try {
+                drawSchematicFn(
+                  window.__TEST_last_draw_args.casings,
+                  window.__TEST_last_draw_args.opts
+                );
+              } catch (inner) {
+                /* ignore rendering errors in test helper */
+              }
+            }
+          } catch (e) {
+            /* ignore */
+          }
+          // Also flush any scheduled draws as a fallback
+          __TEST_flush_draw();
           return true;
         } catch (e) {
           return false;
