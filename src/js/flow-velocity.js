@@ -109,13 +109,19 @@ function resolvePipeSegments({
 }) {
   const override = pipeModeOverride || 'auto';
   if (override === 'drillpipe') {
-    return { mode: 'drillpipe', segments: buildDrillPipeSegments(drillpipeInput) };
+    return {
+      mode: 'drillpipe',
+      segments: buildDrillPipeSegments(drillpipeInput)
+    };
   }
   if (override === 'tubing') {
     return { mode: 'tubing', segments: buildTubingSegments(tubingInput) };
   }
   if (drillpipeInput?.mode === 'drillpipe') {
-    return { mode: 'drillpipe', segments: buildDrillPipeSegments(drillpipeInput) };
+    return {
+      mode: 'drillpipe',
+      segments: buildDrillPipeSegments(drillpipeInput)
+    };
   }
   return { mode: 'tubing', segments: buildTubingSegments(tubingInput) };
 }
@@ -325,9 +331,9 @@ export function computeFlowVelocity(
     summary,
     overlay: overlaySegment
       ? {
-          depthLabel: `${overlaySegment.startDepth.toFixed(1)}–${
-            overlaySegment.endDepth.toFixed(1)
-          } m`,
+          depthLabel: `${overlaySegment.startDepth.toFixed(
+            1
+          )}–${overlaySegment.endDepth.toFixed(1)} m`,
           pipeVelocityMps: overlaySegment.pipe.velocityMps,
           pipeVelocityFps: overlaySegment.pipe.velocityFps,
           annulusVelocityMps: overlayAnnulus?.velocityMps,
@@ -408,7 +414,8 @@ export function setupFlowVelocityUI(deps = {}) {
     depthInputWrap.hidden = !(depthModeSingle && depthModeSingle.checked);
   };
   if (depthModeAll) depthModeAll.addEventListener('change', syncDepthMode);
-  if (depthModeSingle) depthModeSingle.addEventListener('change', syncDepthMode);
+  if (depthModeSingle)
+    depthModeSingle.addEventListener('change', syncDepthMode);
   syncDepthMode();
 
   document.querySelectorAll('.flow-depth-btn').forEach((btn) => {
@@ -474,7 +481,8 @@ export function renderFlowVelocityResults(result) {
   const summaryAnnulusEl = el('flow-summary-annulus');
 
   if (rateSummary) {
-    const unitLabel = FLOW_UNIT_LABELS[result.flowRateUnit] || result.flowRateUnit;
+    const unitLabel =
+      FLOW_UNIT_LABELS[result.flowRateUnit] || result.flowRateUnit;
     rateSummary.textContent = `${result.flowRateValue || 0} ${unitLabel}`;
   }
 
@@ -489,7 +497,8 @@ export function renderFlowVelocityResults(result) {
       : 'No casing IDs available for annulus calculations.';
   }
 
-  if (summaryPipeEl) summaryPipeEl.textContent = formatSummary(result.summary.pipe);
+  if (summaryPipeEl)
+    summaryPipeEl.textContent = formatSummary(result.summary.pipe);
   if (summaryAnnulusEl)
     summaryAnnulusEl.textContent = formatSummary(result.summary.annulus);
 
@@ -500,9 +509,9 @@ export function renderFlowVelocityResults(result) {
 
     const header = document.createElement('div');
     header.className = 'flow-segment-header';
-    header.textContent = `${segment.startDepth.toFixed(1)}–${segment.endDepth.toFixed(
+    header.textContent = `${segment.startDepth.toFixed(
       1
-    )} m`;
+    )}–${segment.endDepth.toFixed(1)} m`;
     card.appendChild(header);
 
     const pipeRow = document.createElement('div');
@@ -545,7 +554,9 @@ export function renderFlowVelocityResults(result) {
   const schematicAnnulus = el('flow-schematic-annulus');
   const schematicDepth = el('flow-schematic-depth');
   if (schematicPipe) {
-    schematicPipe.textContent = formatVelocityValue(result.overlay?.pipeVelocityMps);
+    schematicPipe.textContent = formatVelocityValue(
+      result.overlay?.pipeVelocityMps
+    );
     schematicPipe.classList.toggle(
       'flow-velocity-warning',
       (result.overlay?.pipeVelocityMps || 0) < MINIMUM_HOLE_CLEANING_VELOCITY

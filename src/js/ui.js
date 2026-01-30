@@ -370,6 +370,7 @@ export function setupTooltips() {
   };
   setup('production_liner_info_btn', 'production_liner_info_tooltip');
   setup('reservoir_default_info_btn', 'reservoir_default_info_tooltip');
+  setup('flow_help_info_btn', 'flow_help_info_tooltip');
 }
 
 export function setupSizeIdInputs(deps) {

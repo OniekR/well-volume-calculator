@@ -1570,9 +1570,9 @@ const __testDrawOpts = {
 
 ##### Step 4 Verification Checklist
 
-- [ ] Flow Velocity calculations update when any flow input changes.
-- [ ] Switching to the Flow tab triggers a fresh calculation.
-- [ ] No new console errors appear in the Flow view.
+- [x] Flow Velocity calculations update when any flow input changes.
+- [x] Switching to the Flow tab triggers a fresh calculation.
+- [x] No new console errors appear in the Flow view.
 
 #### Step 4 STOP & COMMIT
 
@@ -1586,9 +1586,9 @@ const __testDrawOpts = {
 
 ##### Step 5 Verification Checklist
 
-- [ ] Enter a valid flow rate and see segment cards populated.
-- [ ] Toggle to Single depth and confirm the schematic depth label updates.
-- [ ] Velocities below 0.8 m/s are highlighted in red.
+- [x] Enter a valid flow rate and see segment cards populated.
+- [x] Toggle to Single depth and confirm the schematic depth label updates.
+- [x] Velocities below 0.8 m/s are highlighted in red.
 
 #### Step 5 STOP & COMMIT
 
@@ -1694,19 +1694,19 @@ function drawArrow(x, y, height, direction, color) {
 
 #### Step 7: Polish UX, tooltip wiring, and documentation
 
-- [ ] Hook up the new Flow Velocity tooltip in `src/js/ui.js`:
+- [x] Hook up the new Flow Velocity tooltip in `src/js/ui.js`:
 
 ```javascript
 setup('flow_help_info_btn', 'flow_help_info_tooltip');
 ```
 
-- [ ] Remove the Under Construction badge from the Flow Velocity nav button in `index.html` by replacing the Flow Velocity button text with:
+- [x] Remove the Under Construction badge from the Flow Velocity nav button in `index.html` by replacing the Flow Velocity button text with:
 
 ```html
 <span class="sidebar-nav-text">Flow Velocity</span>
 ```
 
-- [ ] Update `README.md` to mention the Flow Velocity tab and supported units:
+- [x] Update `README.md` to mention the Flow Velocity tab and supported units:
 
 ```markdown
 - Flow Velocity: calculates pipe and annulus velocities across casing transitions.

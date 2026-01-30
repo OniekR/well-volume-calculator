@@ -313,82 +313,89 @@ export function drawSchematic(casings, opts = {}) {
         endDepth - startDepth
       );
 
-  if (opts?.flowOverlay) {
-    drawFlowOverlay(opts.flowOverlay, rect);
-  }
+      if (opts?.flowOverlay) {
+        drawFlowOverlay(opts.flowOverlay, rect);
+      }
 
+      function drawFlowOverlay(overlay, rect) {
+        if (!ctx || !overlay) return;
+        const baseX = rect.width * 0.78;
+        const baseY = rect.height * 0.18;
+        const arrowHeight = Math.min(140, rect.height * 0.25);
+        const fontSize = Math.max(11, Math.round(rect.width * 0.012));
 
-function drawFlowOverlay(overlay, rect) {
-  if (!ctx || !overlay) return;
-  const baseX = rect.width * 0.78;
-  const baseY = rect.height * 0.18;
-  const arrowHeight = Math.min(140, rect.height * 0.25);
-  const fontSize = Math.max(11, Math.round(rect.width * 0.012));
+        ctx.save();
+        ctx.font = `600 ${fontSize}px Arial`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
 
-  ctx.save();
-  ctx.font = `600 ${fontSize}px Arial`;
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
+        const pipeText = overlay.pipeVelocityMps
+          ? `${overlay.pipeVelocityMps.toFixed(
+              2
+            )} m/s (${overlay.pipeVelocityFps.toFixed(2)} ft/s)`
+          : '—';
+        const annulusText = overlay.annulusVelocityMps
+          ? `${overlay.annulusVelocityMps.toFixed(
+              2
+            )} m/s (${overlay.annulusVelocityFps.toFixed(2)} ft/s)`
+          : '—';
 
-  const pipeText = overlay.pipeVelocityMps
-    ? `${overlay.pipeVelocityMps.toFixed(2)} m/s (${overlay.pipeVelocityFps.toFixed(
-        2
-      )} ft/s)`
-    : '—';
-  const annulusText = overlay.annulusVelocityMps
-    ? `${overlay.annulusVelocityMps.toFixed(2)} m/s (${overlay.annulusVelocityFps.toFixed(
-        2
-      )} ft/s)`
-    : '—';
+        drawArrow(baseX, baseY, arrowHeight, 'up', '#e31b23');
+        ctx.fillStyle = '#e31b23';
+        ctx.fillText(
+          `Annulus ${overlay.annulusLabel || ''}`,
+          baseX + 18,
+          baseY - 8
+        );
+        ctx.fillText(annulusText, baseX + 18, baseY + 10);
 
-  drawArrow(baseX, baseY, arrowHeight, 'up', '#e31b23');
-  ctx.fillStyle = '#e31b23';
-  ctx.fillText(`Annulus ${overlay.annulusLabel || ''}`, baseX + 18, baseY - 8);
-  ctx.fillText(annulusText, baseX + 18, baseY + 10);
+        const pipeY = baseY + arrowHeight + 40;
+        drawArrow(baseX, pipeY, arrowHeight, 'down', '#2fa84f');
+        ctx.fillStyle = '#2fa84f';
+        ctx.fillText('Pipe', baseX + 18, pipeY - 8);
+        ctx.fillText(pipeText, baseX + 18, pipeY + 10);
 
-  const pipeY = baseY + arrowHeight + 40;
-  drawArrow(baseX, pipeY, arrowHeight, 'down', '#2fa84f');
-  ctx.fillStyle = '#2fa84f';
-  ctx.fillText('Pipe', baseX + 18, pipeY - 8);
-  ctx.fillText(pipeText, baseX + 18, pipeY + 10);
+        if (overlay.depthLabel) {
+          ctx.fillStyle = '#555';
+          ctx.fillText(
+            `Depth: ${overlay.depthLabel}`,
+            baseX,
+            pipeY + arrowHeight + 26
+          );
+        }
 
-  if (overlay.depthLabel) {
-    ctx.fillStyle = '#555';
-    ctx.fillText(`Depth: ${overlay.depthLabel}`, baseX, pipeY + arrowHeight + 26);
-  }
+        ctx.restore();
+      }
 
-  ctx.restore();
-}
-
-function drawArrow(x, y, height, direction, color) {
-  if (!ctx) return;
-  const arrowWidth = 10;
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  if (direction === 'up') {
-    ctx.moveTo(x, y);
-    ctx.lineTo(x, y + height);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y - arrowWidth);
-    ctx.lineTo(x - arrowWidth, y + arrowWidth);
-    ctx.lineTo(x + arrowWidth, y + arrowWidth);
-  } else {
-    ctx.moveTo(x, y);
-    ctx.lineTo(x, y + height);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y + height + arrowWidth);
-    ctx.lineTo(x - arrowWidth, y + height - arrowWidth);
-    ctx.lineTo(x + arrowWidth, y + height - arrowWidth);
-  }
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
+      function drawArrow(x, y, height, direction, color) {
+        if (!ctx) return;
+        const arrowWidth = 10;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (direction === 'up') {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y + height);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x, y - arrowWidth);
+          ctx.lineTo(x - arrowWidth, y + arrowWidth);
+          ctx.lineTo(x + arrowWidth, y + arrowWidth);
+        } else {
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y + height);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x, y + height + arrowWidth);
+          ctx.lineTo(x - arrowWidth, y + height - arrowWidth);
+          ctx.lineTo(x + arrowWidth, y + height - arrowWidth);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
       // Draw drill pipe inner (hollow)
       ctx.fillStyle = '#e6e6e6';
       ctx.fillRect(
