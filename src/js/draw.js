@@ -82,7 +82,9 @@ export function drawSchematic(casings, opts = {}) {
 
   const tubingMaxDepth =
     opts && opts.tubingSegments && opts.tubingSegments.length
-      ? Math.max(...opts.tubingSegments.map((t) => Number(t.shoe || t.length || 0)))
+      ? Math.max(
+          ...opts.tubingSegments.map((t) => Number(t.shoe || t.length || 0))
+        )
       : 0;
 
   const maxDepth = Math.max(
@@ -99,7 +101,8 @@ export function drawSchematic(casings, opts = {}) {
     const hasLabel =
       typeof opts.currentPresetName === 'string' &&
       opts.currentPresetName.trim() !== '';
-    const hasTubing = opts && opts.tubingSegments && opts.tubingSegments.length > 0;
+    const hasTubing =
+      opts && opts.tubingSegments && opts.tubingSegments.length > 0;
     if (!hasLabel && !hasTubing) return;
   }
 

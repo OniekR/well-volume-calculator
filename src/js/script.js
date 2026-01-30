@@ -1,7 +1,12 @@
 'use strict';
 
 import { computeVolumes, computeUpperCompletionBreakdown } from './logic.js';
-import { initDraw, scheduleDraw as scheduleDrawFn, drawSchematic as drawSchematicFn, __TEST_flush_draw } from './draw.js';
+import {
+  initDraw,
+  scheduleDraw as scheduleDrawFn,
+  drawSchematic as drawSchematicFn,
+  __TEST_flush_draw
+} from './draw.js';
 import {
   captureStateObject,
   applyStateObject as applyStateObjectFn
@@ -324,7 +329,10 @@ const VolumeCalc = (() => {
     // Expose the draw args for test helpers so we can force a deterministic redraw in CI
     try {
       if (typeof window !== 'undefined') {
-        window.__TEST_last_draw_args = { casings: casingsToDraw, opts: __testDrawOpts };
+        window.__TEST_last_draw_args = {
+          casings: casingsToDraw,
+          opts: __testDrawOpts
+        };
       }
     } catch (e) {
       /* ignore */
