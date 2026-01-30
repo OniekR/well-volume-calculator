@@ -27,6 +27,12 @@ import {
   gatherFlowVelocityInput,
   renderFlowVelocityResults
 } from './flow-velocity.js';
+import {
+  computePressureTest,
+  gatherPressureInput,
+  setupPressureUI,
+  renderPressureResults
+} from './pressure.js';
 
 /*
  * Refactored module for the Well Volume Calculator
@@ -83,6 +89,7 @@ const VolumeCalc = (() => {
   // Currently loaded or saved preset name (displayed on the canvas)
   let currentPresetName = '';
   let lastFlowResults = undefined;
+  let lastPressureResults = undefined;
 
   // Drawing responsibilities (canvas sizing, DPR, scheduling) are provided by `src/js/draw.js`.
   // Initialize drawing module with the canvas element later during setup via `initDraw(canvas)`.
@@ -282,19 +289,36 @@ const VolumeCalc = (() => {
 
     renderFlowVelocityResults(lastFlowResults);
 
+    let dpBreakdown;
+    let ucBreakdown;
+    if (dpInput.mode === 'drillpipe') {
+      dpBreakdown = computeDrillPipeBreakdown(dpInput.pipes, casingsInput);
+    } else {
+      ucBreakdown = computeUpperCompletionBreakdown(casingsInput);
+    }
+
+    const pressureInput = gatherPressureInput();
+    lastPressureResults = computePressureTest(pressureInput, {
+      casingsInput,
+      drillpipeInput: dpInput,
+      tubingInput,
+      volumes: {
+        drillPipeCapacity: dpBreakdown?.dpIdVolume,
+        tubingCapacity: ucBreakdown?.ucIdVolume,
+        annulusInnermost:
+          dpBreakdown?.annulusVolume ?? ucBreakdown?.annulusVolume
+      }
+    });
+    renderPressureResults(lastPressureResults);
+
     // Render upper completion breakdown (tubing or drill pipe)
     if (dpInput.mode === 'drillpipe') {
-      const dpBreakdown = computeDrillPipeBreakdown(
-        dpInput.pipes,
-        casingsInput
-      );
       renderUpperCompletionBreakdown(dpBreakdown, 'drillpipe');
       // Ensure upper_completion isn't drawn
       casingsToDraw = casingsToDraw.filter(
         (c) => c.role !== 'upper_completion'
       );
     } else {
-      const ucBreakdown = computeUpperCompletionBreakdown(casingsInput);
       renderUpperCompletionBreakdown(ucBreakdown, 'tubing');
     }
 
@@ -394,6 +418,10 @@ const VolumeCalc = (() => {
       captureStateObject,
       applyStateObject: applyStateObjectFn,
       initDraw
+    });
+    setupPressureUI({
+      calculateVolume,
+      scheduleSave: persistence.scheduleSave
     });
     initializeSidebar();
 

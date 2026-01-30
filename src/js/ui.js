@@ -1494,6 +1494,7 @@ function setupDrillPipeMode(deps) {
     // Ensure UI initially reflects the toggle state (in case it was set by saved state)
     try {
       modeToggle.dispatchEvent(new Event('change'));
+      document.dispatchEvent(new CustomEvent('keino:drillpipe-ui-ready'));
     } catch (e) {
       /* ignore */
     }

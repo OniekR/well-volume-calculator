@@ -828,7 +828,7 @@ describe('PRESSURE_DEFAULTS constants', () => {
 
 ### Step 2: Create Pressure Test HTML UI
 
-- [ ] Open `index.html` and locate the Flow Velocity view section (search for `id="view-flow"`). Insert the following pressure test section **after** the closing `</section>` of the flow velocity view and **before** the settings view (`id="view-settings"`):
+- [x] Open `index.html` and locate the Flow Velocity view section (search for `id="view-flow"`). Insert the following pressure test section **after** the closing `</section>` of the flow velocity view and **before** the settings view (`id="view-settings"`):
 
 ```html
 <!-- ═══════════════════════════════════════════════════════════════════
@@ -978,7 +978,7 @@ describe('PRESSURE_DEFAULTS constants', () => {
 </section>
 ```
 
-- [ ] Locate the sidebar navigation in `index.html` (search for `data-section="flow"`). Find the **disabled** pressure button and **enable** it by removing the `disabled` and `aria-disabled="true"` attributes. The button should look like this after editing:
+- [x] Locate the sidebar navigation in `index.html` (search for `data-section="flow"`). Find the **disabled** pressure button and **enable** it by removing the `disabled` and `aria-disabled="true"` attributes. The button should look like this after editing:
 
 ```html
 <li class="sidebar-nav-item" role="listitem">
@@ -1007,11 +1007,11 @@ describe('PRESSURE_DEFAULTS constants', () => {
 
 #### Step 2 Verification Checklist
 
-- [ ] Open `index.html` in browser
-- [ ] Verify "Pressure" button appears in sidebar (between Flow Velocity and Settings)
-- [ ] Click "Pressure" button — pressure test view should display
-- [ ] Verify all UI elements render: section selector area, pressure inputs (20, 345 defaults), k value input (18 default), fluid preset buttons, empty state message
-- [ ] No console errors in browser dev tools
+- [x] Open `index.html` in browser
+- [x] Verify "Pressure" button appears in sidebar (between Flow Velocity and Settings)
+- [x] Click "Pressure" button — pressure test view should display
+- [x] Verify all UI elements render: section selector area, pressure inputs (20, 345 defaults), k value input (18 default), fluid preset buttons, empty state message
+- [x] No console errors in browser dev tools
 
 #### Step 2 STOP & COMMIT
 
@@ -1021,7 +1021,7 @@ describe('PRESSURE_DEFAULTS constants', () => {
 
 ### Step 3: Style Pressure Test UI
 
-- [ ] Open `src/css/style.css` and add the following styles at the end of the file, before any closing comments or media queries for the pressure section:
+- [x] Open `src/css/style.css` and add the following styles at the end of the file, before any closing comments or media queries for the pressure section:
 
 ```css
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1280,11 +1280,11 @@ describe('PRESSURE_DEFAULTS constants', () => {
 
 #### Step 3 Verification Checklist
 
-- [ ] Open in browser — verify pressure card has proper background, border, shadow
-- [ ] Section buttons display in a flex wrap layout
-- [ ] Selected section buttons have red border and tinted background
-- [ ] Quick preset buttons have pill shape with hover effect
-- [ ] Result cards display centered with large red volume numbers
+- [x] Open in browser — verify pressure card has proper background, border, shadow
+- [x] Section buttons display in a flex wrap layout
+- [x] Selected section buttons have red border and tinted background
+- [x] Quick preset buttons have pill shape with hover effect
+- [x] Result cards display centered with large red volume numbers
 - [ ] Toggle dark mode — verify all elements adapt correctly
 - [ ] Test responsive layout at narrow widths (mobile view)
 
@@ -1296,7 +1296,7 @@ describe('PRESSURE_DEFAULTS constants', () => {
 
 ### Step 4: Wire Up Event Handlers and Integration
 
-- [ ] Open `src/js/sidebar.js` and add `'pressure'` to the `KNOWN_SECTIONS` Set. Locate the line:
+- [x] Open `src/js/sidebar.js` and add `'pressure'` to the `KNOWN_SECTIONS` Set. Locate the line:
 
 ```javascript
 const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
@@ -1314,7 +1314,7 @@ const KNOWN_SECTIONS = new Set([
 ]);
 ```
 
-- [ ] Open `src/js/script.js` and add the pressure module import. Locate the import section at the top and add:
+- [x] Open `src/js/script.js` and add the pressure module import. Locate the import section at the top and add:
 
 ```javascript
 import {
@@ -1325,7 +1325,7 @@ import {
 } from './pressure.js';
 ```
 
-- [ ] In `src/js/script.js`, locate the `VolumeCalc` IIFE and add a variable to track pressure results. Find:
+- [x] In `src/js/script.js`, locate the `VolumeCalc` IIFE and add a variable to track pressure results. Find:
 
 ```javascript
 let lastFlowResults = undefined;
@@ -1337,7 +1337,7 @@ Add after it:
 let lastPressureResults = undefined;
 ```
 
-- [ ] In `src/js/script.js`, inside the `calculateVolume()` function, add the pressure test calculation. Locate where `lastFlowResults` is computed (after the flow velocity computation) and add the following after the `renderFlowVelocityResults(lastFlowResults);` call:
+- [x] In `src/js/script.js`, inside the `calculateVolume()` function, add the pressure test calculation. Locate where `lastFlowResults` is computed (after the flow velocity computation) and add the following after the `renderFlowVelocityResults(lastFlowResults);` call:
 
 ```javascript
 // Pressure test calculation
@@ -1355,7 +1355,7 @@ lastPressureResults = computePressureTest(pressureInput, {
 renderPressureResults(lastPressureResults);
 ```
 
-- [ ] In `src/js/script.js`, inside the `initUI()` call within `init()`, add the pressure UI setup. Locate the call to `setupFlowVelocityUI` and add after it:
+- [x] In `src/js/script.js`, inside the `initUI()` call within `init()`, add the pressure UI setup. Locate the call to `setupFlowVelocityUI` and add after it:
 
 ```javascript
 setupPressureUI({
@@ -1366,7 +1366,7 @@ setupPressureUI({
 
 #### Step 4 Verification Checklist
 
-- [ ] Run `npm test` — all tests pass
+- [x] Run `npm test` — all tests pass
 - [ ] Open in browser, navigate to Pressure tab
 - [ ] Configure some casings in the Casings tab, then return to Pressure tab
 - [ ] Section buttons should appear dynamically based on configured well
