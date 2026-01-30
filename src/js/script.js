@@ -11,7 +11,7 @@ import {
   captureStateObject,
   applyStateObject as applyStateObjectFn
 } from './state.js';
-import { initPOIToggle, initUI } from './ui.js';
+import { initUI } from './ui.js';
 import { initializeSidebar } from './sidebar.js';
 import { gatherInputs } from './inputs.js';
 import { renderResults, renderUpperCompletionBreakdown } from './render.js';
@@ -371,7 +371,6 @@ const VolumeCalc = (() => {
       applyStateObject: applyStateObjectFn,
       initDraw
     });
-    initPOIToggle();
     initializeSidebar();
 
     // load persisted state AFTER UI is initialized so dynamic inputs (e.g., drill pipe)

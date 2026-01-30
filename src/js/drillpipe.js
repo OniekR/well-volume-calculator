@@ -52,8 +52,14 @@ export const DRILLPIPE_CATALOG = [
  * @returns {Object} - { mode: 'tubing'|'drillpipe', count: number, pipes: [{size, length}, ...] }
  */
 export function gatherDrillPipeInput() {
+  const ucCheckbox = document.getElementById('use_upper_completion');
   const modeToggle = document.getElementById('uc_mode_toggle');
   const mode = modeToggle && modeToggle.checked ? 'drillpipe' : 'tubing';
+
+  // If upper completion checkbox is unchecked, return empty data
+  if (ucCheckbox && !ucCheckbox.checked) {
+    return { mode: 'tubing', count: 0, pipes: [] };
+  }
 
   if (mode === 'tubing') {
     return { mode: 'tubing', count: 0, pipes: [] };

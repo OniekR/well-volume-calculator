@@ -415,6 +415,40 @@ h1 {
   color: var(--text-color);
 }
 
+/* Prevent no-hide sections from ever collapsing */
+.casing-input.no-hide.collapsed {
+  display: block;
+  width: 100%;
+  margin-right: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.casing-input.no-hide.collapsed .casing-body {
+  display: block;
+}
+
+.casing-input.no-hide.collapsed .casing-header {
+  padding: 12px 16px;
+  opacity: 1;
+  background: transparent;
+}
+
+.casing-input.no-hide.collapsed .casing-header input[type='checkbox'] {
+  display: inline-block;
+}
+
+.casing-input.no-hide.collapsed .header-inline {
+  display: flex;
+}
+
+.casing-input.no-hide.collapsed .casing-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  opacity: 1;
+  margin: 0;
+  position: static;
+}
+
 /* Even more compact collapsed state and horizontal layout */
 .casing-input.collapsed {
   display: inline-block;
@@ -1723,9 +1757,9 @@ select:focus {
 /* Tubing Input Rows - Compact horizontal layout */
 .tubing-input-row {
   display: grid;
-  grid-template-columns: 80px 140px 70px 110px 70px 110px;
+  grid-template-columns: 140px 110px 110px;
   gap: 8px;
-  align-items: center;
+  align-items: start;
   margin-bottom: 8px;
   padding: 10px 12px;
   background: linear-gradient(
@@ -1738,47 +1772,64 @@ select:focus {
   transition: all 0.2s ease;
 }
 
-/* Tubing label (Tubing 1, Tubing 2, Tubing 3) */
-.tubing-input-row > label:nth-of-type(1) {
+/* Tubing size wrapper (label + select stacked) */
+.tubing-size-wrapper {
   grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Tubing label (Tubing 1, Tubing 2, Tubing 3) */
+.tubing-size-wrapper > label {
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--text-color);
 }
 
 /* Size select */
-.tubing-input-row > select:nth-of-type(1) {
+.tubing-size-wrapper > select {
+  width: 100%;
+}
+
+/* Top wrapper (label + input stacked) */
+.tubing-top-wrapper {
   grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* Top label */
-.tubing-input-row > label:nth-of-type(2) {
-  grid-column: 3;
-  text-align: right;
+.tubing-top-wrapper > label {
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
-  padding-right: 4px;
 }
 
 /* Top input */
-.tubing-input-row > input:nth-of-type(1) {
-  grid-column: 4;
+.tubing-top-wrapper > input {
+  width: 100%;
 }
 
-/* Shoe label */
-.tubing-input-row > label:nth-of-type(3) {
-  grid-column: 5;
-  text-align: right;
+/* Length wrapper (label + input stacked) */
+.tubing-length-wrapper {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Top label */
+.tubing-top-wrapper > label {
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
-  padding-right: 4px;
 }
 
-/* Shoe input */
-.tubing-input-row > input:nth-of-type(2) {
-  grid-column: 6;
+/* Top input */
+.tubing-top-wrapper > input {
+  width: 100%;
 }
 
 .tubing-input-row:hover {

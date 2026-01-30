@@ -1,0 +1,10 @@
+{
+  "production_drift": "6.0",
+  "upper_completion_size_id": "4.892",
+  "uc_top": "10",
+  "uc_shoe": "80",
+  "production_top": "0",
+  "production_shoe": "200",
+  "warning_el": "Warning: Upper completion TJ (6.098) exceeds production drift (6). May not fit.",
+  "uc_table": "<table id=\"upperCompletionVolumes\" class=\"volume-table\" aria-live=\"polite\" aria-describedby=\"upper-completion-breakdown-note\">\n                <thead>\n      <tr>\n        <th scope=\"col\">Depth (m)</th>\n        <th scope=\"col\">Tubing (m³)</th>\n        <th scope=\"col\">Annulus (m³)</th>\n        <th scope=\"col\">length (m)</th>\n        <th scope=\"col\">Tubing (L/m)</th>\n        <th scope=\"col\">Annulus (L/m)</th>\n      </tr>\n    </thead>\n                <tbody><tr><td>10.0-80.0</td><td>0.8</td><td>1.5</td><td>70.0</td><td>0.0</td><td>21.6</td></tr><tr class=\"totals-row\"><td>Totals</td><td>0.8</td><td>1.5</td><td>70.0</td><td>12.1</td><td>21.6</td></tr></tbody>\n              </table>"
+}

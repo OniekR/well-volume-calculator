@@ -31,6 +31,13 @@ export function setupCasingToggles(deps) {
     if (!checkbox || !header) return;
 
     const update = () => {
+      // Skip collapse/expand for upper completion checkbox - always keep it expanded
+      if (checkbox.id === 'use_upper_completion') {
+        section.classList.remove('collapsed');
+        header.setAttribute('aria-expanded', 'true');
+        return;
+      }
+
       if (checkbox.checked) {
         section.classList.remove('collapsed');
         header.setAttribute('aria-expanded', 'true');
@@ -43,24 +50,46 @@ export function setupCasingToggles(deps) {
     checkbox.addEventListener('change', () => {
       update();
 
-      // Special handling for upper completion checkbox
+      // Special handling for upper completion checkbox - disable/enable all UC inputs
       if (checkbox.id === 'use_upper_completion') {
+        const tubingSection = el('uc_tubing_section');
         const drillpipeSection = el('uc_drillpipe_section');
         const modeToggle = el('uc_mode_toggle');
+        const isEnabled = checkbox.checked;
 
-        if (!checkbox.checked) {
-          // When disabling upper completion, hide drill pipe section and reset mode to tubing
-          if (drillpipeSection) {
-            drillpipeSection.classList.add('hidden');
-          }
-          if (modeToggle) {
-            modeToggle.checked = false;
-            const sliderEl =
-              modeToggle.nextElementSibling ||
-              (modeToggle.closest &&
-                modeToggle.closest('.switch')?.querySelector('.slider'));
-            if (sliderEl) sliderEl.classList.add('slider--tubing');
-          }
+        // Disable/enable mode toggle
+        if (modeToggle) {
+          modeToggle.disabled = !isEnabled;
+        }
+
+        // Disable/enable tubing section inputs
+        if (tubingSection) {
+          const tubingControls = tubingSection.querySelectorAll(
+            'input, select, textarea, button'
+          );
+          tubingControls.forEach((ctrl) => {
+            ctrl.disabled = !isEnabled;
+            if (isEnabled) {
+              ctrl.classList.remove('readonly-input');
+            } else {
+              ctrl.classList.add('readonly-input');
+            }
+          });
+        }
+
+        // Disable/enable drill pipe section inputs
+        if (drillpipeSection) {
+          const drillpipeControls = drillpipeSection.querySelectorAll(
+            'input, select, textarea, button'
+          );
+          drillpipeControls.forEach((ctrl) => {
+            ctrl.disabled = !isEnabled;
+            if (isEnabled) {
+              ctrl.classList.remove('readonly-input');
+            } else {
+              ctrl.classList.add('readonly-input');
+            }
+          });
         }
       }
 
@@ -69,6 +98,11 @@ export function setupCasingToggles(deps) {
     });
 
     header.addEventListener('click', (e) => {
+      // Disable header toggle for upper completion
+      if (checkbox.id === 'use_upper_completion') {
+        return;
+      }
+
       const target = e.target;
       if (
         target.closest('.header-inline') ||
@@ -83,6 +117,11 @@ export function setupCasingToggles(deps) {
 
     header.tabIndex = 0;
     header.addEventListener('keydown', (e) => {
+      // Disable keyboard toggle for upper completion
+      if (checkbox.id === 'use_upper_completion') {
+        return;
+      }
+
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         checkbox.checked = !checkbox.checked;
@@ -1346,8 +1385,23 @@ function setupDrillPipeMode(deps) {
   const drillpipeSection = el('uc_drillpipe_section');
   const drillpipeCountBtns = document.querySelectorAll('.drillpipe-count-btn');
   const drillpipeContainer = el('drillpipe_inputs_container');
+  const completionHeading = document.querySelector(
+    '#upper_completion_section .casing-header h3'
+  );
 
   if (!modeToggle || !drillpipeSection) return;
+
+  // Update heading text based on mode
+  const updateCompletionHeading = (isDrillPipe) => {
+    if (completionHeading) {
+      completionHeading.textContent = isDrillPipe
+        ? 'Drill pipe string'
+        : 'Upper completion';
+    }
+  };
+
+  // Set initial heading based on default state
+  updateCompletionHeading(modeToggle.checked);
 
   // Dynamic async import for drill pipe functions
   (async () => {
@@ -1358,6 +1412,8 @@ function setupDrillPipeMode(deps) {
     // Toggle between tubing and drill pipe mode
     modeToggle.addEventListener('change', () => {
       const isDP = modeToggle.checked;
+      // Update heading text
+      updateCompletionHeading(isDP);
       // Keep the slider visually green when in tubing mode (unchecked)
       const sliderEl =
         modeToggle.nextElementSibling ||
@@ -1531,6 +1587,36 @@ function setupTubingMode(deps) {
       });
     }
   })();
+
+  // Initialize upper completion checkbox state
+  const ucCheckbox = el('use_upper_completion');
+  if (ucCheckbox && !ucCheckbox.checked) {
+    // If unchecked on load, disable all controls
+    const modeToggleEl = el('uc_mode_toggle');
+    if (modeToggleEl) modeToggleEl.disabled = true;
+
+    const tubingSectionEl = el('uc_tubing_section');
+    if (tubingSectionEl) {
+      const tubingControls = tubingSectionEl.querySelectorAll(
+        'input, select, textarea, button'
+      );
+      tubingControls.forEach((ctrl) => {
+        ctrl.disabled = true;
+        ctrl.classList.add('readonly-input');
+      });
+    }
+
+    const drillpipeSectionEl = el('uc_drillpipe_section');
+    if (drillpipeSectionEl) {
+      const drillpipeControls = drillpipeSectionEl.querySelectorAll(
+        'input, select, textarea, button'
+      );
+      drillpipeControls.forEach((ctrl) => {
+        ctrl.disabled = true;
+        ctrl.classList.add('readonly-input');
+      });
+    }
+  }
 }
 
 export function initUI(deps) {
@@ -1552,30 +1638,4 @@ export function initUI(deps) {
   setupTubingMode(deps);
   setupNavActive();
   setupThemeToggle();
-}
-
-export function initPOIToggle() {
-  const poiToggleBtn = document.getElementById('poi-toggle-btn');
-  const poiToggleBtnText = document.getElementById('poi-toggle-btn-text');
-  const poiSection = document.getElementById('poi-section');
-
-  if (!poiToggleBtn || !poiToggleBtnText || !poiSection) {
-    console.warn('POI toggle elements not found');
-    return;
-  }
-
-  const updatePOIToggleButton = () => {
-    const isHidden = poiSection.style.display === 'none';
-    poiToggleBtnText.textContent = isHidden
-      ? 'Show POI Section'
-      : 'Hide POI Section';
-  };
-
-  poiToggleBtn.addEventListener('click', () => {
-    const isCurrentlyHidden = poiSection.style.display === 'none';
-    poiSection.style.display = isCurrentlyHidden ? '' : 'none';
-    updatePOIToggleButton();
-  });
-
-  updatePOIToggleButton();
 }
