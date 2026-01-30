@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'volumeCalc_activeSection';
 
 const DEFAULT_SECTION = 'casings';
-const KNOWN_SECTIONS = new Set(['casings', 'completion', 'settings']);
+const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 
 let activeSection = localStorage.getItem(STORAGE_KEY) || DEFAULT_SECTION;
 
