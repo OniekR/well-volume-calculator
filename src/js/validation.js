@@ -15,28 +15,35 @@ export function getUpperCompletionTJ(sizeId) {
  * returns array of objects describing failures: { role, drift, tj }
  */
 export function validateUpperCompletionFit(casings) {
-  const uc = casings.find((c) => c.role === 'upper_completion');
-  if (!uc || !uc.use) return [];
-
-  const tj = getUpperCompletionTJ(uc.id);
-  if (typeof tj === 'undefined') return [];
-
-  // Find casings that fully contain the upper completion (top <= uc.top && depth >= uc.depth)
-  const containerCasings = casings.filter((c) => {
-    if (!c.use) return false;
-    if (c.role === 'open_hole') return false;
-    const topVal = typeof uc.top !== 'undefined' ? uc.top : 0;
-    const ucDepth = uc.depth;
-    if (typeof c.depth === 'undefined' || isNaN(c.depth)) return false;
-    const cTop = typeof c.top !== 'undefined' ? c.top : 0;
-    return cTop <= topVal && c.depth >= ucDepth;
-  });
+  const ucSegments = casings.filter(
+    (c) => c.role === 'upper_completion' && c.use
+  );
+  if (!ucSegments.length) return [];
 
   const failures = [];
-  containerCasings.forEach((c) => {
-    if (typeof c.drift !== 'undefined' && c.drift !== null && !isNaN(c.drift)) {
-      if (tj > c.drift) failures.push({ role: c.role, drift: c.drift, tj });
-    }
+  ucSegments.forEach((uc) => {
+    const tj = getUpperCompletionTJ(uc.id);
+    if (typeof tj === 'undefined') return;
+
+    const containerCasings = casings.filter((c) => {
+      if (!c.use) return false;
+      if (c.role === 'open_hole') return false;
+      const topVal = typeof uc.top !== 'undefined' ? uc.top : 0;
+      const ucDepth = uc.depth;
+      if (typeof c.depth === 'undefined' || isNaN(c.depth)) return false;
+      const cTop = typeof c.top !== 'undefined' ? c.top : 0;
+      return cTop <= topVal && c.depth >= ucDepth;
+    });
+
+    containerCasings.forEach((c) => {
+      if (
+        typeof c.drift !== 'undefined' &&
+        c.drift !== null &&
+        !isNaN(c.drift)
+      ) {
+        if (tj > c.drift) failures.push({ role: c.role, drift: c.drift, tj });
+      }
+    });
   });
 
   return failures;

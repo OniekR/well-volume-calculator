@@ -1,7 +1,12 @@
 'use strict';
 
 import { computeVolumes, computeUpperCompletionBreakdown } from './logic.js';
-import { initDraw, scheduleDraw as scheduleDrawFn } from './draw.js';
+import {
+  initDraw,
+  scheduleDraw as scheduleDrawFn,
+  drawSchematic as drawSchematicFn,
+  __TEST_flush_draw
+} from './draw.js';
 import {
   captureStateObject,
   applyStateObject as applyStateObjectFn
@@ -16,6 +21,7 @@ import {
   gatherDrillPipeInput,
   computeDrillPipeBreakdown
 } from './drillpipe.js';
+import { gatherTubingInput } from './tubing.js';
 
 /*
  * Refactored module for the Well Volume Calculator
@@ -248,8 +254,10 @@ const VolumeCalc = (() => {
     let { casingsToDraw } = drawResult;
 
     // Render results to DOM (volumes exclude UC, but tubing POI includes it)
-    const ucBottom =
-      casingsInput.find((c) => c.role === 'upper_completion')?.depth || 0;
+    const ucBottomValues = casingsInput
+      .filter((c) => c.role === 'upper_completion')
+      .map((c) => c.depth || 0);
+    const ucBottom = ucBottomValues.length ? Math.max(...ucBottomValues) : 0;
     renderResults(result, {
       ucEnabled,
       dpMode: dpInput.mode === 'drillpipe',
@@ -287,7 +295,22 @@ const VolumeCalc = (() => {
       waterDepth = riserDepthVal;
     }
 
-    scheduleDraw(casingsToDraw, {
+    // Get tapered tubing for visualization
+    const tubingInput = gatherTubingInput();
+    const tubingSegments =
+      dpInput.mode !== 'drillpipe' &&
+      tubingInput.count > 0 &&
+      tubingInput.tubings.length > 0
+        ? tubingInput.tubings
+        : undefined;
+
+    if (tubingSegments && tubingSegments.length > 0) {
+      casingsToDraw = casingsToDraw.filter(
+        (c) => c.role !== 'upper_completion'
+      );
+    }
+
+    const __testDrawOpts = {
       showWater,
       waterDepth,
       plugDepth:
@@ -299,8 +322,23 @@ const VolumeCalc = (() => {
       drillPipeSegments:
         dpInput.mode === 'drillpipe' && dpInput.pipes.length > 0
           ? dpInput.pipes
-          : undefined
-    });
+          : undefined,
+      tubingSegments
+    };
+
+    // Expose the draw args for test helpers so we can force a deterministic redraw in CI
+    try {
+      if (typeof window !== 'undefined') {
+        window.__TEST_last_draw_args = {
+          casings: casingsToDraw,
+          opts: __testDrawOpts
+        };
+      }
+    } catch (e) {
+      /* ignore */
+    }
+
+    scheduleDraw(casingsToDraw, __testDrawOpts);
 
     // Upper completion fit warnings are handled by the UI module (initUpperCompletionChecks)
     // so avoid updating any legacy DOM elements here.
@@ -376,6 +414,39 @@ const VolumeCalc = (() => {
     // initial calculation and save
     calculateVolume();
     _scheduleSave();
+  }
+
+  // Test helper: expose a function to force recalculation/draw in test environments
+  try {
+    if (typeof window !== 'undefined') {
+      window.__TEST_force_recalc = () => {
+        try {
+          calculateVolume();
+          // If we have the last draw args captured, call the renderer directly to guarantee an immediate redraw
+          try {
+            if (typeof window !== 'undefined' && window.__TEST_last_draw_args) {
+              try {
+                drawSchematicFn(
+                  window.__TEST_last_draw_args.casings,
+                  window.__TEST_last_draw_args.opts
+                );
+              } catch (inner) {
+                /* ignore rendering errors in test helper */
+              }
+            }
+          } catch (e) {
+            /* ignore */
+          }
+          // Also flush any scheduled draws as a fallback
+          __TEST_flush_draw();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+    }
+  } catch (e) {
+    /* ignore */
   }
 
   return {

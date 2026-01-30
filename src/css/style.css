@@ -1514,8 +1514,66 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(227, 27, 35, 0.15);
 }
 
+/* Tubing count selector with buttons */
+.tubing-count-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tubing-count-selector label {
+  font-weight: 600;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.tubing-button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.tubing-count-btn {
+  padding: 10px 16px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tubing-count-btn:hover {
+  border-color: #2c6bd9;
+  color: #2c6bd9;
+}
+
+.tubing-count-btn.active {
+  background: #2c6bd9;
+  border-color: #2c6bd9;
+  color: white;
+  box-shadow: 0 2px 8px rgba(44, 107, 217, 0.3);
+}
+
+.tubing-count-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(44, 107, 217, 0.15);
+}
+
 /* Drill pipe inputs container - constrain width to prevent layout overflow */
 #drillpipe_inputs_container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Tubing inputs container - constrain width to prevent layout overflow */
+#tubing_inputs_container {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
@@ -1660,6 +1718,132 @@ select:focus {
   font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.2s ease;
+}
+
+/* Tubing Input Rows - Compact horizontal layout */
+.tubing-input-row {
+  display: grid;
+  grid-template-columns: 80px 140px 70px 110px 70px 110px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(44, 107, 217, 0.04),
+    rgba(100, 149, 237, 0.02)
+  );
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+/* Tubing label (Tubing 1, Tubing 2, Tubing 3) */
+.tubing-input-row > label:nth-of-type(1) {
+  grid-column: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+/* Size select */
+.tubing-input-row > select:nth-of-type(1) {
+  grid-column: 2;
+}
+
+/* Top label */
+.tubing-input-row > label:nth-of-type(2) {
+  grid-column: 3;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
+/* Top input */
+.tubing-input-row > input:nth-of-type(1) {
+  grid-column: 4;
+}
+
+/* Shoe label */
+.tubing-input-row > label:nth-of-type(3) {
+  grid-column: 5;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
+/* Shoe input */
+.tubing-input-row > input:nth-of-type(2) {
+  grid-column: 6;
+}
+
+.tubing-input-row:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(44, 107, 217, 0.07),
+    rgba(100, 149, 237, 0.03)
+  );
+  border-color: #2c6bd9;
+  box-shadow: 0 1px 4px rgba(44, 107, 217, 0.12);
+}
+
+.tubing-input-row select,
+.tubing-input-row input {
+  padding: 10px 12px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tubing-input-row select:hover,
+.tubing-input-row input:hover {
+  border-color: #2c6bd9;
+}
+
+.tubing-input-row select:focus,
+.tubing-input-row input:focus {
+  outline: none;
+  border-color: #2c6bd9;
+  box-shadow: 0 0 0 3px rgba(44, 107, 217, 0.15);
+}
+
+.tubing-input-row select {
+  appearance: none;
+  padding-right: 28px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.tubing-input-row select option {
+  color: #000;
+  background-color: #fff;
+  padding: 8px;
+}
+
+.tubing-input-row input[type='number'] {
+  font-variant-numeric: tabular-nums;
+}
+
+.tubing-input-row label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.85;
 }
 
 .drillpipe-size-select {

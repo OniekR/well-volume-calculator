@@ -1,5 +1,6 @@
 import { el } from './dom.js';
 import { OD, DRIFT } from './constants.js';
+import { gatherTubingInput } from './tubing.js';
 
 /**
  * Parse user numeric input tolerant of common locale formatting (commas for decimals,
@@ -246,16 +247,36 @@ export function gatherInputs() {
       use: !!el('use_small_liner')?.checked,
       od: smallLinerOD
     },
-    {
-      role: 'upper_completion',
-      id: upperCompletionID,
-      top: !isNaN(readInputNumber('depth_uc_top'))
-        ? readInputNumber('depth_uc_top')
-        : undefined,
-      depth: readInputNumber('depth_uc'),
-      use: !!el('use_upper_completion')?.checked,
-      od: upperCompletionOD
-    },
+    ...(() => {
+      // Handle tapered tubing: gather from tapered tubing inputs if available
+      const { count, tubings } = gatherTubingInput();
+      if (count > 0 && tubings.length > 0) {
+        // Return array of upper_completion casings for each tubing section
+        return tubings.map((tubing, idx) => ({
+          role: 'upper_completion',
+          id: tubing.id,
+          top: tubing.top,
+          depth: tubing.shoe,
+          use: !!el('use_upper_completion')?.checked,
+          od: tubing.od,
+          lPerM: tubing.lPerM,
+          _tubingIndex: idx
+        }));
+      }
+      // Fallback to single upper_completion if no tapered tubing
+      return [
+        {
+          role: 'upper_completion',
+          id: upperCompletionID,
+          top: !isNaN(readInputNumber('depth_uc_top'))
+            ? readInputNumber('depth_uc_top')
+            : undefined,
+          depth: readInputNumber('depth_uc'),
+          use: !!el('use_upper_completion')?.checked,
+          od: upperCompletionOD
+        }
+      ];
+    })(),
     {
       role: 'open_hole',
       id: openHoleID,

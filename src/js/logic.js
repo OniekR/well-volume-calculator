@@ -105,15 +105,19 @@ export function computeVolumes(casingsInput, opts = {}) {
   const drillPipeInput = opts.drillPipe || null; // { mode, count, pipes: [{size, length, lPerM, eod}] }
   const subtractEod = opts.subtractEod !== false; // Default to true
 
-  // Check if upper completion is active
-  const uc = casingsInput.find((c) => c.role === 'upper_completion');
-  const ucActive = uc && uc.use;
-  const ucTopVal = ucActive && typeof uc.top !== 'undefined' ? uc.top : 0;
-  const ucBottomVal = ucActive ? uc.depth : 0;
-  const ucIdArea =
-    ucActive && uc.id ? Math.PI * Math.pow((uc.id / 2) * 0.0254, 2) : 0;
-  const ucOdRadius = ucActive ? (uc.od / 2) * 0.0254 : 0;
-  const ucOdArea = ucActive ? Math.PI * Math.pow(ucOdRadius, 2) : 0;
+  // Check if upper completion is active (support multiple tubing segments)
+  const ucSegments = casingsInput
+    .filter((c) => c.role === 'upper_completion' && c.use)
+    .map((c) => ({
+      ...c,
+      top: typeof c.top !== 'undefined' ? c.top : 0
+    }))
+    .sort((a, b) => a.top - b.top);
+  const ucActive = ucSegments.length > 0;
+  const ucTopVal = ucActive ? Math.min(...ucSegments.map((s) => s.top)) : 0;
+  const ucBottomVal = ucActive
+    ? Math.max(...ucSegments.map((s) => s.depth || 0))
+    : 0;
 
   // prepare draw entries and per-casing map
   const perCasingMap = {};
@@ -197,6 +201,7 @@ export function computeVolumes(casingsInput, opts = {}) {
 
     const covering = casingsInput.filter((c) => {
       if (!c.use) return false;
+      if (c.role === 'upper_completion') return false;
       if (c.depth <= segStart) return false;
       const topVal = typeof c.top !== 'undefined' ? c.top : 0;
       if (topVal >= segEnd) return false;
@@ -204,6 +209,81 @@ export function computeVolumes(casingsInput, opts = {}) {
       if (c.role === 'surface' && intermediateInUse) return false;
       return true;
     });
+
+    // If no outer casing covers this sub-segment, we still need to account for
+    // upper-completion (tubing) volumes that may overlap this depth range
+    // (e.g. UC exists inside an open hole). Compute UC-specific contributions
+    // for this segment and add them directly when there is no covering casing.
+    if (
+      plugEnabled &&
+      !isNaN(plugDepthVal) &&
+      typeof plugDepthVal !== 'undefined' &&
+      ucActive &&
+      covering.length === 0
+    ) {
+      // Find containing casing (if any) to compute annulus area
+      const containing = casingsInput
+        .filter((c) => c.use && c.role !== 'upper_completion')
+        .filter((c) => {
+          const cTopVal = typeof c.top !== 'undefined' ? c.top : 0;
+          return cTopVal <= segStart && c.depth >= segEnd;
+        })
+        .sort((a, b) => {
+          const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+          const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+          return ai - bi;
+        });
+
+      let casingIdArea = 0;
+      if (containing.length > 0 && containing[0].id) {
+        const casingIdRadius = (containing[0].id / 2) * 0.0254;
+        casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
+      }
+
+      // Compute UC overlaps for this segment and add tubing/annulus/steel
+      // quantities directly to the appropriate POI accumulators. We don't
+      // modify per-casing totals here because there is no owning casing.
+      ucSegments.forEach((ucSeg) => {
+        const segUcTop = typeof ucSeg.top !== 'undefined' ? ucSeg.top : 0;
+        const segUcBottom = ucSeg.depth;
+        const overlapStart = Math.max(segStart, segUcTop);
+        const overlapEnd = Math.min(segEnd, segUcBottom);
+        if (overlapStart >= overlapEnd) return;
+
+        const overlapLen = overlapEnd - overlapStart;
+        const ucIdArea = ucSeg.id
+          ? Math.PI * Math.pow((ucSeg.id / 2) * 0.0254, 2)
+          : 0;
+        const ucOdRadius = ucSeg.od ? (ucSeg.od / 2) * 0.0254 : 0;
+        const ucOdArea = ucOdRadius > 0 ? Math.PI * Math.pow(ucOdRadius, 2) : 0;
+        const tubingSteelArea = Math.max(0, ucOdArea - ucIdArea);
+        const annulusArea = Math.max(0, casingIdArea - ucOdArea);
+
+        if (segEnd <= plugDepthVal) {
+          plugAboveTubing += ucIdArea * overlapLen;
+          plugAboveAnnulus += annulusArea * overlapLen;
+        } else if (segStart >= plugDepthVal) {
+          plugBelowTubing += ucIdArea * overlapLen;
+          plugBelowAnnulus += annulusArea * overlapLen;
+          ucSteelSubtractedBelow += tubingSteelArea * overlapLen;
+        } else {
+          const aboveOverlapLen = Math.max(
+            0,
+            Math.min(plugDepthVal, overlapEnd) - overlapStart
+          );
+          const belowOverlapLen = Math.max(
+            0,
+            overlapEnd - Math.max(plugDepthVal, overlapStart)
+          );
+
+          plugAboveTubing += ucIdArea * aboveOverlapLen;
+          plugBelowTubing += ucIdArea * belowOverlapLen;
+          plugAboveAnnulus += annulusArea * aboveOverlapLen;
+          plugBelowAnnulus += annulusArea * belowOverlapLen;
+          ucSteelSubtractedBelow += tubingSteelArea * belowOverlapLen;
+        }
+      });
+    }
 
     if (covering.length === 0) continue;
 
@@ -265,17 +345,15 @@ export function computeVolumes(casingsInput, opts = {}) {
       !isNaN(plugDepthVal) &&
       typeof plugDepthVal !== 'undefined'
     ) {
-      // Check if this segment has ANY overlap with UC range
-      const ucOverlapStart = Math.max(segStart, ucTopVal);
-      const ucOverlapEnd = Math.min(segEnd, ucBottomVal);
-      const hasUcOverlap = ucActive && ucOverlapStart < ucOverlapEnd;
+      let hasUcOverlap = false;
+      let tubingAbove = 0;
+      let tubingBelow = 0;
+      let annulusAbove = 0;
+      let annulusBelow = 0;
+      let steelAbove = 0;
+      let steelBelow = 0;
 
-      if (hasUcOverlap) {
-        // This segment has overlap with UC range
-        // Calculate tubing volume for the overlapping portion
-        const ucOverlapLen = ucOverlapEnd - ucOverlapStart;
-        const tubingVolInOverlap = ucIdArea * ucOverlapLen;
-
+      if (ucActive) {
         // Find containing casing for annulus calculation
         const containing = casingsInput
           .filter((c) => c.use && c.role !== 'upper_completion')
@@ -289,87 +367,86 @@ export function computeVolumes(casingsInput, opts = {}) {
             return ai - bi;
           });
 
-        let annulusVolInOverlap = 0;
+        let casingIdArea = 0;
         if (containing.length > 0 && containing[0].id) {
           const casingIdRadius = (containing[0].id / 2) * 0.0254;
-          const casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
-          const annulusArea = Math.max(0, casingIdArea - ucOdArea);
-          annulusVolInOverlap = annulusArea * ucOverlapLen;
+          casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
         }
 
-        const tubingSteelArea = ucOdArea - ucIdArea;
-        const steelVolInOverlap = tubingSteelArea * ucOverlapLen;
+        ucSegments.forEach((ucSeg) => {
+          const segUcTop = typeof ucSeg.top !== 'undefined' ? ucSeg.top : 0;
+          const segUcBottom = ucSeg.depth;
+          const overlapStart = Math.max(segStart, segUcTop);
+          const overlapEnd = Math.min(segEnd, segUcBottom);
+          if (overlapStart >= overlapEnd) return;
 
-        // Now split the whole segment by POI
-        if (segEnd <= plugDepthVal) {
-          // Entire segment is above POI
-          plugAboveTubing += tubingVolInOverlap;
-          plugAboveAnnulus += annulusVolInOverlap;
-          plugAboveVolume += segVol - steelVolInOverlap;
-        } else if (segStart >= plugDepthVal) {
-          // Entire segment is below POI
-          plugBelowTubing += tubingVolInOverlap;
-          plugBelowAnnulus += annulusVolInOverlap;
-          plugBelowVolume += segVol - steelVolInOverlap;
+          hasUcOverlap = true;
+          const overlapLen = overlapEnd - overlapStart;
 
-          // Track how much steel volume we've already subtracted for below-POI
-          // UC segments
-          ucSteelSubtractedBelow += steelVolInOverlap;
-        } else {
-          // Segment crosses POI - split it
-          const aboveLen = Math.max(0, plugDepthVal - segStart);
-          const belowLen = Math.max(0, segEnd - plugDepthVal);
+          const ucIdArea = ucSeg.id
+            ? Math.PI * Math.pow((ucSeg.id / 2) * 0.0254, 2)
+            : 0;
+          const ucOdRadius = ucSeg.od ? (ucSeg.od / 2) * 0.0254 : 0;
+          const ucOdArea =
+            ucOdRadius > 0 ? Math.PI * Math.pow(ucOdRadius, 2) : 0;
+          const tubingSteelArea = Math.max(0, ucOdArea - ucIdArea);
+          const annulusArea = Math.max(0, casingIdArea - ucOdArea);
 
-          // Tubing splits based on POI intersection with UC overlap
-          const aboveUcOverlapLen = Math.max(
-            0,
-            Math.min(plugDepthVal, ucOverlapEnd) - ucOverlapStart
-          );
-          const belowUcOverlapLen = Math.max(
-            0,
-            ucOverlapEnd - Math.max(plugDepthVal, ucOverlapStart)
-          );
+          if (segEnd <= plugDepthVal) {
+            tubingAbove += ucIdArea * overlapLen;
+            annulusAbove += annulusArea * overlapLen;
+            steelAbove += tubingSteelArea * overlapLen;
+          } else if (segStart >= plugDepthVal) {
+            tubingBelow += ucIdArea * overlapLen;
+            annulusBelow += annulusArea * overlapLen;
+            steelBelow += tubingSteelArea * overlapLen;
+          } else {
+            const aboveOverlapLen = Math.max(
+              0,
+              Math.min(plugDepthVal, overlapEnd) - overlapStart
+            );
+            const belowOverlapLen = Math.max(
+              0,
+              overlapEnd - Math.max(plugDepthVal, overlapStart)
+            );
 
-          const tubingAbove = ucIdArea * aboveUcOverlapLen;
-          const tubingBelow = ucIdArea * belowUcOverlapLen;
+            tubingAbove += ucIdArea * aboveOverlapLen;
+            tubingBelow += ucIdArea * belowOverlapLen;
+            annulusAbove += annulusArea * aboveOverlapLen;
+            annulusBelow += annulusArea * belowOverlapLen;
+            steelAbove += tubingSteelArea * aboveOverlapLen;
+            steelBelow += tubingSteelArea * belowOverlapLen;
+          }
+        });
+      }
 
-          const tubingSteelArea = ucOdArea - ucIdArea;
-          const steelAbove = tubingSteelArea * aboveUcOverlapLen;
-          const steelBelow = tubingSteelArea * belowUcOverlapLen;
+      if (segEnd <= plugDepthVal) {
+        plugAboveVolume += segVol - steelAbove;
+        if (hasUcOverlap) {
+          plugAboveTubing += tubingAbove;
+          plugAboveAnnulus += annulusAbove;
+        }
+      } else if (segStart >= plugDepthVal) {
+        plugBelowVolume += segVol - steelBelow;
+        if (hasUcOverlap) {
+          plugBelowTubing += tubingBelow;
+          plugBelowAnnulus += annulusBelow;
+          ucSteelSubtractedBelow += steelBelow;
+        }
+      } else {
+        const aboveLen = Math.max(0, plugDepthVal - segStart);
+        const belowLen = Math.max(0, segEnd - plugDepthVal);
+        const volAbove = area * aboveLen;
+        const volBelow = area * belowLen;
+        plugAboveVolume += volAbove - steelAbove;
+        plugBelowVolume += volBelow - steelBelow;
 
-          const annulusAbove =
-            annulusVolInOverlap * (aboveUcOverlapLen / ucOverlapLen);
-          const annulusBelow =
-            annulusVolInOverlap * (belowUcOverlapLen / ucOverlapLen);
-
+        if (hasUcOverlap) {
           plugAboveTubing += tubingAbove;
           plugBelowTubing += tubingBelow;
           plugAboveAnnulus += annulusAbove;
           plugBelowAnnulus += annulusBelow;
-
-          const volAbove = area * aboveLen;
-          const volBelow = area * belowLen;
-          // Subtract tubing steel from the casing volume to get fluid volumes
-          plugAboveVolume += volAbove - steelAbove;
-          plugBelowVolume += volBelow - steelBelow;
-
-          // Track steel subtracted for the below-POI portion so we can avoid
-          // double-subtracting if a fallback method is applied later
           ucSteelSubtractedBelow += steelBelow;
-        }
-      } else {
-        // No UC overlap, just split the volume by POI
-        if (segEnd <= plugDepthVal) {
-          plugAboveVolume += segVol;
-        } else if (segStart >= plugDepthVal) {
-          plugBelowVolume += segVol;
-        } else {
-          const aboveLen = Math.max(0, plugDepthVal - segStart);
-          const belowLen = Math.max(0, segEnd - plugDepthVal);
-          const volAbove = area * aboveLen;
-          const volBelow = area * belowLen;
-          plugAboveVolume += volAbove;
-          plugBelowVolume += volBelow;
         }
       }
     }
@@ -989,28 +1066,32 @@ export function computeVolumes(casingsInput, opts = {}) {
     typeof plugDepthVal !== 'undefined' &&
     ucBottomVal > plugDepthVal
   ) {
-    const lengthBelow = ucBottomVal - Math.max(ucTopVal, plugDepthVal);
+    let totalUcSteelBelow = 0;
 
-    if (lengthBelow > 0) {
-      let totalUcSteelBelow = 0;
-      if (subtractEod && typeof uc.eod !== 'undefined' && uc.eod > 0) {
-        // Use explicit closed-end displacement if provided
-        totalUcSteelBelow = (uc.eod / 1000) * lengthBelow;
-      } else if (uc.od && uc.id) {
-        // Fallback: calculate steel from OD and ID geometry
-        const tubingSteelArea = Math.max(0, ucOdArea - ucIdArea);
-        totalUcSteelBelow = tubingSteelArea * lengthBelow;
+    ucSegments.forEach((ucSeg) => {
+      const segTop = typeof ucSeg.top !== 'undefined' ? ucSeg.top : 0;
+      const segBottom = ucSeg.depth || 0;
+      const lengthBelow = segBottom - Math.max(segTop, plugDepthVal);
+      if (lengthBelow <= 0) return;
+
+      if (subtractEod && typeof ucSeg.eod !== 'undefined' && ucSeg.eod > 0) {
+        totalUcSteelBelow += (ucSeg.eod / 1000) * lengthBelow;
+      } else if (ucSeg.od && ucSeg.id) {
+        const tubingSteelArea = Math.max(
+          0,
+          calculatePipeSteelArea(ucSeg.od, ucSeg.id)
+        );
+        totalUcSteelBelow += tubingSteelArea * lengthBelow;
       }
+    });
 
-      // Only subtract the amount NOT already subtracted in the segment loop
-      const remainingToSubtract = Math.max(
-        0,
-        totalUcSteelBelow - ucSteelSubtractedBelow
-      );
+    const remainingToSubtract = Math.max(
+      0,
+      totalUcSteelBelow - ucSteelSubtractedBelow
+    );
 
-      if (remainingToSubtract > 0) {
-        plugBelowVolume = Math.max(0, plugBelowVolume - remainingToSubtract);
-      }
+    if (remainingToSubtract > 0) {
+      plugBelowVolume = Math.max(0, plugBelowVolume - remainingToSubtract);
     }
   }
 
@@ -1083,9 +1164,16 @@ export function computeVolumes(casingsInput, opts = {}) {
  * @returns {Object} - UC volume breakdown with ID and annulus volumes (section-wise and totals)
  */
 export function computeUpperCompletionBreakdown(casingsInput) {
-  // Find the upper completion
-  const uc = casingsInput.find((c) => c.role === 'upper_completion');
-  if (!uc || !uc.use) {
+  const ucSegments = casingsInput
+    .filter((c) => c.role === 'upper_completion' && c.use)
+    .map((c) => ({
+      ...c,
+      top: typeof c.top !== 'undefined' ? Number(c.top) : 0,
+      depth: typeof c.depth !== 'undefined' ? Number(c.depth) : NaN
+    }))
+    .filter((c) => isFinite(c.top) && isFinite(c.depth));
+
+  if (!ucSegments.length) {
     return {
       used: false,
       sections: [],
@@ -1096,99 +1184,111 @@ export function computeUpperCompletionBreakdown(casingsInput) {
     };
   }
 
-  const ucTopVal = typeof uc.top !== 'undefined' ? uc.top : 0;
-  const ucBottomVal = uc.depth;
-  if (ucBottomVal <= ucTopVal) {
-    return {
-      used: false,
-      sections: [],
-      ucIdVolume: 0,
-      annulusVolume: 0,
-      ucIdLength: 0,
-      annulusLength: 0
-    };
-  }
+  // Build fine-grained segments across all UC sections
+  const rawSegments = [];
+  ucSegments.forEach((ucSeg) => {
+    const ucTopVal = ucSeg.top;
+    const ucBottomVal = ucSeg.depth;
+    if (!isFinite(ucTopVal) || !isFinite(ucBottomVal)) return;
+    if (ucBottomVal <= ucTopVal) return;
 
-  // Calculate UC ID area (tubing inside)
-  const ucIdArea = uc.id ? Math.PI * Math.pow((uc.id / 2) * 0.0254, 2) : 0;
+    const ucIdArea = ucSeg.id
+      ? Math.PI * Math.pow((ucSeg.id / 2) * 0.0254, 2)
+      : 0;
+    const ucOdRadius = ucSeg.od ? (ucSeg.od / 2) * 0.0254 : 0;
+    const ucOdArea = ucOdRadius > 0 ? Math.PI * Math.pow(ucOdRadius, 2) : 0;
 
-  // Calculate UC OD area for annulus calculation
-  const ucOdRadius = (uc.od / 2) * 0.0254; // Convert to meters
-  const ucOdArea = Math.PI * Math.pow(ucOdRadius, 2);
+    const pointsSet = new Set([ucTopVal, ucBottomVal]);
+    casingsInput.forEach((c) => {
+      if (c.role === 'upper_completion') return;
+      if (!c.use) return;
+      if (c.depth <= ucTopVal || c.top >= ucBottomVal) return;
+      if (
+        typeof c.top !== 'undefined' &&
+        isFinite(Number(c.top)) &&
+        Number(c.top) > ucTopVal &&
+        Number(c.top) < ucBottomVal
+      ) {
+        pointsSet.add(Number(c.top));
+      }
+      if (
+        isFinite(Number(c.depth)) &&
+        Number(c.depth) > ucTopVal &&
+        Number(c.depth) < ucBottomVal
+      ) {
+        pointsSet.add(Number(c.depth));
+      }
+    });
 
-  // Create section points within UC range
-  const pointsSet = new Set([ucTopVal, ucBottomVal]);
-  casingsInput.forEach((c) => {
-    if (c.role === 'upper_completion') return;
-    if (!c.use) return;
-    if (c.depth <= ucTopVal || c.top >= ucBottomVal) return;
-    // Add casing transition points within UC range
-    if (
-      typeof c.top !== 'undefined' &&
-      c.top > ucTopVal &&
-      c.top < ucBottomVal
-    ) {
-      pointsSet.add(c.top);
-    }
-    if (c.depth > ucTopVal && c.depth < ucBottomVal) {
-      pointsSet.add(c.depth);
+    const points = Array.from(pointsSet)
+      .filter((p) => isFinite(p))
+      .sort((a, b) => a - b);
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const segStart = points[i];
+      const segEnd = points[i + 1];
+      const segLength = segEnd - segStart;
+      if (segLength <= 0) continue;
+
+      const ucIdVol = ucIdArea * segLength;
+
+      const containing = casingsInput
+        .filter((c) => c.use && c.role !== 'upper_completion')
+        .filter((c) => {
+          const cTopVal = typeof c.top !== 'undefined' ? c.top : 0;
+          return cTopVal <= segStart && c.depth >= segEnd;
+        })
+        .sort((a, b) => {
+          const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
+          const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
+          return ai - bi;
+        });
+
+      const containingCasing = containing.length ? containing[0] : null;
+
+      let annulusVol = 0;
+      let containerKey = 'open';
+      if (containingCasing && containingCasing.id) {
+        containerKey = `${containingCasing.role}|${containingCasing.id}`;
+        const casingIdRadius = (containingCasing.id / 2) * 0.0254;
+        const casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
+        const annulusArea = Math.max(0, casingIdArea - ucOdArea);
+        annulusVol = annulusArea * segLength;
+      }
+
+      rawSegments.push({
+        start: segStart,
+        end: segEnd,
+        length: segLength,
+        containerKey,
+        ucIdVol,
+        annulusVol
+      });
     }
   });
 
-  const points = Array.from(pointsSet).sort((a, b) => a - b);
-
-  // Build fine-grained segments then merge adjacent segments that have the same
-  // containing casing to reduce the number of rows shown to the user.
-  const rawSegments = [];
-  for (let i = 0; i < points.length - 1; i++) {
-    const segStart = points[i];
-    const segEnd = points[i + 1];
-    const segLength = segEnd - segStart;
-    if (segLength <= 0) continue;
-
-    // UC ID volume for this section
-    const ucIdVol = ucIdArea * segLength;
-
-    // Find containing casings for this section and choose the smallest ID (narrowest)
-    const containing = casingsInput
-      .filter((c) => c.use && c.role !== 'upper_completion')
-      .filter((c) => {
-        const cTopVal = typeof c.top !== 'undefined' ? c.top : 0;
-        return cTopVal <= segStart && c.depth >= segEnd;
-      })
-      .sort((a, b) => {
-        const ai = isNaN(Number(a.id)) ? Infinity : Number(a.id);
-        const bi = isNaN(Number(b.id)) ? Infinity : Number(b.id);
-        return ai - bi;
-      });
-
-    const containingCasing = containing.length ? containing[0] : null;
-
-    let annulusVol = 0;
-    let containerKey = 'open';
-    if (containingCasing && containingCasing.id) {
-      containerKey = `${containingCasing.role}|${containingCasing.id}`;
-      const casingIdRadius = (containingCasing.id / 2) * 0.0254; // meters
-      const casingIdArea = Math.PI * Math.pow(casingIdRadius, 2);
-      const annulusArea = Math.max(0, casingIdArea - ucOdArea);
-      annulusVol = annulusArea * segLength;
-    }
-
-    rawSegments.push({
-      start: segStart,
-      end: segEnd,
-      length: segLength,
-      containerKey,
-      ucIdVol,
-      annulusVol
-    });
+  if (!rawSegments.length) {
+    return {
+      used: false,
+      sections: [],
+      ucIdVolume: 0,
+      annulusVolume: 0,
+      ucIdLength: 0,
+      annulusLength: 0
+    };
   }
+
+  rawSegments.sort((a, b) => a.start - b.start);
 
   // Merge consecutive raw segments that share the same containerKey
   const merged = [];
   for (const seg of rawSegments) {
     const last = merged.length ? merged[merged.length - 1] : null;
-    if (last && last.containerKey === seg.containerKey) {
+    if (
+      last &&
+      last.containerKey === seg.containerKey &&
+      last.end === seg.start
+    ) {
       last.end = seg.end;
       last.length += seg.length;
       last.ucIdVol += seg.ucIdVol;
@@ -1199,7 +1299,10 @@ export function computeUpperCompletionBreakdown(casingsInput) {
   }
 
   const sections = merged.map((m) => ({
-    depth: `${m.start.toFixed(1)}-${m.end.toFixed(1)}`,
+    depth: `${(isFinite(m.start) ? m.start : 0).toFixed(1)}-${(isFinite(m.end)
+      ? m.end
+      : 0
+    ).toFixed(1)}`,
     ucIdVolume: m.ucIdVol,
     annulusVolume: m.annulusVol,
     sectionLength: m.length
