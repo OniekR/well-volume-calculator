@@ -28,6 +28,18 @@ export function captureStateObject(getInputsFn) {
   } catch (e) {
     /* ignore */
   }
+
+  try {
+    const activeTubingBtn = document.querySelector('.tubing-count-btn.active');
+    if (activeTubingBtn?.dataset?.count) {
+      state.tubing_count = {
+        type: 'input',
+        value: String(activeTubingBtn.dataset.count)
+      };
+    }
+  } catch (e) {
+    /* ignore */
+  }
   return state;
 }
 
@@ -133,19 +145,44 @@ export function applyStateObject(state, callbacks = {}) {
 
   // Restore tapered tubing inputs if present in state
   try {
+    const tubingCountValue = state?.tubing_count?.value;
+    if (tubingCountValue != null) {
+      const tubingBtn = el(`tubing_count_${tubingCountValue}`);
+      if (tubingBtn) {
+        document.querySelectorAll('.tubing-count-btn').forEach((btn) => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+        });
+        tubingBtn.classList.add('active');
+        tubingBtn.setAttribute('aria-pressed', 'true');
+        tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
+      }
+    } else {
+      const tubingKeys = Object.keys(state || {}).filter((k) =>
+        /^tubing_(size|length)_\d+$/.test(k)
+      );
+      if (tubingKeys.length > 0) {
+        const maxIdx = Math.max(
+          ...tubingKeys.map((k) => parseInt(k.match(/\d+$/)?.[0] || '0', 10))
+        );
+        const count = Math.min(3, Math.max(1, maxIdx + 1));
+        const tubingBtn = el(`tubing_count_${count}`);
+        if (tubingBtn) {
+          document.querySelectorAll('.tubing-count-btn').forEach((btn) => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+          });
+          tubingBtn.classList.add('active');
+          tubingBtn.setAttribute('aria-pressed', 'true');
+          tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
+        }
+      }
+    }
+
     const tubingKeys = Object.keys(state || {}).filter((k) =>
       /^tubing_(size|length)_\d+$/.test(k)
     );
     if (tubingKeys.length > 0) {
-      const maxIdx = Math.max(
-        ...tubingKeys.map((k) => parseInt(k.match(/\d+$/)?.[0] || '0', 10))
-      );
-      const count = Math.min(3, Math.max(1, maxIdx + 1));
-      const tubingBtn = el(`tubing_count_${count}`);
-      if (tubingBtn) {
-        tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
-      }
-
       setTimeout(() => {
         tubingKeys.forEach((id) => {
           const field = el(id);
@@ -215,6 +252,12 @@ export function applyStateObject(state, callbacks = {}) {
         dpCount.value = String(dpCountValue);
         dpCount.dispatchEvent(new Event('change', { bubbles: true }));
       } else if (dpBtn) {
+        document.querySelectorAll('.drillpipe-count-btn').forEach((btn) => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+        });
+        dpBtn.classList.add('active');
+        dpBtn.setAttribute('aria-pressed', 'true');
         dpBtn.dispatchEvent(new Event('click', { bubbles: true }));
       }
     } catch (e) {
