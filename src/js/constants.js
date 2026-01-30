@@ -34,3 +34,5 @@ export const DRIFT = {
   reservoir: { 6.184: 6.102, 4.778: 4.653 },
   small_liner: { 4.276: 4.151, 3.958: 3.833 }
 };
+
+export const MINIMUM_HOLE_CLEANING_VELOCITY = 0.8;

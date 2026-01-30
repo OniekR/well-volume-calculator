@@ -2,6 +2,7 @@ import { el, qs } from './dom.js';
 import { getUpperCompletionTJ } from './validation.js';
 import { DRIFT, OD, TJ } from './constants.js';
 import { TUBING_CATALOG } from './tubing.js';
+import { setupFlowVelocityUI } from './flow-velocity.js';
 
 export function setupEventDelegation(deps) {
   const { calculateVolume, scheduleSave } = deps;
@@ -1625,6 +1626,7 @@ export function initUI(deps) {
   setupCasingToggles(deps);
   setupButtons(deps);
   setupTooltips(deps);
+  setupFlowVelocityUI(deps);
   setupSizeIdInputs(deps);
   initUpperCompletionChecks(deps);
   setupWellheadSync(deps);

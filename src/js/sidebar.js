@@ -232,6 +232,14 @@ export function setSection(sectionName, { focus } = {}) {
   if (button) setActiveButton(button);
   saveActiveSection(normalized);
   setActiveView(normalized, { focus: !!focus });
+
+  try {
+    document.dispatchEvent(
+      new CustomEvent('keino:sectionchange', { detail: normalized })
+    );
+  } catch (error) {
+    console.warn('Unable to broadcast section change:', error);
+  }
 }
 
 export function getActiveSection() {

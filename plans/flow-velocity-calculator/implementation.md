@@ -230,9 +230,9 @@ const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 
 ##### Step 1 Verification Checklist
 
-- [ ] Flow Velocity appears between Completion and Settings in the sidebar.
-- [ ] The Flow Velocity button is enabled and shows the Under Construction badge.
-- [ ] No console errors occur when clicking the Flow Velocity tab.
+- [x] Flow Velocity appears between Completion and Settings in the sidebar.
+- [x] The Flow Velocity button is enabled and shows the Under Construction badge.
+- [x] No console errors occur when clicking the Flow Velocity tab.
 
 #### Step 1 STOP & COMMIT
 
@@ -240,7 +240,7 @@ const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 
 #### Step 2: Create Flow Velocity view HTML structure and styling
 
-- [ ] Add the Flow Velocity view after the completion section in `index.html` by inserting the block below right before the existing `<section id="view-settings" ...>`:
+- [x] Add the Flow Velocity view after the completion section in `index.html` by inserting the block below right before the existing `<section id="view-settings" ...>`:
 
 ```html
 <section
@@ -455,7 +455,7 @@ const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 </section>
 ```
 
-- [ ] Add flow view styles to `src/css/style.css` (append near other section styles):
+- [x] Add flow view styles to `src/css/style.css` (append near other section styles):
 
 ```css
 .flow-header {
@@ -701,9 +701,9 @@ const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 
 ##### Step 2 Verification Checklist
 
-- [ ] Flow Velocity view renders correctly with inputs and empty state.
-- [ ] Flow rate presets display in a row and wrap on small screens.
-- [ ] Depth input row appears only when Single depth is selected.
+- [x] Flow Velocity view renders correctly with inputs and empty state.
+- [x] Flow rate presets display in a row and wrap on small screens.
+- [x] Depth input row appears only when Single depth is selected.
 
 #### Step 2 STOP & COMMIT
 
@@ -711,13 +711,13 @@ const KNOWN_SECTIONS = new Set(['casings', 'completion', 'flow', 'settings']);
 
 #### Step 3: Create Flow Velocity calculation module and tests
 
-- [ ] Add the minimum velocity constant to `src/js/constants.js`:
+- [x] Add the minimum velocity constant to `src/js/constants.js`:
 
 ```javascript
 export const MINIMUM_HOLE_CLEANING_VELOCITY = 0.8;
 ```
 
-- [ ] Create `src/js/flow-velocity.js` with the full module below:
+- [x] Create `src/js/flow-velocity.js` with the full module below:
 
 ```javascript
 import { el } from './dom.js';
@@ -1300,7 +1300,7 @@ export function renderFlowVelocityResults(result) {
 }
 ```
 
-- [ ] Add unit tests in `src/js/__tests__/flow-velocity.test.js`:
+- [x] Add unit tests in `src/js/__tests__/flow-velocity.test.js`:
 
 ```javascript
 import { describe, it, expect } from 'vitest';
@@ -1438,7 +1438,7 @@ describe('computeFlowVelocity', () => {
 
 ##### Step 3 Verification Checklist
 
-- [ ] `npm test` runs without failures.
+- [x] `npm test` runs without failures.
 - [ ] `computeFlowVelocity` returns valid results for a single casing/tubing setup.
 - [ ] Unit conversions match expected values.
 
@@ -1448,7 +1448,7 @@ describe('computeFlowVelocity', () => {
 
 #### Step 4: Integrate Flow Velocity calculations into the main script
 
-- [ ] Update `src/js/sidebar.js` to broadcast section changes. Insert this block at the end of `setSection`:
+- [x] Update `src/js/sidebar.js` to broadcast section changes. Insert this block at the end of `setSection`:
 
 ```javascript
 saveActiveSection(normalized);
@@ -1463,7 +1463,7 @@ try {
 }
 ```
 
-- [ ] Wire Flow Velocity UI hooks in `src/js/ui.js`:
+- [x] Wire Flow Velocity UI hooks in `src/js/ui.js`:
 
 ```javascript
 import { setupFlowVelocityUI } from './flow-velocity.js';
@@ -1473,7 +1473,7 @@ import { setupFlowVelocityUI } from './flow-velocity.js';
 setupFlowVelocityUI(deps);
 ```
 
-- [ ] Update `src/js/script.js` to compute flow velocity results:
+- [x] Update `src/js/script.js` to compute flow velocity results:
 
 ```javascript
 import {
@@ -1580,9 +1580,9 @@ const __testDrawOpts = {
 
 #### Step 5: Render Flow Velocity results and warnings
 
-- [ ] Ensure `renderFlowVelocityResults` is wired in `src/js/script.js` (from Step 4).
-- [ ] Verify the `flow-rate-error` warning shows when flow rate is zero or negative.
-- [ ] Confirm that velocities below 0.8 m/s render with the warning style.
+- [x] Ensure `renderFlowVelocityResults` is wired in `src/js/script.js` (from Step 4).
+- [x] Verify the `flow-rate-error` warning shows when flow rate is zero or negative.
+- [x] Confirm that velocities below 0.8 m/s render with the warning style.
 
 ##### Step 5 Verification Checklist
 
@@ -1596,7 +1596,7 @@ const __testDrawOpts = {
 
 #### Step 6: Add main-canvas schematic overlay
 
-- [ ] Update `src/js/draw.js` to render flow velocity arrows when `flowOverlay` is provided. Add the helper functions below near the bottom of the file and call `drawFlowOverlay` at the end of `drawSchematic`:
+- [x] Update `src/js/draw.js` to render flow velocity arrows when `flowOverlay` is provided. Add the helper functions below near the bottom of the file and call `drawFlowOverlay` at the end of `drawSchematic`:
 
 ```javascript
 if (opts?.flowOverlay) {

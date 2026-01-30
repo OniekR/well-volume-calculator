@@ -121,7 +121,9 @@
                   </svg>
                   <span class="sidebar-nav-text"
                     >Flow Velocity
-                    <span class="badge badge--construction">🚧 Under Construction</span>
+                    <span class="badge badge--construction"
+                      >🚧 Under Construction</span
+                    >
                   </span>
                 </button>
               </li>
@@ -1409,6 +1411,249 @@
                   <div id="plugTotalBelowPOI" class="hidden">
                     <span class="label">Total vol below tubing:</span>
                     <span>— m³</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="view-flow"
+            class="app-view"
+            data-view="flow"
+            aria-label="Flow Velocity"
+            hidden
+          >
+            <div class="flow-header">
+              <h2>Flow Velocity</h2>
+              <p class="small-note">
+                Calculate inside-pipe and annulus velocities at each casing
+                transition or at a single selected depth.
+              </p>
+            </div>
+
+            <div class="flow-card">
+              <div class="input-row three-cols flow-input-row">
+                <div class="input-inline">
+                  <label for="flow_rate">Flow rate</label>
+                  <input
+                    type="number"
+                    id="flow_rate"
+                    name="flow_rate"
+                    step="1"
+                    min="0"
+                    placeholder="0"
+                  />
+                </div>
+                <div class="input-inline">
+                  <label for="flow_rate_unit">Unit</label>
+                  <select id="flow_rate_unit" name="flow_rate_unit">
+                    <option value="lpm">L/min</option>
+                    <option value="gpm">GPM</option>
+                    <option value="m3h">m³/h</option>
+                    <option value="bpm">BPM</option>
+                  </select>
+                </div>
+                <div class="input-inline">
+                  <label>Presets (L/min)</label>
+                  <div class="flow-quick-buttons">
+                    <button
+                      type="button"
+                      class="flow-quick-btn"
+                      data-flow-lpm="1000"
+                    >
+                      1000
+                    </button>
+                    <button
+                      type="button"
+                      class="flow-quick-btn"
+                      data-flow-lpm="2000"
+                    >
+                      2000
+                    </button>
+                    <button
+                      type="button"
+                      class="flow-quick-btn"
+                      data-flow-lpm="3000"
+                    >
+                      3000
+                    </button>
+                    <button
+                      type="button"
+                      class="flow-quick-btn"
+                      data-flow-lpm="4000"
+                    >
+                      4000
+                    </button>
+                    <button
+                      type="button"
+                      class="flow-quick-btn"
+                      data-flow-lpm="5000"
+                    >
+                      5000
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                id="flow-rate-error"
+                class="small-note warning hidden"
+                role="alert"
+              ></div>
+
+              <div class="input-row three-cols flow-input-row">
+                <div class="input-inline">
+                  <label for="flow_pipe_mode_override">Pipe selection</label>
+                  <select
+                    id="flow_pipe_mode_override"
+                    name="flow_pipe_mode_override"
+                  >
+                    <option value="auto">Auto (use configured mode)</option>
+                    <option value="tubing">Tubing</option>
+                    <option value="drillpipe">Drill pipe</option>
+                  </select>
+                  <div id="flow-pipe-mode-note" class="small-note">
+                    This only affects Flow Velocity calculations.
+                  </div>
+                </div>
+                <div class="input-inline">
+                  <label>Depth mode</label>
+                  <div
+                    class="toggle-inline flow-toggle-group"
+                    role="group"
+                    aria-label="Flow depth mode"
+                  >
+                    <label class="inline-checkbox">
+                      <input
+                        type="radio"
+                        id="flow_depth_mode_all"
+                        name="flow_depth_mode"
+                        checked
+                      />
+                      All depths
+                    </label>
+                    <label class="inline-checkbox">
+                      <input
+                        type="radio"
+                        id="flow_depth_mode_single"
+                        name="flow_depth_mode"
+                      />
+                      Single depth
+                    </label>
+                  </div>
+                </div>
+                <div class="input-inline" id="flow-depth-input" hidden>
+                  <label for="flow_depth_value">Depth (m)</label>
+                  <input
+                    type="number"
+                    id="flow_depth_value"
+                    name="flow_depth_value"
+                    step="1"
+                    min="0"
+                    placeholder="0"
+                  />
+                  <div class="casing-footer-row">
+                    <button
+                      type="button"
+                      class="wellhead-btn flow-depth-btn"
+                      data-target="flow_depth_value"
+                      data-source="wellhead_depth"
+                    >
+                      Use wellhead
+                    </button>
+                    <button
+                      type="button"
+                      class="wellhead-btn flow-depth-btn"
+                      data-target="flow_depth_value"
+                      data-source="depth_open"
+                    >
+                      Use TD
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flow-help-row">
+                <button
+                  type="button"
+                  id="flow_help_info_btn"
+                  class="info-btn"
+                  aria-label="Flow velocity help"
+                >
+                  i
+                </button>
+                <div
+                  id="flow_help_info_tooltip"
+                  class="info-tooltip hidden"
+                  role="tooltip"
+                  aria-hidden="true"
+                >
+                  <p>
+                    Flow velocity is computed using the configured tubing or
+                    drill pipe sizes and active casing IDs at each depth
+                    segment.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div id="flow-results-empty" class="flow-empty-state">
+              <p class="small-note">
+                Enter a flow rate to see velocities by depth segment.
+              </p>
+            </div>
+
+            <div
+              id="flow-results"
+              class="flow-results hidden"
+              aria-live="polite"
+            >
+              <div class="flow-summary-grid">
+                <div class="flow-summary-card">
+                  <h3>Flow rate</h3>
+                  <p id="flow-rate-summary">—</p>
+                  <p class="small-note">
+                    Minimum hole cleaning velocity: 0.8 m/s
+                  </p>
+                </div>
+                <div class="flow-summary-card">
+                  <h3>Active pipe</h3>
+                  <p id="flow-pipe-summary">—</p>
+                  <p id="flow-casing-summary" class="small-note"></p>
+                </div>
+                <div class="flow-summary-card">
+                  <h3>Velocity summary</h3>
+                  <div class="flow-summary-stats">
+                    <div>
+                      <span>Pipe</span>
+                      <strong id="flow-summary-pipe">—</strong>
+                    </div>
+                    <div>
+                      <span>Annulus</span>
+                      <strong id="flow-summary-annulus">—</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flow-results-grid">
+                <div class="flow-results-list" id="flow-results-list"></div>
+                <div class="flow-schematic-card" aria-label="Flow schematic">
+                  <div class="flow-schematic">
+                    <div class="flow-schematic-column">
+                      <div class="flow-schematic-arrow flow-arrow-up">
+                        <span class="flow-arrow-label">Annulus (up)</span>
+                        <strong id="flow-schematic-annulus">—</strong>
+                      </div>
+                      <div class="flow-schematic-arrow flow-arrow-down">
+                        <span class="flow-arrow-label">Pipe (down)</span>
+                        <strong id="flow-schematic-pipe">—</strong>
+                      </div>
+                    </div>
+                    <div class="flow-schematic-depth" id="flow-schematic-depth">
+                      —
+                    </div>
                   </div>
                 </div>
               </div>

@@ -12,7 +12,7 @@ import {
   applyStateObject as applyStateObjectFn
 } from './state.js';
 import { initUI } from './ui.js';
-import { initializeSidebar } from './sidebar.js';
+import { initializeSidebar, getActiveSection } from './sidebar.js';
 import { gatherInputs } from './inputs.js';
 import { renderResults, renderUpperCompletionBreakdown } from './render.js';
 import { setupPresetsUI } from './presets-ui.js';
@@ -22,6 +22,11 @@ import {
   computeDrillPipeBreakdown
 } from './drillpipe.js';
 import { gatherTubingInput } from './tubing.js';
+import {
+  computeFlowVelocity,
+  gatherFlowVelocityInput,
+  renderFlowVelocityResults
+} from './flow-velocity.js';
 
 /*
  * Refactored module for the Well Volume Calculator
@@ -77,6 +82,7 @@ const VolumeCalc = (() => {
 
   // Currently loaded or saved preset name (displayed on the canvas)
   let currentPresetName = '';
+  let lastFlowResults = undefined;
 
   // Drawing responsibilities (canvas sizing, DPR, scheduling) are provided by `src/js/draw.js`.
   // Initialize drawing module with the canvas element later during setup via `initDraw(canvas)`.
@@ -177,6 +183,16 @@ const VolumeCalc = (() => {
 
     // Determine drill pipe mode early so we can exclude UC from volume calculations
     const dpInput = gatherDrillPipeInput();
+    const tubingInput = gatherTubingInput();
+
+    const flowInput = gatherFlowVelocityInput();
+    lastFlowResults = computeFlowVelocity(flowInput, {
+      casingsInput,
+      drillpipeInput: dpInput,
+      tubingInput,
+      surfaceInUse,
+      intermediateInUse
+    });
 
     // Read the "Subtract DP steel displacement" toggle
     const subtractEodToggle = document.getElementById('subtract_eod_toggle');
@@ -264,6 +280,8 @@ const VolumeCalc = (() => {
       ucBottom
     });
 
+    renderFlowVelocityResults(lastFlowResults);
+
     // Render upper completion breakdown (tubing or drill pipe)
     if (dpInput.mode === 'drillpipe') {
       const dpBreakdown = computeDrillPipeBreakdown(
@@ -296,7 +314,6 @@ const VolumeCalc = (() => {
     }
 
     // Get tapered tubing for visualization
-    const tubingInput = gatherTubingInput();
     const tubingSegments =
       dpInput.mode !== 'drillpipe' &&
       tubingInput.count > 0 &&
@@ -309,6 +326,12 @@ const VolumeCalc = (() => {
         (c) => c.role !== 'upper_completion'
       );
     }
+
+    const activeSection = getActiveSection();
+    const flowOverlay =
+      activeSection === 'flow' && lastFlowResults?.valid
+        ? lastFlowResults.overlay
+        : undefined;
 
     const __testDrawOpts = {
       showWater,
@@ -323,7 +346,8 @@ const VolumeCalc = (() => {
         dpInput.mode === 'drillpipe' && dpInput.pipes.length > 0
           ? dpInput.pipes
           : undefined,
-      tubingSegments
+      tubingSegments,
+      flowOverlay
     };
 
     // Expose the draw args for test helpers so we can force a deterministic redraw in CI
@@ -372,6 +396,10 @@ const VolumeCalc = (() => {
       initDraw
     });
     initializeSidebar();
+
+    document.addEventListener('keino:sectionchange', () => {
+      calculateVolume();
+    });
 
     // load persisted state AFTER UI is initialized so dynamic inputs (e.g., drill pipe)
     // have their event handlers attached and can be rendered/restored correctly.
