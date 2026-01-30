@@ -22,6 +22,11 @@ All notable changes to this project are documented in this file.
 
 - Remove large Total Volume display and the UI-only **Hide total** toggle. Hole volume table in the sidebar remains the canonical total volume display. A deprecation note has been added to the `README.md`.
 
+### Fixed
+
+- Upper completion / "Drill pipe string" checkbox: unchecking now disables all upper completion controls (tubing and drill pipe inputs and mode/count controls), treats DP/tubing as absent in calculations (lengths treated as 0), hides the drill pipe/tubing breakdown and removes DP/tubing from the canvas schematic. Re-checking preserves prior inputs and re-enables calculations.
+- Initialization: page load respects saved `use_upper_completion` state and disables inputs when unchecked.
+
 ### Notes
 
 - Recommended: review `well-presets.json` for other presets that may benefit from including `small_liner` defaults.
