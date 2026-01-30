@@ -113,19 +113,16 @@ let watchdog = setTimeout(() => {
       // Select a tubing size (prefer index 1 if available) and set length to 60m
       try {
         await page.$eval('#tubing_size_0', (el) => {
-          if (el.options && el.options.length > 1)
-            el.value = String(Math.min(1, el.options.length - 1));
+          if (el.options && el.options.length > 1) el.value = String(Math.min(1, el.options.length - 1));
         });
       } catch (e) {}
-
+      
       await page.$eval('#use_upper_completion', (el) => (el.checked = true));
       await (page.waitForTimeout ? page.waitForTimeout(300) : wait(300));
-
+      
       try {
         await page.$eval('#tubing_length_0', (el) => (el.value = '60'));
-        await page.$eval('#tubing_length_0', (el) =>
-          el.dispatchEvent(new Event('input', { bubbles: true }))
-        );
+        await page.$eval('#tubing_length_0', (el) => el.dispatchEvent(new Event('input', { bubbles: true })));
       } catch (e) {}
     }
     await (page.waitForTimeout ? page.waitForTimeout(300) : wait(300));
@@ -154,7 +151,7 @@ let watchdog = setTimeout(() => {
       document.getElementById('wellSchematic').toDataURL()
     );
     flog('Setting depth_uc to 80 (or tubing length when tubing UI present)');
-
+    
     // Set depth based on which UI is present
     if (foundSizeSelector === '#upper_completion_size') {
       await page.$eval('#depth_uc', (el) => (el.value = '80'));
@@ -169,8 +166,17 @@ let watchdog = setTimeout(() => {
         el.dispatchEvent(new Event('input', { bubbles: true }))
       );
     }
-
-    await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
+    
+    // Wait until the canvas dataURL changes, or timeout after a short while
+    try {
+      await page.waitForFunction(
+        (prev) => document.getElementById('wellSchematic').toDataURL() !== prev,
+        { timeout: 3000 },
+        before
+      );
+    } catch (e) {
+      // If the wait times out we still capture the canvas for debugging
+    }
     flog('Capturing canvas after change');
     const after = await page.evaluate(() =>
       document.getElementById('wellSchematic').toDataURL()
@@ -212,7 +218,7 @@ let watchdog = setTimeout(() => {
     await page.$eval('#production_drift', (el) =>
       el.dispatchEvent(new Event('input', { bubbles: true }))
     );
-
+    
     // Dispatch input on the appropriate UC depth element
     if (foundSizeSelector === '#upper_completion_size') {
       await page.$eval('#depth_uc', (el) =>
@@ -223,7 +229,7 @@ let watchdog = setTimeout(() => {
         el.dispatchEvent(new Event('input', { bubbles: true }))
       );
     }
-
+    
     await (page.waitForTimeout ? page.waitForTimeout(500) : wait(500));
 
     // Wait up to 5s for either the new or legacy warning element to appear with relevant text
