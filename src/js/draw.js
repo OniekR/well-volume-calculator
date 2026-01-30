@@ -80,19 +80,27 @@ export function drawSchematic(casings, opts = {}) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, rect.width, rect.height);
 
+  const tubingMaxDepth =
+    opts && opts.tubingSegments && opts.tubingSegments.length
+      ? Math.max(...opts.tubingSegments.map((t) => Number(t.shoe || t.length || 0)))
+      : 0;
+
   const maxDepth = Math.max(
     opts && !isNaN(opts.waterDepth) ? opts.waterDepth : 0,
-    casings.length ? Math.max(...casings.map((c) => c.depth)) : 0
+    casings.length ? Math.max(...casings.map((c) => c.depth)) : 0,
+    tubingMaxDepth
   );
+
   const maxOD = casings.length ? Math.max(...casings.map((c) => c.od)) : 18.625;
   // If there is no depth information, normally we can abort early.
-  // However, always allow rendering of a provided preset label (a UI overlay)
-  // even when maxDepth is zero so tests and user overlays still appear.
+  // However, always allow rendering when a provided preset label (a UI overlay)
+  // or tubing segments are present so tests and user overlays still appear.
   if (maxDepth === 0) {
     const hasLabel =
       typeof opts.currentPresetName === 'string' &&
       opts.currentPresetName.trim() !== '';
-    if (!hasLabel) return;
+    const hasTubing = opts && opts.tubingSegments && opts.tubingSegments.length > 0;
+    if (!hasLabel && !hasTubing) return;
   }
 
   const centerX = rect.width / 2;
