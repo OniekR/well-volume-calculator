@@ -2218,11 +2218,11 @@ describe('ui.js', () => {
 
 ##### Step 7 Verification Checklist
 
-- [ ] Run `npm test -- --run` - all tests pass
+- [x] Run `npm test -- --run` - all tests pass
 - [ ] Run `npm test -- --coverage` and verify:
   - `sidebar.js` reaches 85%+ line coverage
   - `ui.js` reaches 65%+ line coverage
-- [ ] No build errors or console warnings
+- [x] No build errors or console warnings
 
 #### Step 7 STOP & COMMIT
 

@@ -78,7 +78,14 @@ describe('pressure.js', () => {
 
   describe('buildSelectableSections()', () => {
     const mockCasings = [
-      { role: 'surface', name: 'Surface Casing', use: true, depth: 500, od: 13.375, id: 12.415 },
+      {
+        role: 'surface',
+        name: 'Surface Casing',
+        use: true,
+        depth: 500,
+        od: 13.375,
+        id: 12.415
+      },
       {
         role: 'intermediate',
         name: 'Intermediate',

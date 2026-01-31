@@ -169,7 +169,9 @@ describe('render.js', () => {
 
     it('renders UC breakdown sections', () => {
       renderUpperCompletionBreakdown(mockBreakdown, 'tubing');
-      const rows = document.querySelectorAll('#upperCompletionVolumes tbody tr');
+      const rows = document.querySelectorAll(
+        '#upperCompletionVolumes tbody tr'
+      );
       expect(rows.length).toBe(3);
     });
 
