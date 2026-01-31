@@ -6,6 +6,7 @@ const KNOWN_SECTIONS = new Set([
   'completion',
   'flow',
   'pressure',
+  'lift',
   'settings'
 ]);
 

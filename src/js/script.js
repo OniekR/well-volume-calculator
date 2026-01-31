@@ -33,6 +33,7 @@ import {
   setupPressureUI,
   renderPressureResults
 } from './pressure.js';
+import { setupStringLiftUI } from './string-lift.js';
 
 /*
  * Refactored module for the Well Volume Calculator
@@ -423,6 +424,7 @@ const VolumeCalc = (() => {
       calculateVolume,
       scheduleSave: persistence.scheduleSave
     });
+    setupStringLiftUI({ scheduleSave: persistence.scheduleSave });
     initializeSidebar();
 
     document.addEventListener('keino:sectionchange', () => {
