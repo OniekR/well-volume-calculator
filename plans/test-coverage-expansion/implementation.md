@@ -614,8 +614,8 @@ describe('tubing.js', () => {
 
 #### Step 3: Presets Module Tests
 
-- [ ] Create new test file `src/js/__tests__/presets.unit.test.js`
-- [ ] Copy and paste code below into `src/js/__tests__/presets.unit.test.js`:
+- [x] Create new test file `src/js/__tests__/presets.unit.test.js`
+- [x] Copy and paste code below into `src/js/__tests__/presets.unit.test.js`:
 
 ```javascript
 /** @vitest-environment jsdom */
@@ -883,9 +883,9 @@ describe('presets.js', () => {
 
 ##### Step 3 Verification Checklist
 
-- [ ] Run `npm test -- --run` - all tests pass
-- [ ] Run `npm test -- --coverage` and verify `presets.js` reaches 75%+ line coverage
-- [ ] No build errors or console warnings
+- [x] Run `npm test -- --run` - all tests pass
+- [x] Run `npm test -- --coverage` and verify `presets.js` reaches 75%+ line coverage
+- [x] No build errors or console warnings
 
 #### Step 3 STOP & COMMIT
 
