@@ -27,6 +27,8 @@ All notable changes to this project are documented in this file.
 - UI: added an "🚧 Under Construction" badge to the **Pressure** navigation button to indicate the feature is still in development.
 - Styling: improved dark-theme styles for Flow Velocity presets (`.flow-quick-btn`) to provide better contrast and hover states on dark surfaces.
 - Chore: ran Prettier/ESLint auto-fixes across the codebase to normalize formatting and resolve Prettier/ESLint warnings; removed an unused variable (`ucTopVal`) to clear a `no-unused-vars` warning.
+- Persistence: restored tubing and drillpipe count buttons explicitly, with backward-compatible fallback for older saved states.
+- Upper completion: mode toggle now switches the visible section even when Upper completion is unchecked, while keeping inputs disabled.
 
 ### Removed
 
@@ -36,6 +38,7 @@ All notable changes to this project are documented in this file.
 
 - Upper completion / "Drill pipe string" checkbox: unchecking now disables all upper completion controls (tubing and drill pipe inputs and mode/count controls), treats DP/tubing as absent in calculations (lengths treated as 0), hides the drill pipe/tubing breakdown and removes DP/tubing from the canvas schematic. Re-checking preserves prior inputs and re-enables calculations.
 - Initialization: page load respects saved `use_upper_completion` state and disables inputs when unchecked.
+- Tubing and drill pipe button state persistence across reloads, including restoring active count and inputs after mode switches.
 
 ### Notes
 

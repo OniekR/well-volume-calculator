@@ -396,10 +396,10 @@ describe('Mode Toggle with Checkbox Unchecked', () => {
 
 ## Final Verification
 
-- [ ] All tubing count button states persist across page reloads
-- [ ] All drillpipe count button states persist across page reloads (unchanged behavior)
-- [ ] Mode toggle slider works when completion checkbox is unchecked
-- [ ] Mode toggle only changes visual sections when checkbox is checked
-- [ ] When checkbox is re-enabled, the correct section (based on slider state) is shown
-- [ ] All unit tests pass
-- [ ] All existing functionality still works
+- [x] All tubing count button states persist across page reloads
+- [x] All drillpipe count button states persist across page reloads (unchanged behavior)
+- [x] Mode toggle slider works when completion checkbox is unchecked
+- [x] Mode toggle only changes visual sections when checkbox is checked
+- [x] When checkbox is re-enabled, the correct section (based on slider state) is shown
+- [x] All unit tests pass
+- [x] All existing functionality still works
