@@ -1201,14 +1201,14 @@ setupStringLiftUI({ scheduleSave: persistence.scheduleSave });
 
 ### Step 4 Verification Checklist
 
-- [ ] No import errors when running `npm run dev`
-- [ ] String Lift view shows calculated results when navigated to
-- [ ] Changing casing dropdown updates the ID input field
-- [ ] Changing drill pipe dropdown updates the OD input field
-- [ ] Changing any input triggers recalculation
-- [ ] Results display with correct formatting (European decimal comma)
-- [ ] Calculation breakdown shows all intermediate values
-- [ ] Validation errors show when casing ID ≤ pipe OD
+- [x] No import errors when running `npm run dev`
+- [x] String Lift view shows calculated results when navigated to
+- [x] Changing casing dropdown updates the ID input field
+- [x] Changing drill pipe dropdown updates the OD input field
+- [x] Changing any input triggers recalculation
+- [x] Results display with correct formatting (European decimal comma)
+- [x] Calculation breakdown shows all intermediate values
+- [x] Validation errors show when casing ID ≤ pipe OD
 
 ### Step 4 STOP & COMMIT
 
@@ -1227,8 +1227,8 @@ git commit -m "feat(lift): wire up string-lift module to main application"
 
 #### 5.1 Create unit test file
 
-- [ ] Create a new file at `__tests__/string-lift.unit.test.js`
-- [ ] Copy and paste the following test code:
+- [x] Create a new file at `__tests__/string-lift.unit.test.js`
+- [x] Copy and paste the following test code:
 
 ```javascript
 import { describe, it, expect } from 'vitest';
@@ -1518,7 +1518,7 @@ describe('String Lift Calculator', () => {
 
 #### 5.2 Run the tests
 
-- [ ] Run the tests to verify the calculations:
+- [x] Run the tests to verify the calculations:
 
 ```bash
 npm run test:run
