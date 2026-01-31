@@ -1,13 +1,14 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
+import * as drawModule from '../draw.js';
+const {
   initDraw,
   disposeDraw,
   resizeCanvasForDPR,
   scheduleDraw,
   drawSchematic,
   __TEST_flush_draw
-} from '../draw.js';
+} = drawModule;
 
 describe('draw.js', () => {
   let ctxMock;
@@ -82,6 +83,20 @@ describe('draw.js', () => {
 
     it('handles undefined canvas gracefully', () => {
       expect(() => initDraw(undefined)).not.toThrow();
+    });
+
+    it('handles getContext errors gracefully', () => {
+      const throwingCanvas = {
+        nodeType: 1,
+        getContext: vi.fn(() => {
+          throw new Error('No context');
+        }),
+        getBoundingClientRect: vi.fn(() => ({ width: 400, height: 600 })),
+        width: 0,
+        height: 0,
+        style: {}
+      };
+      expect(() => initDraw(throwingCanvas)).not.toThrow();
     });
   });
 
@@ -166,6 +181,18 @@ describe('draw.js', () => {
       expect(ctxMock.clearRect).toHaveBeenCalled();
     });
 
+    it('runs draw via requestAnimationFrame', () => {
+      const raf = vi.fn((cb) => {
+        cb();
+        return 1;
+      });
+      vi.stubGlobal('requestAnimationFrame', raf);
+      initDraw(fakeCanvas);
+      scheduleDraw(mockCasings, {});
+      expect(raf).toHaveBeenCalled();
+      expect(ctxMock.clearRect).toHaveBeenCalled();
+    });
+
     it('handles empty casings array', () => {
       initDraw(fakeCanvas);
       scheduleDraw([], {});
@@ -242,6 +269,12 @@ describe('draw.js', () => {
       expect(ctxMock.fillText).toHaveBeenCalled();
     });
 
+    it('draws preset overlay when currentPresetName is provided', () => {
+      initDraw(fakeCanvas);
+      drawSchematic(mockCasings, { currentPresetName: 'Active Preset' });
+      expect(ctxMock.fillText).toHaveBeenCalled();
+    });
+
     it('handles non-initialized state gracefully', () => {
       expect(() => drawSchematic(mockCasings, {})).not.toThrow();
     });
@@ -279,6 +312,54 @@ describe('draw.js', () => {
         }
       };
       expect(() => drawSchematic(mockCasings, opts)).not.toThrow();
+    });
+
+    it('draws tubing and drill pipe segments with flow overlay', () => {
+      initDraw(fakeCanvas);
+      const opts = {
+        tubingSegments: [{ size: 0, top: 0, shoe: 800, length: 800 }],
+        drillPipeSegments: [{ size: 0, length: 400 }],
+        flowOverlay: {
+          annulusVelocityMps: 1.25,
+          annulusVelocityFps: 4.1,
+          pipeVelocityMps: 0.5,
+          pipeVelocityFps: 1.6,
+          annulusLabel: 'A',
+          depthLabel: '400 m'
+        }
+      };
+      drawSchematic(mockCasings, opts);
+      const textCalls = ctxMock.fillText.mock.calls.map((call) => call[0]);
+      expect(textCalls.some((text) => String(text).includes('Depth:'))).toBe(
+        true
+      );
+    });
+
+    it('renders open hole casing', () => {
+      initDraw(fakeCanvas);
+      const openHoleCasings = [
+        {
+          role: 'open_hole',
+          name: 'Open Hole',
+          od: 8.5,
+          id: 8.5,
+          top: 0,
+          shoe: 400,
+          depth: 400,
+          prevDepth: 0,
+          index: 0,
+          z: 0,
+          hidden: false
+        }
+      ];
+      expect(() => drawSchematic(openHoleCasings, {})).not.toThrow();
+      expect(ctxMock.fillText).toHaveBeenCalled();
+    });
+  });
+
+  describe('__TEST_flush_draw()', () => {
+    it('returns false when no scheduled draw', () => {
+      expect(__TEST_flush_draw()).toBe(false);
     });
   });
 });

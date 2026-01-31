@@ -7,6 +7,8 @@ import {
   getPresetNames,
   getPresetState,
   populatePresetsUI,
+  exportPresets,
+  importPresetsFile,
   savePreset,
   deletePreset
 } from '../presets.js';
@@ -40,6 +42,8 @@ describe('presets.js', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.restoreAllMocks();
+    window.alert = vi.fn();
+    window.confirm = vi.fn(() => true);
     document.body.innerHTML = `
       <select id="preset_list">
         <option value="">Select preset...</option>
@@ -50,6 +54,7 @@ describe('presets.js', () => {
   afterEach(() => {
     localStorage.clear();
     document.body.innerHTML = '';
+    vi.unstubAllGlobals();
   });
 
   describe('loadPresetsFromStorage()', () => {
@@ -236,6 +241,104 @@ describe('presets.js', () => {
     it('handles missing select element gracefully', () => {
       document.body.innerHTML = '';
       expect(() => populatePresetsUI()).not.toThrow();
+    });
+  });
+
+  describe('exportPresets()', () => {
+    it('creates a download and revokes the blob URL', () => {
+      const createObjectURL = vi.fn(() => 'blob:mock');
+      const revokeObjectURL = vi.fn();
+      const originalCreateElement = document.createElement.bind(document);
+      vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
+      vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+        const el = originalCreateElement(tag);
+        if (tag === 'a') el.click = vi.fn();
+        return el;
+      });
+
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(mockStoredPresets));
+      exportPresets();
+
+      expect(createObjectURL).toHaveBeenCalled();
+      expect(revokeObjectURL).toHaveBeenCalled();
+    });
+
+    it('alerts when export fails', () => {
+      vi.stubGlobal('URL', {
+        createObjectURL: () => {
+          throw new Error('boom');
+        },
+        revokeObjectURL: vi.fn()
+      });
+      exportPresets();
+      expect(window.alert).toHaveBeenCalled();
+    });
+  });
+
+  describe('importPresetsFile()', () => {
+    it('merges incoming presets and refreshes UI', () => {
+      const originalFileReader = global.FileReader;
+      class MockFileReader {
+        readAsText() {
+          this.result = JSON.stringify({
+            presets: {
+              Incoming: { state: { casings: [{ name: 'Incoming' }] } }
+            }
+          });
+          this.onload();
+        }
+      }
+      global.FileReader = MockFileReader;
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(mockStoredPresets));
+
+      importPresetsFile(new File(['data'], 'presets.json'));
+
+      const stored = JSON.parse(localStorage.getItem(PRESETS_KEY));
+      expect(stored.Incoming).toBeDefined();
+      expect(window.alert).toHaveBeenCalled();
+
+      global.FileReader = originalFileReader;
+    });
+
+    it('respects conflict cancellation', () => {
+      const originalFileReader = global.FileReader;
+      window.confirm = vi.fn(() => false);
+      class MockFileReader {
+        readAsText() {
+          this.result = JSON.stringify({
+            presets: {
+              'My Custom Well': { state: { casings: [{ name: 'Incoming' }] } }
+            }
+          });
+          this.onload();
+        }
+      }
+      global.FileReader = MockFileReader;
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(mockStoredPresets));
+
+      importPresetsFile(new File(['data'], 'presets.json'));
+
+      const stored = JSON.parse(localStorage.getItem(PRESETS_KEY));
+      expect(stored['My Custom Well'].state).toEqual(
+        mockStoredPresets['My Custom Well'].state
+      );
+
+      global.FileReader = originalFileReader;
+    });
+
+    it('alerts when reader fails', () => {
+      const originalFileReader = global.FileReader;
+      class MockFileReader {
+        readAsText() {
+          this.onerror();
+        }
+      }
+      global.FileReader = MockFileReader;
+
+      importPresetsFile(new File(['data'], 'presets.json'));
+      expect(window.alert).toHaveBeenCalled();
+
+      global.FileReader = originalFileReader;
     });
   });
 

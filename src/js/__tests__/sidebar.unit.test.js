@@ -136,9 +136,13 @@ describe('sidebar.js', () => {
 
     it('moves focus with ArrowDown', () => {
       const casingsBtn = document.querySelector('[data-section="casings"]');
-      const completionBtn = document.querySelector('[data-section="completion"]');
+      const completionBtn = document.querySelector(
+        '[data-section="completion"]'
+      );
       casingsBtn.focus();
-      casingsBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      casingsBtn.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowDown' })
+      );
       expect(document.activeElement).toBe(completionBtn);
     });
 
@@ -146,7 +150,9 @@ describe('sidebar.js', () => {
       const casingsBtn = document.querySelector('[data-section="casings"]');
       const settingsBtn = document.querySelector('[data-section="settings"]');
       casingsBtn.focus();
-      casingsBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+      casingsBtn.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowUp' })
+      );
       expect(document.activeElement).toBe(settingsBtn);
     });
   });

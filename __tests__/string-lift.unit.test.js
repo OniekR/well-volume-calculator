@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest';
+/** @vitest-environment jsdom */
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   computeAnnularArea,
   computeLiftForce,
   calculateStringLift,
+  gatherStringLiftInput,
+  renderStringLiftResults,
+  setupStringLiftUI,
   CASING_OPTIONS,
   getDrillpipeOptions
 } from '../src/js/string-lift.js';
@@ -166,7 +170,6 @@ describe('String Lift Calculator', () => {
       };
 
       const result = calculateStringLift(input);
-
       expect(result.valid).toBe(true);
       expect(result.tons).toBeCloseTo(503, 0);
       expect(result.areaM2).toBeCloseTo(0.143, 2);
@@ -246,6 +249,107 @@ describe('String Lift Calculator', () => {
       expect(result).toHaveProperty('tons');
       expect(result).toHaveProperty('kgf');
       expect(result).toHaveProperty('newtons');
+    });
+  });
+
+  describe('gatherStringLiftInput', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <select id="lift_casing_select"><option value="12.415" selected></option></select>
+        <input id="lift_casing_id" value="12.415" />
+        <select id="lift_drillpipe_select"><option value="5" selected></option></select>
+        <input id="lift_drillpipe_od" value="5" />
+        <input id="lift_pressure" value="5000" />
+        <select id="lift_pressure_unit"><option value="psi" selected></option></select>
+      `;
+    });
+
+    it('parses input values and converts psi to bar', () => {
+      const input = gatherStringLiftInput();
+      expect(input.casingID).toBe(12.415);
+      expect(input.pipeOD).toBe(5);
+      expect(input.pressureUnit).toBe('psi');
+      expect(input.pressureBar).toBeCloseTo(5000 * 0.0689476, 6);
+    });
+  });
+
+  describe('renderStringLiftResults', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <div id="lift-results" class="hidden"></div>
+        <div id="lift-results-empty"></div>
+        <div id="lift-error" class="hidden"></div>
+        <div id="lift-result-value"></div>
+        <div id="lift-breakdown-id"></div>
+        <div id="lift-breakdown-od"></div>
+        <div id="lift-breakdown-area"></div>
+        <div id="lift-breakdown-pressure"></div>
+        <div id="lift-breakdown-lift"></div>
+      `;
+    });
+
+    it('shows error for invalid result', () => {
+      renderStringLiftResults({ valid: false, reason: 'missing_input' });
+      expect(
+        document.getElementById('lift-error').classList.contains('hidden')
+      ).toBe(false);
+    });
+
+    it('renders valid result values', () => {
+      renderStringLiftResults({
+        valid: true,
+        casingID: 12.415,
+        casingIDMeters: 0.315,
+        pipeOD: 5,
+        pipeODMeters: 0.127,
+        areaM2: 0.05,
+        areaIn2: 10,
+        pressureBar: 100,
+        pressurePa: 10000000,
+        pressureUnit: 'bar',
+        pressureRaw: 100,
+        tons: 50,
+        kgf: 100,
+        newtons: 200
+      });
+      expect(
+        document.getElementById('lift-results').classList.contains('hidden')
+      ).toBe(false);
+      expect(document.getElementById('lift-result-value').textContent).toContain(
+        '50'
+      );
+    });
+  });
+
+  describe('setupStringLiftUI', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <select id="lift_casing_select"><option value="12.415" selected></option></select>
+        <input id="lift_casing_id" value="12.415" />
+        <select id="lift_drillpipe_select"><option value="5" selected></option></select>
+        <input id="lift_drillpipe_od" value="5" />
+        <input id="lift_pressure" value="100" />
+        <select id="lift_pressure_unit"><option value="bar" selected></option></select>
+        <div id="lift-results"></div>
+        <div id="lift-results-empty"></div>
+        <div id="lift-error" class="hidden"></div>
+        <div id="lift-result-value"></div>
+        <div id="lift-breakdown-id"></div>
+        <div id="lift-breakdown-od"></div>
+        <div id="lift-breakdown-area"></div>
+        <div id="lift-breakdown-pressure"></div>
+        <div id="lift-breakdown-lift"></div>
+      `;
+    });
+
+    it('recalculates on input changes and schedules save', () => {
+      const deps = { scheduleSave: vi.fn() };
+      setupStringLiftUI(deps);
+      document.getElementById('lift_pressure').value = '200';
+      document
+        .getElementById('lift_pressure')
+        .dispatchEvent(new Event('input'));
+      expect(deps.scheduleSave).toHaveBeenCalled();
     });
   });
 
