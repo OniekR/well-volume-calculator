@@ -1230,8 +1230,8 @@ describe('pressure.js', () => {
 
 #### Step 5: Draw Module Tests
 
-- [ ] Expand existing or create test file `src/js/__tests__/draw.unit.test.js`
-- [ ] Copy and paste code below into `src/js/__tests__/draw.unit.test.js`:
+- [x] Expand existing or create test file `src/js/__tests__/draw.unit.test.js`
+- [x] Copy and paste code below into `src/js/__tests__/draw.unit.test.js`:
 
 ```javascript
 /** @vitest-environment jsdom */
@@ -1510,9 +1510,9 @@ describe('draw.js', () => {
 
 ##### Step 5 Verification Checklist
 
-- [ ] Run `npm test -- --run` - all tests pass
-- [ ] Run `npm test -- --coverage` and verify `draw.js` reaches 65%+ line coverage
-- [ ] No build errors or console warnings
+- [x] Run `npm test -- --run` - all tests pass
+- [x] Run `npm test -- --coverage` and verify `draw.js` reaches 65%+ line coverage
+- [x] No build errors or console warnings
 
 #### Step 5 STOP & COMMIT
 
