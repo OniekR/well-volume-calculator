@@ -19,6 +19,7 @@ All notable changes to this project are documented in this file.
 - Small liner: added `Small liner` casing with two sizes (5\" 18# / 4 1/2\" 12.6#), top and shoe inputs, and a `Liner` default button that uses the Reservoir shoe - 50 m.
 - Canvas: assigned `small_liner` a higher z-index so it always renders above `Reservoir` on the schematic.
 - Presets: updated built-in presets — default `Plug` is now **unchecked**; `Small liner` defaults set (size 5\" 18#, top 3691, shoe 4992).- String Lift: added a new **String Lift** calculator that computes upward force (in metric tons) from pressure acting on the annular area between casing ID and drill pipe OD (F = P × A). Includes dropdowns for casing and drill pipe sizes with custom input options, a detailed result breakdown, unit tests (`__tests__/string-lift.unit.test.js`), and the implementation module `src/js/string-lift.js`.
+
 ### Changed
 
 - Refactor: extracted presets management into `src/js/presets.js` and removed duplicate implementations from `src/js/script.js`.
