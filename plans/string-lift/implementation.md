@@ -1147,12 +1147,12 @@ git commit -m "feat(lift): add string-lift module with core calculations"
 
 ### Step 3 Verification Checklist
 
-- [ ] No CSS syntax errors
-- [ ] String Lift view has proper card styling
-- [ ] Result card shows with red background
-- [ ] Breakdown section is properly styled
-- [ ] Layout looks correct on both desktop and mobile widths
-- [ ] Dark mode displays correctly (if app supports dark mode)
+- [x] No CSS syntax errors
+- [x] String Lift view has proper card styling
+- [x] Result card shows with red background
+- [x] Breakdown section is properly styled
+- [x] Layout looks correct on both desktop and mobile widths
+- [x] Dark mode displays correctly (if app supports dark mode)
 
 ### Step 3 STOP & COMMIT
 
@@ -1171,8 +1171,8 @@ git commit -m "style(lift): add CSS styles for string lift calculator UI"
 
 #### 4.1 Import and initialize string-lift module in script.js
 
-- [ ] Open [src/js/script.js](src/js/script.js)
-- [ ] Add the import statement with the other imports at the top of the file:
+- [x] Open [src/js/script.js](src/js/script.js)
+- [x] Add the import statement with the other imports at the top of the file:
 
 Find the existing imports (look for lines like `import { computePressureTest, ...`):
 
@@ -1184,8 +1184,8 @@ import { setupStringLiftUI } from './string-lift.js';
 
 #### 4.2 Call setupStringLiftUI in the init function
 
-- [ ] Find the `init()` function inside the IIFE module (search for `function init()`)
-- [ ] Add the call to `setupStringLiftUI()` after `setupPressureUI()` is called
+- [x] Find the `init()` function inside the IIFE module (search for `function init()`)
+- [x] Add the call to `setupStringLiftUI()` after `setupPressureUI()` is called
 
 Find where `setupPressureUI` is called:
 
