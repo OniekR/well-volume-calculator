@@ -25,6 +25,7 @@ All notable changes to this project are documented in this file.
 - Refactor: extracted presets management into `src/js/presets.js` and removed duplicate implementations from `src/js/script.js`.
 - CI: added an HTTP Puppeteer smoke test for the P-9 preset and a CI job to run it (`.github/workflows/ci.yml`).
 - UI: added an "🚧 Under Construction" badge to the **Pressure** navigation button to indicate the feature is still in development.
+- UI: added an "🚧 Under Construction" badge to the **String Lift** navigation button and added `role="button"` to the nav control so it matches Flow and Pressure.
 - Styling: improved dark-theme styles for Flow Velocity presets (`.flow-quick-btn`) to provide better contrast and hover states on dark surfaces.
 - Chore: ran Prettier/ESLint auto-fixes across the codebase to normalize formatting and resolve Prettier/ESLint warnings; removed an unused variable (`ucTopVal`) to clear a `no-unused-vars` warning.
 - Persistence: restored tubing and drillpipe count buttons explicitly, with backward-compatible fallback for older saved states.
