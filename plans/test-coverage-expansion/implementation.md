@@ -1778,9 +1778,9 @@ describe('render.js', () => {
 
 ##### Step 6 Verification Checklist
 
-- [ ] Run `npm test -- --run` - all tests pass
-- [ ] Run `npm test -- --coverage` and verify `render.js` reaches 70%+ line coverage
-- [ ] No build errors or console warnings
+- [x] Run `npm test -- --run` - all tests pass
+- [x] Run `npm test -- --coverage` and verify `render.js` reaches 70%+ line coverage
+- [x] No build errors or console warnings
 
 #### Step 6 STOP & COMMIT
 
