@@ -282,7 +282,7 @@ describe('storage.js', () => {
     });
 
     it('returns null for invalid JSON', () => {
-      localStorage.setItem('invalid_key', 'not valid json {{{');
+      localStorage.setItem('invalid_key', 'not valid json { { {');
       const result = loadState('invalid_key');
       expect(result).toBeNull();
     });
