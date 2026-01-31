@@ -340,8 +340,8 @@ describe('storage.js', () => {
 
 #### Step 2: Tubing Module Tests
 
-- [ ] Create new test file `src/js/__tests__/tubing.unit.test.js`
-- [ ] Copy and paste code below into `src/js/__tests__/tubing.unit.test.js`:
+- [x] Create new test file `src/js/__tests__/tubing.unit.test.js`
+- [x] Copy and paste code below into `src/js/__tests__/tubing.unit.test.js`:
 
 ```javascript
 /** @vitest-environment jsdom */
@@ -602,9 +602,9 @@ describe('tubing.js', () => {
 
 ##### Step 2 Verification Checklist
 
-- [ ] Run `npm test -- --run` - all tests pass
-- [ ] Run `npm test -- --coverage` and verify `tubing.js` reaches 70%+ line coverage
-- [ ] No build errors or console warnings
+- [x] Run `npm test -- --run` - all tests pass
+- [x] Run `npm test -- --coverage` and verify `tubing.js` reaches 70%+ line coverage
+- [x] No build errors or console warnings
 
 #### Step 2 STOP & COMMIT
 
