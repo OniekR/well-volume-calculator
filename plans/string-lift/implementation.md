@@ -451,7 +451,7 @@ function formatNumberWithSpaces(value, decimals = 1) {
  * @param {Object} params
  * @param {number} params.casingID - Casing inner diameter in inches
  * @param {number} params.pipeOD - Pipe outer diameter in inches
- * @returns {{areaM2: number, areaIn2: number}|null}
+ * @returns {({areaM2: number, areaIn2: number})|null}
  */
 export function computeAnnularArea({ casingID, pipeOD }) {
   const idInches = normalizeNumber(casingID);
@@ -477,7 +477,7 @@ export function computeAnnularArea({ casingID, pipeOD }) {
  * @param {Object} params
  * @param {number} params.annularAreaM2 - Annular area in m²
  * @param {number} params.pressureBar - Pressure in bar
- * @returns {{tons: number, kgf: number, newtons: number}|null}
+ * @returns {({tons: number, kgf: number, newtons: number})|null}
  */
 export function computeLiftForce({ annularAreaM2, pressureBar }) {
   const area = normalizeNumber(annularAreaM2);
