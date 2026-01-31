@@ -895,8 +895,8 @@ describe('presets.js', () => {
 
 #### Step 4: Pressure Module Tests
 
-- [ ] Expand existing or create test file `src/js/__tests__/pressure.unit.test.js`
-- [ ] Copy and paste code below into `src/js/__tests__/pressure.unit.test.js`:
+- [x] Expand existing or create test file `src/js/__tests__/pressure.unit.test.js`
+- [x] Copy and paste code below into `src/js/__tests__/pressure.unit.test.js`:
 
 ```javascript
 /** @vitest-environment jsdom */
@@ -1218,9 +1218,9 @@ describe('pressure.js', () => {
 
 ##### Step 4 Verification Checklist
 
-- [ ] Run `npm test -- --run` - all tests pass
-- [ ] Run `npm test -- --coverage` and verify `pressure.js` reaches 75%+ line coverage
-- [ ] No build errors or console warnings
+- [x] Run `npm test -- --run` - all tests pass
+- [x] Run `npm test -- --coverage` and verify `pressure.js` reaches 75%+ line coverage
+- [x] No build errors or console warnings
 
 #### Step 4 STOP & COMMIT
 
