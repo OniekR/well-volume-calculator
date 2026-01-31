@@ -315,9 +315,9 @@ describe('String Lift Calculator', () => {
       expect(
         document.getElementById('lift-results').classList.contains('hidden')
       ).toBe(false);
-      expect(document.getElementById('lift-result-value').textContent).toContain(
-        '50'
-      );
+      expect(
+        document.getElementById('lift-result-value').textContent
+      ).toContain('50');
     });
   });
 

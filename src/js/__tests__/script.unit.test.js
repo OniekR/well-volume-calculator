@@ -91,7 +91,14 @@ vi.mock('../string-lift.js', () => ({
 const baseInputs = {
   casingsInput: [
     { role: 'surface', depth: 200, use: true, prevDepth: 0, id: 10, od: 12 },
-    { role: 'upper_completion', depth: 400, use: true, prevDepth: 0, id: 4, od: 5 }
+    {
+      role: 'upper_completion',
+      depth: 400,
+      use: true,
+      prevDepth: 0,
+      id: 4,
+      od: 5
+    }
   ],
   plugEnabled: true,
   plugDepthVal: 120,

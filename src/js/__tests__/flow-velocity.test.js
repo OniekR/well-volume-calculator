@@ -253,12 +253,20 @@ describe('renderFlowVelocityResults', () => {
 
   it('shows empty state for inactive results', () => {
     renderFlowVelocityResults({ active: false });
-    expect(document.getElementById('flow-results').classList.contains('hidden')).toBe(true);
+    expect(
+      document.getElementById('flow-results').classList.contains('hidden')
+    ).toBe(true);
   });
 
   it('shows error for invalid flow rate', () => {
-    renderFlowVelocityResults({ active: true, valid: false, reason: 'invalid-flow-rate' });
-    expect(document.getElementById('flow-rate-error').classList.contains('hidden')).toBe(false);
+    renderFlowVelocityResults({
+      active: true,
+      valid: false,
+      reason: 'invalid-flow-rate'
+    });
+    expect(
+      document.getElementById('flow-rate-error').classList.contains('hidden')
+    ).toBe(false);
   });
 
   it('renders segment cards for valid results', () => {
@@ -269,15 +277,16 @@ describe('renderFlowVelocityResults', () => {
       flowRateValue: 1200,
       pipeMode: 'tubing',
       casingLabels: ['Surface'],
-      summary: { pipe: { avg: 1, min: 1, max: 1 }, annulus: { avg: 2, min: 2, max: 2 } },
+      summary: {
+        pipe: { avg: 1, min: 1, max: 1 },
+        annulus: { avg: 2, min: 2, max: 2 }
+      },
       segments: [
         {
           startDepth: 0,
           endDepth: 100,
           pipe: { label: 'Tubing', velocityMps: 1, velocityFps: 3 },
-          annuli: [
-            { casingLabel: 'Surface', velocityMps: 2, velocityFps: 6 }
-          ]
+          annuli: [{ casingLabel: 'Surface', velocityMps: 2, velocityFps: 6 }]
         }
       ]
     };

@@ -115,7 +115,8 @@ describe('setupPresetsUI', () => {
 
   it('disables delete for builtin presets', () => {
     const sel = document.getElementById('preset_list');
-    sel.innerHTML = '<option value="builtin" data-builtin="1" selected>Builtin</option>';
+    sel.innerHTML =
+      '<option value="builtin" data-builtin="1" selected>Builtin</option>';
     setupPresetsUI();
     document.getElementById('delete_preset_btn').click();
     expect(window.alert).toHaveBeenCalled();
@@ -132,7 +133,9 @@ describe('setupPresetsUI', () => {
 
   it('refreshes presets on storage event', () => {
     setupPresetsUI();
-    window.dispatchEvent(new StorageEvent('storage', { key: 'well_presets_v1' }));
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'well_presets_v1' })
+    );
     expect(window.__KeinoPresets.populatePresetsUI).toHaveBeenCalled();
   });
 });
