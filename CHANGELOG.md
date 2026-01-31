@@ -18,14 +18,13 @@ All notable changes to this project are documented in this file.
 - Styling: nudged casing headings to better align with inline checkboxes and hide inline header controls (e.g., `Tie-back`, `Dummy hanger`) when sections are collapsed.
 - Small liner: added `Small liner` casing with two sizes (5\" 18# / 4 1/2\" 12.6#), top and shoe inputs, and a `Liner` default button that uses the Reservoir shoe - 50 m.
 - Canvas: assigned `small_liner` a higher z-index so it always renders above `Reservoir` on the schematic.
-- Presets: updated built-in presets — default `Plug` is now **unchecked**; `Small liner` defaults set (size 5\" 18#, top 3691, shoe 4992).
-
+- Presets: updated built-in presets — default `Plug` is now **unchecked**; `Small liner` defaults set (size 5\" 18#, top 3691, shoe 4992).- String Lift: added a new **String Lift** calculator that computes upward force (in metric tons) from pressure acting on the annular area between casing ID and drill pipe OD (F = P × A). Includes dropdowns for casing and drill pipe sizes with custom input options, a detailed result breakdown, unit tests (`__tests__/string-lift.unit.test.js`), and the implementation module `src/js/string-lift.js`.
 ### Changed
 
 - Refactor: extracted presets management into `src/js/presets.js` and removed duplicate implementations from `src/js/script.js`.
 - CI: added an HTTP Puppeteer smoke test for the P-9 preset and a CI job to run it (`.github/workflows/ci.yml`).
 - UI: added an "🚧 Under Construction" badge to the **Pressure** navigation button to indicate the feature is still in development.
-- UI: added an "🚧 Under Construction" badge to the **String Lift** navigation button and added `role="button"` to the nav control so it matches Flow and Pressure.
+- UI: moved the **String Lift** navigation item from the 'Coming Soon' section into the main navigation (between Pressure and Settings), enabled the control (`role="button"`) and added an "🚧 Under Construction" badge while final polishing continues.
 - Styling: improved dark-theme styles for Flow Velocity presets (`.flow-quick-btn`) to provide better contrast and hover states on dark surfaces.
 - Chore: ran Prettier/ESLint auto-fixes across the codebase to normalize formatting and resolve Prettier/ESLint warnings; removed an unused variable (`ucTopVal`) to clear a `no-unused-vars` warning.
 - Persistence: restored tubing and drillpipe count buttons explicitly, with backward-compatible fallback for older saved states.
