@@ -58,10 +58,7 @@ export function setupCasingToggles(deps) {
         const modeToggle = el('uc_mode_toggle');
         const isEnabled = checkbox.checked;
 
-        // Disable/enable mode toggle
-        if (modeToggle) {
-          modeToggle.disabled = !isEnabled;
-        }
+        // Mode toggle remains enabled so user can set preference even when section is disabled
 
         // Disable/enable tubing section inputs
         if (tubingSection) {
@@ -91,6 +88,41 @@ export function setupCasingToggles(deps) {
               ctrl.classList.add('readonly-input');
             }
           });
+        }
+
+        if (isEnabled && modeToggle) {
+          const isDP = modeToggle.checked;
+          if (isDP) {
+            tubingSection?.classList.add('hidden');
+            drillpipeSection?.classList.remove('hidden');
+            qs(
+              '#uc_drillpipe_section input, #uc_drillpipe_section select'
+            ).forEach((input) => {
+              input.disabled = false;
+              input.classList.remove('readonly-input');
+            });
+            qs('#uc_tubing_section input, #uc_tubing_section select').forEach(
+              (input) => {
+                input.disabled = true;
+                input.classList.add('readonly-input');
+              }
+            );
+          } else {
+            drillpipeSection?.classList.add('hidden');
+            tubingSection?.classList.remove('hidden');
+            qs('#uc_tubing_section input, #uc_tubing_section select').forEach(
+              (input) => {
+                input.disabled = false;
+                input.classList.remove('readonly-input');
+              }
+            );
+            qs(
+              '#uc_drillpipe_section input, #uc_drillpipe_section select'
+            ).forEach((input) => {
+              input.disabled = true;
+              input.classList.add('readonly-input');
+            });
+          }
         }
       }
 
@@ -194,25 +226,6 @@ export function setupButtons(deps) {
       }
       const tb = _el('depth_tb');
       if (tb) tb.value = input.value;
-      scheduleSave();
-      calculateVolume();
-    })
-  );
-
-  qs('.liner-default-btn').forEach((btn) =>
-    btn.addEventListener('click', () => {
-      const target = _el('depth_7_top');
-      if (!target) return;
-      const inter = _el('depth_9')?.value;
-      const well = _el('wellhead_depth')?.value;
-      if (inter !== undefined && inter !== '') {
-        const val = Number(inter);
-        if (!isNaN(val)) target.value = String(val - 50);
-      } else if (well !== undefined && well !== '') {
-        target.value = well;
-      }
-      const tb = _el('depth_tb');
-      if (tb) tb.value = target.value;
       scheduleSave();
       calculateVolume();
     })
@@ -1414,6 +1427,9 @@ function setupDrillPipeMode(deps) {
     // Toggle between tubing and drill pipe mode
     modeToggle.addEventListener('change', () => {
       const isDP = modeToggle.checked;
+      const ucCheckbox = el('use_upper_completion');
+      const isSectionEnabled = ucCheckbox?.checked ?? true;
+
       // Update heading text
       updateCompletionHeading(isDP);
       // Keep the slider visually green when in tubing mode (unchecked)
@@ -1457,13 +1473,29 @@ function setupDrillPipeMode(deps) {
           );
           tubingControls.forEach((ctrl) => {
             try {
-              ctrl.disabled = false;
-              ctrl.classList.remove('readonly-input');
+              ctrl.disabled = !isSectionEnabled;
+              if (isSectionEnabled) {
+                ctrl.classList.remove('readonly-input');
+              } else {
+                ctrl.classList.add('readonly-input');
+              }
             } catch (e) {
               /* ignore */
             }
           });
         }
+      }
+      if (!isSectionEnabled) {
+        [tubingSection, drillpipeSection].forEach((section) => {
+          if (!section) return;
+          const controls = section.querySelectorAll(
+            'input, select, textarea, button'
+          );
+          controls.forEach((ctrl) => {
+            ctrl.disabled = true;
+            ctrl.classList.add('readonly-input');
+          });
+        });
       }
       calculateVolume();
       if (scheduleSave) scheduleSave();
