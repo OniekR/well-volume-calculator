@@ -148,8 +148,11 @@ describe('ui.js', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <input id="wellhead_depth" value="100" />
+        <input id="depth_9" value="200" />
         <input id="depth_7_top" value="" />
+        <input id="depth_tb" value="" />
         <button class="wellhead-btn" data-target="depth_7_top">Wellhead</button>
+        <button class="liner-default-btn">Liner</button>
       `;
     });
 
@@ -169,6 +172,19 @@ describe('ui.js', () => {
       setupButtons(deps);
       document.querySelector('.wellhead-btn').click();
       expect(document.getElementById('depth_7_top').value).toBe('100');
+      expect(deps.calculateVolume).toHaveBeenCalled();
+      expect(deps.scheduleSave).toHaveBeenCalled();
+    });
+
+    it('sets production top from intermediate shoe minus 50 on liner button click', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+      setupButtons(deps);
+      document.querySelector('.liner-default-btn').click();
+      expect(document.getElementById('depth_7_top').value).toBe('150');
+      expect(document.getElementById('depth_tb').value).toBe('150');
       expect(deps.calculateVolume).toHaveBeenCalled();
       expect(deps.scheduleSave).toHaveBeenCalled();
     });
@@ -324,6 +340,31 @@ describe('ui.js', () => {
       expect(deps.scheduleSave).toHaveBeenCalled();
     });
 
+    it('does not apply dummy hanger depth when dummy is unchecked', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+      setupTiebackBehavior(deps);
+
+      const prodLiner = document.getElementById('production_is_liner');
+      const tb = document.getElementById('depth_tb');
+      const dummy = document.getElementById('dummy_hanger');
+      const prodTop = document.getElementById('depth_7_top');
+
+      prodTop.value = '1550';
+      tb.value = '437';
+      tb.dataset.userEdited = 'true';
+      dummy.checked = false;
+
+      prodLiner.checked = true;
+      prodLiner.dispatchEvent(new Event('change'));
+
+      expect(tb.value).toBe('1550');
+      expect(tb.readOnly).toBe(true);
+      expect(tb.classList.contains('readonly-input')).toBe(true);
+    });
+
     it('hides tieback when production liner is unchecked', () => {
       const deps = {
         calculateVolume: vi.fn(),
@@ -350,6 +391,65 @@ describe('ui.js', () => {
       const tb = document.getElementById('depth_tb');
       expect(tb.value).toBe('175');
       expect(tb.classList.contains('readonly-input')).toBe(false);
+    });
+
+    it('keeps liner behavior when tie-back is unchecked from liner state', () => {
+      document.getElementById('production_is_liner').checked = true;
+      document.getElementById('depth_7_top').value = '1550';
+
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+
+      setupTiebackBehavior(deps);
+
+      const prodLiner = document.getElementById('production_is_liner');
+      const casingBtn = document.getElementById('production_casing_btn');
+      const linerBtn = document.querySelector('.liner-default-btn');
+      const prodTop = document.getElementById('depth_7_top');
+      const tieBottom = document.getElementById('depth_tb');
+
+      prodLiner.checked = false;
+      prodLiner.dispatchEvent(new Event('change'));
+
+      expect(casingBtn.classList.contains('active')).toBe(false);
+      expect(linerBtn.classList.contains('active')).toBe(true);
+      expect(prodTop.value).toBe('1550');
+      expect(tieBottom.value).toBe('1550');
+    });
+
+    it('resets dummy hanger when tie-back is toggled off and back on', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+      setupTiebackBehavior(deps);
+
+      const prodLiner = document.getElementById('production_is_liner');
+      const dummy = document.getElementById('dummy_hanger');
+      const prodTop = document.getElementById('depth_7_top');
+      const tieBottom = document.getElementById('depth_tb');
+
+      prodTop.value = '1550';
+      prodLiner.checked = true;
+      prodLiner.dispatchEvent(new Event('change'));
+
+      dummy.checked = true;
+      dummy.dispatchEvent(new Event('change'));
+      expect(dummy.checked).toBe(true);
+
+      prodLiner.checked = false;
+      prodLiner.dispatchEvent(new Event('change'));
+      expect(dummy.checked).toBe(false);
+
+      prodLiner.checked = true;
+      prodLiner.dispatchEvent(new Event('change'));
+
+      expect(dummy.checked).toBe(false);
+      expect(tieBottom.value).toBe('1550');
+      expect(tieBottom.readOnly).toBe(true);
+      expect(tieBottom.classList.contains('readonly-input')).toBe(true);
     });
   });
 

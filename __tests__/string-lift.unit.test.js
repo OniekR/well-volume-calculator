@@ -19,7 +19,8 @@ describe('String Lift Calculator', () => {
       // Check for common sizes
       const labels = CASING_OPTIONS.map((opt) => opt.label);
       expect(labels).toContain('18 5/8"');
-      expect(labels).toContain('13 3/8"');
+      expect(labels).toContain('13 3/8" (12.415" ID)');
+      expect(labels).toContain('13 3/8" (12.347" ID)');
       expect(labels).toContain('9 5/8" (8.535" ID)');
       expect(labels).toContain('7" (6.276" ID)');
     });

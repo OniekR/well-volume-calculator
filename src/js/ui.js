@@ -262,6 +262,31 @@ export function setupButtons(deps) {
       calculateVolume();
     })
   );
+
+  qs('.liner-default-btn').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const target = _el('depth_7_top');
+      if (!target) return;
+
+      const interVal = _el('depth_9')?.value;
+      const wellVal = _el('wellhead_depth')?.value;
+
+      if (interVal !== undefined && interVal !== '') {
+        const val = Number(interVal);
+        if (!isNaN(val)) {
+          target.value = String(val - 50);
+        }
+      } else if (wellVal !== undefined && wellVal !== '') {
+        target.value = wellVal;
+      }
+
+      const tb = _el('depth_tb');
+      if (tb) tb.value = target.value;
+
+      scheduleSave();
+      calculateVolume();
+    })
+  );
 }
 
 export function setupProductionToggleButtons() {
@@ -981,12 +1006,21 @@ export function setupTiebackBehavior(deps) {
       tiebackCasing.setAttribute('aria-hidden', 'false');
       useTie.checked = true;
       const tb = el('depth_tb');
+      const dummy = el('dummy_hanger');
       if (tb) {
-        tb.removeAttribute('readonly');
-        tb.classList.remove('readonly-input');
-        const wellVal = Number(el('wellhead_depth')?.value || 0);
-        if (!tb.dataset.userEdited)
-          tb.value = Number((wellVal + 75).toFixed(1));
+        if (dummy && dummy.checked) {
+          tb.removeAttribute('readonly');
+          tb.classList.remove('readonly-input');
+          const wellVal = Number(el('wellhead_depth')?.value || 0);
+          if (!tb.dataset.userEdited)
+            tb.value = Number((wellVal + 75).toFixed(1));
+        } else {
+          tb.setAttribute('readonly', 'true');
+          tb.readOnly = true;
+          tb.classList.add('readonly-input');
+          const prodTopEl = el('depth_7_top');
+          if (prodTopEl) tb.value = prodTopEl.value;
+        }
       }
       useTie.dispatchEvent(new Event('change', { bubbles: true }));
       if (casingBtn) {
@@ -1001,22 +1035,34 @@ export function setupTiebackBehavior(deps) {
       if (linerBtnEl) {
         linerBtnEl.click();
         const tb2 = el('depth_tb');
-        if (tb2 && !tb2.dataset.userEdited) {
-          tb2.removeAttribute('readonly');
-          tb2.classList.remove('readonly-input');
-          const wellVal2 = Number(el('wellhead_depth')?.value || 0);
-          tb2.value = Number((wellVal2 + 75).toFixed(1));
+        const dummy2 = el('dummy_hanger');
+        if (tb2 && !(dummy2 && dummy2.checked)) {
+          tb2.setAttribute('readonly', 'true');
+          tb2.readOnly = true;
+          tb2.classList.add('readonly-input');
+          const prodTopEl = el('depth_7_top');
+          if (prodTopEl) tb2.value = prodTopEl.value;
         }
       }
     } else {
       tiebackCasing.classList.add('hidden');
       tiebackCasing.setAttribute('aria-hidden', 'true');
       useTie.checked = false;
+      const dummyEl = el('dummy_hanger');
+      if (dummyEl) dummyEl.checked = false;
+      const linerBtn = qs('.liner-default-btn')[0];
+      const keepLinerActive = !!(
+        linerBtn && linerBtn.classList.contains('active')
+      );
+      const prodTopEl = el('depth_7_top');
+      const wellEl = el('wellhead_depth');
+      if (!keepLinerActive && prodTopEl && wellEl && wellEl.value !== '') {
+        prodTopEl.value = wellEl.value;
+      }
       const tb = el('depth_tb');
       if (tb) {
         tb.setAttribute('readonly', 'true');
         tb.classList.add('readonly-input');
-        const prodTopEl = el('depth_7_top');
         if (prodTopEl) tb.value = prodTopEl.value;
       }
       if (casingBtn) {
@@ -1028,12 +1074,19 @@ export function setupTiebackBehavior(deps) {
         prodInfoBtn.setAttribute('aria-hidden', 'false');
       }
       if (casingBtn) {
-        const linerBtn = qs('.liner-default-btn')[0];
         casingBtn.classList.add('active');
         casingBtn.setAttribute('aria-pressed', 'true');
         if (linerBtn) {
           linerBtn.classList.remove('active');
           linerBtn.setAttribute('aria-pressed', 'false');
+        }
+      }
+      if (keepLinerActive && linerBtn) {
+        linerBtn.classList.add('active');
+        linerBtn.setAttribute('aria-pressed', 'true');
+        if (casingBtn) {
+          casingBtn.classList.remove('active');
+          casingBtn.setAttribute('aria-pressed', 'false');
         }
       }
     }
@@ -1062,23 +1115,33 @@ export function setupTiebackBehavior(deps) {
       well.addEventListener('input', () => {
         setTimeout(() => {
           if (useTie && useTie.checked) {
-            tieBottom.removeAttribute('readonly');
-            tieBottom.classList.remove('readonly-input');
-            if (!userEdited) {
-              tieBottom.value = Number(
-                (Number(well.value || 0) + 75).toFixed(1)
-              );
+            const dummyEl = el('dummy_hanger');
+            if (dummyEl && dummyEl.checked) {
+              tieBottom.removeAttribute('readonly');
+              tieBottom.classList.remove('readonly-input');
+              if (!userEdited) {
+                tieBottom.value = Number(
+                  (Number(well.value || 0) + 75).toFixed(1)
+                );
+                scheduleSave();
+                calculateVolume();
+                setTimeout(() => {
+                  if (useTie && useTie.checked && !userEdited) {
+                    tieBottom.value = Number(
+                      (Number(well.value || 0) + 75).toFixed(1)
+                    );
+                    scheduleSave();
+                    calculateVolume();
+                  }
+                }, 150);
+              }
+            } else {
+              tieBottom.setAttribute('readonly', 'true');
+              tieBottom.readOnly = true;
+              tieBottom.classList.add('readonly-input');
+              tieBottom.value = prodTop.value === '' ? '' : prodTop.value;
               scheduleSave();
               calculateVolume();
-              setTimeout(() => {
-                if (useTie && useTie.checked && !userEdited) {
-                  tieBottom.value = Number(
-                    (Number(well.value || 0) + 75).toFixed(1)
-                  );
-                  scheduleSave();
-                  calculateVolume();
-                }
-              }, 150);
             }
           } else {
             sync();
@@ -1170,11 +1233,18 @@ export function setupTiebackBehavior(deps) {
 
     useTie.addEventListener('change', () => {
       if (useTie.checked) {
-        tieBottom.removeAttribute('readonly');
-        tieBottom.classList.remove('readonly-input');
-        const wellVal = well && well.value !== '' ? Number(well.value) : 0;
-        if (!userEdited) {
-          tieBottom.value = Number((wellVal + 75).toFixed(1));
+        if (dummy && dummy.checked) {
+          tieBottom.removeAttribute('readonly');
+          tieBottom.classList.remove('readonly-input');
+          const wellVal = well && well.value !== '' ? Number(well.value) : 0;
+          if (!userEdited) {
+            tieBottom.value = Number((wellVal + 75).toFixed(1));
+          }
+        } else {
+          tieBottom.setAttribute('readonly', 'true');
+          tieBottom.readOnly = true;
+          tieBottom.classList.add('readonly-input');
+          tieBottom.value = prodTop.value === '' ? '' : prodTop.value;
         }
       } else {
         if (!(dummy && dummy.checked)) {
@@ -1204,11 +1274,10 @@ export function setupTiebackBehavior(deps) {
           tb.value = Number((wellVal + 75).toFixed(1));
       }
     } else if (useTie && useTie.checked) {
-      tieBottom.removeAttribute('readonly');
-      tieBottom.classList.remove('readonly-input');
-      const wellVal = well && well.value !== '' ? Number(well.value) : 0;
-      if (!tieBottom.dataset.userEdited)
-        tieBottom.value = Number((wellVal + 75).toFixed(1));
+      tieBottom.setAttribute('readonly', 'true');
+      tieBottom.readOnly = true;
+      tieBottom.classList.add('readonly-input');
+      tieBottom.value = prodTop.value === '' ? '' : prodTop.value;
     } else {
       tieBottom.setAttribute('readonly', 'true');
       tieBottom.classList.add('readonly-input');

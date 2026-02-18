@@ -39,4 +39,22 @@ describe('gatherInputs', () => {
     const prod = out.casingsInput.find((c) => c.role === 'production');
     expect(prod.id).toBe(8.921);
   });
+
+  it('resolves shared production/tieback IDs with explicit OD mappings', () => {
+    document.body.innerHTML = `
+      <select id="production_size"><option value="9.66">9.66</option></select>
+      <input id="production_size_id" value="9.66" />
+      <select id="tieback_size"><option value="8.681">8.681</option></select>
+      <input id="tieback_size_id" value="8.681" />
+    `;
+
+    const out = gatherInputs();
+    const prod = out.casingsInput.find((c) => c.role === 'production');
+    const tie = out.casingsInput.find((c) => c.role === 'tieback');
+
+    expect(prod.id).toBe(9.66);
+    expect(prod.od).toBe(11.5);
+    expect(tie.id).toBe(8.681);
+    expect(tie.od).toBe(9.625);
+  });
 });
