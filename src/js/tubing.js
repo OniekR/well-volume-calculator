@@ -3,22 +3,9 @@
  * Handles tapered tubing selection, calculation, and UI management
  */
 
-export const TUBING_CATALOG = [
-  {
-    name: '4 1/2" 12.6# L-80',
-    id: 3.958,
-    od: 4.5,
-    lPerM: 9.728,
-    eod: 0
-  },
-  {
-    name: '5 1/2" 17#',
-    id: 4.892,
-    od: 5.5,
-    lPerM: 11.803,
-    eod: 0
-  }
-];
+import { DEFAULT_TUBING_CATALOG, getTubingCatalog } from './definitions.js';
+
+export const TUBING_CATALOG = DEFAULT_TUBING_CATALOG;
 
 /**
  * Update the calculated top depth displays based on cumulative lengths
@@ -51,6 +38,7 @@ export function updateTubingDepthDisplays() {
  * @returns {Object} - { count: number, tubings: [{size, length, top, shoe}, ...] }
  */
 export function gatherTubingInput() {
+  const catalog = getTubingCatalog();
   const ucCheckbox = document.getElementById('use_upper_completion');
 
   // If upper completion checkbox is unchecked, return empty data
@@ -72,13 +60,13 @@ export function gatherTubingInput() {
     if (!sizeSelect || !lengthInput) continue;
 
     const selectedIndex = parseInt(sizeSelect.value, 10);
-    const sizeName = TUBING_CATALOG[selectedIndex]?.name || '';
+    const sizeName = catalog[selectedIndex]?.name || '';
     const length = parseFloat(lengthInput.value) || 0;
     const top = cumulativeDepth;
     const shoe = top + length;
-    const lPerM = TUBING_CATALOG[selectedIndex]?.lPerM;
-    const od = TUBING_CATALOG[selectedIndex]?.od;
-    const id = TUBING_CATALOG[selectedIndex]?.id;
+    const lPerM = catalog[selectedIndex]?.lPerM;
+    const od = catalog[selectedIndex]?.od;
+    const id = catalog[selectedIndex]?.id;
 
     tubings.push({
       size: selectedIndex,
@@ -103,6 +91,7 @@ export function gatherTubingInput() {
  * Shows size selector and length input; top/shoe are calculated automatically
  */
 export function renderTubingInputs(count) {
+  const catalog = getTubingCatalog();
   const container = document.getElementById('tubing_inputs_container');
   if (!container) return;
 
@@ -139,8 +128,8 @@ export function renderTubingInputs(count) {
     sizeSelect.className = 'tubing-size-select';
     sizeSelect.setAttribute('aria-label', `Tubing size ${i + 1}`);
 
-    for (let idx = 0; idx < TUBING_CATALOG.length; idx++) {
-      const tubing = TUBING_CATALOG[idx];
+    for (let idx = 0; idx < catalog.length; idx++) {
+      const tubing = catalog[idx];
       const option = document.createElement('option');
       option.value = idx;
       option.textContent = tubing.name;

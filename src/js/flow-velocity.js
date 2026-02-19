@@ -1,6 +1,6 @@
 import { el } from './dom.js';
 import { MINIMUM_HOLE_CLEANING_VELOCITY } from './constants.js';
-import { DRILLPIPE_CATALOG } from './drillpipe.js';
+import { getDrillpipeCatalog } from './definitions.js';
 
 export const FLOW_UNIT_LABELS = {
   lpm: 'L/min',
@@ -70,18 +70,19 @@ export function diameterInchesToAreaM2(diameterInches) {
 }
 
 function buildDrillPipeSegments(drillpipeInput) {
+  const catalog = getDrillpipeCatalog();
   const pipes = drillpipeInput?.pipes || [];
   let currentDepth = 0;
   return pipes
     .map((pipe) => {
       const length = normalizeNumber(pipe.length) || 0;
-      const catalog = DRILLPIPE_CATALOG[pipe.size] || {};
+      const catalogEntry = catalog[pipe.size] || {};
       const segment = {
         top: currentDepth,
         bottom: currentDepth + length,
-        id: catalog.id,
-        od: catalog.od,
-        label: catalog.name || pipe.sizeName || 'Drill pipe'
+        id: catalogEntry.id,
+        od: catalogEntry.od,
+        label: catalogEntry.name || pipe.sizeName || 'Drill pipe'
       };
       currentDepth += length;
       return segment;

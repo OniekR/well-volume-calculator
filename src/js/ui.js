@@ -1,8 +1,27 @@
 import { el, qs } from './dom.js';
 import { getUpperCompletionTJ } from './validation.js';
 import { DRIFT, OD, TJ } from './constants.js';
-import { TUBING_CATALOG } from './tubing.js';
+import { getTubingCatalog } from './definitions.js';
 import { setupFlowVelocityUI } from './flow-velocity.js';
+import {
+  addManualCasingDefinition,
+  addManualTubingDefinition,
+  deleteCasingDefinition,
+  deleteDrillpipeEntry,
+  deleteTubingEntry,
+  getCasingDefinition,
+  getCasingDefinitions,
+  getCasingField,
+  getDrillpipeCatalog,
+  isCasingManual,
+  isDrillpipeManual,
+  isTubingManual,
+  registerCasingOptionLabels,
+  resetDefinitionsToDefaults,
+  setCasingDefinition,
+  setDrillpipeEntry,
+  setTubingEntry
+} from './definitions.js';
 
 export function setupEventDelegation(deps) {
   const { calculateVolume, scheduleSave } = deps;
@@ -453,13 +472,13 @@ export function setupSizeIdInputs(deps) {
 
         if (driftLabel && driftInput) {
           const idNum = Number(sel.value);
-          const driftMap =
-            DRIFT && DRIFT[selId.replace('_size', '')]
-              ? DRIFT[selId.replace('_size', '')]
-              : selId === 'conductor_size' && DRIFT.conductor
-              ? DRIFT.conductor
-              : {};
-          const driftVal = driftMap[idNum];
+          const sectionKey = selId.replace('_size', '');
+          const driftVal = getCasingField(
+            sectionKey,
+            idNum,
+            'drift',
+            DRIFT && DRIFT[sectionKey] ? DRIFT[sectionKey][idNum] : undefined
+          );
           driftLabel.textContent = 'Drift:';
           if (
             typeof driftVal !== 'undefined' &&
@@ -477,13 +496,13 @@ export function setupSizeIdInputs(deps) {
           const driftNote = container && container.querySelector('.drift-note');
 
           const idNum = Number(sel.value);
-          const driftMap =
-            DRIFT && DRIFT[selId.replace('_size', '')]
-              ? DRIFT[selId.replace('_size', '')]
-              : selId === 'conductor_size' && DRIFT.conductor
-              ? DRIFT.conductor
-              : {};
-          const driftVal = driftMap[idNum];
+          const sectionKey = selId.replace('_size', '');
+          const driftVal = getCasingField(
+            sectionKey,
+            idNum,
+            'drift',
+            DRIFT && DRIFT[sectionKey] ? DRIFT[sectionKey][idNum] : undefined
+          );
 
           if (driftLabel && driftInput) {
             driftLabel.textContent = 'Drift:';
@@ -655,7 +674,7 @@ export function checkUpperCompletionFit() {
         if (!sizeSelect || !lengthInput) return;
 
         const idx = parseInt(sizeSelect.value, 10);
-        const tubing = TUBING_CATALOG[idx];
+        const tubing = getTubingCatalog()[idx];
         if (!tubing) return;
 
         const length = Number(lengthInput.value) || 0;
@@ -664,9 +683,12 @@ export function checkUpperCompletionFit() {
         cumulativeDepth = ucShoe;
 
         const ucKey = tubing.id;
-        const ucOd =
-          (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
-          tubing.od;
+        const ucOd = getCasingField(
+          'upper_completion',
+          ucKey,
+          'od',
+          tubing.od
+        );
         const ucTj =
           (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
           undefined;
@@ -733,9 +755,13 @@ export function checkUpperCompletionFit() {
     if (!ucIdEl) return;
     const ucKey = ucIdEl.value;
     if (!ucKey) return removeUpperCompletionWarning();
-    const ucOd =
+    const ucOd = getCasingField(
+      'upper_completion',
+      ucKey,
+      'od',
       (OD && OD.upper_completion && OD.upper_completion[ucKey]) ||
-      (OD && OD.upper_completion && OD.upper_completion[Number(ucKey)]);
+        (OD && OD.upper_completion && OD.upper_completion[Number(ucKey)])
+    );
     const ucTj =
       (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
       (TJ && TJ.upper_completion && TJ.upper_completion[Number(ucKey)]);
@@ -1033,7 +1059,9 @@ export function setupTiebackBehavior(deps) {
       }
       const linerBtnEl = qs('.liner-default-btn')[0];
       if (linerBtnEl) {
-        linerBtnEl.click();
+        const prodTopEl = el('depth_7_top');
+        const shouldApplyDefault = !prodTopEl || prodTopEl.value.trim() === '';
+        if (shouldApplyDefault) linerBtnEl.click();
         const tb2 = el('depth_tb');
         const dummy2 = el('dummy_hanger');
         if (tb2 && !(dummy2 && dummy2.checked)) {
@@ -1723,6 +1751,386 @@ function setupTubingMode(deps) {
   }
 }
 
+function setupDefinitionsSettings(deps) {
+  const { calculateVolume, scheduleSave } = deps;
+  const typeCasingRadio = el('defs_type_casing');
+  const typeDrillpipeRadio = el('defs_type_drillpipe');
+  const sectionContainer = el('defs_section_container');
+  const sectionSelect = el('defs_section_select');
+  const itemSelect = el('defs_item_select');
+  const nameInput = el('defs_name_input');
+  const idInput = el('defs_id_input');
+  const odInput = el('defs_od_input');
+  const driftInput = el('defs_drift_input');
+  const tjInput = el('defs_tj_input');
+  const lPerMInput = el('defs_lperm_input');
+  const eodInput = el('defs_eod_input');
+  const cedInput = el('defs_ced_input');
+  const saveBtn = el('defs_save_btn');
+  const addBtn = el('defs_add_btn');
+  const deleteBtn = el('defs_delete_btn');
+  const resetBtn = el('defs_reset_btn');
+  const msg = el('defs_msg');
+
+  if (
+    !typeCasingRadio ||
+    !typeDrillpipeRadio ||
+    !sectionSelect ||
+    !itemSelect ||
+    !nameInput ||
+    !idInput ||
+    !odInput ||
+    !saveBtn ||
+    !addBtn ||
+    !deleteBtn ||
+    !resetBtn
+  )
+    return;
+
+  const getSelectedType = () => {
+    return typeCasingRadio.checked ? 'casing' : 'drillpipe';
+  };
+
+  const casingSelectMap = [
+    { section: 'conductor', selectId: 'conductor_size' },
+    { section: 'surface', selectId: 'surface_size' },
+    { section: 'intermediate', selectId: 'intermediate_size' },
+    { section: 'production', selectId: 'production_size' },
+    { section: 'tieback', selectId: 'tieback_size' },
+    { section: 'reservoir', selectId: 'reservoir_size' },
+    { section: 'small_liner', selectId: 'small_liner_size' },
+    { section: 'open_hole', selectId: 'open_hole_size' },
+    { section: 'upper_completion', selectId: 'upper_completion_size' }
+  ];
+
+  const setMessage = (text) => {
+    if (!msg) return;
+    msg.textContent = text || '';
+  };
+
+  const parseNumber = (input) => {
+    const value = Number(input?.value);
+    return Number.isFinite(value) ? value : undefined;
+  };
+
+  const registerCurrentLabels = () => {
+    casingSelectMap.forEach(({ section, selectId }) => {
+      const select = el(selectId);
+      if (!select) return;
+      const options = Array.from(select.options)
+        .filter((opt) => opt.value !== 'none' && opt.value !== 'custom')
+        .map((opt) => ({
+          id: Number(opt.value),
+          label: opt.textContent?.trim() || String(opt.value)
+        }));
+      registerCasingOptionLabels(section, options);
+    });
+  };
+
+  const populateGeneralSelects = () => {
+    casingSelectMap.forEach(({ section, selectId }) => {
+      const select = el(selectId);
+      if (!select) return;
+
+      const current = select.value;
+      const definitions = getCasingDefinitions(section);
+      if (!definitions.length) return;
+
+      const sorted = [...definitions].sort((a, b) => Number(b.id) - Number(a.id));
+      select.innerHTML = '';
+      sorted.forEach((entry) => {
+        const option = document.createElement('option');
+        option.value = String(entry.id);
+        option.textContent = entry.label || String(entry.id);
+        select.appendChild(option);
+      });
+
+      const hasCurrent = sorted.some((entry) => String(entry.id) === String(current));
+      if (hasCurrent) select.value = current;
+      else select.value = String(sorted[0]?.id ?? '');
+
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const liftDpSelect = el('lift_drillpipe_select');
+    if (liftDpSelect) {
+      const current = liftDpSelect.value;
+      const catalog = getDrillpipeCatalog();
+      liftDpSelect.innerHTML = '';
+      [...catalog]
+        .sort((a, b) => b.od - a.od)
+        .forEach((dp) => {
+          const option = document.createElement('option');
+          option.value = String(dp.od);
+          option.textContent = dp.name;
+          liftDpSelect.appendChild(option);
+        });
+      const customOption = document.createElement('option');
+      customOption.value = 'custom';
+      customOption.textContent = 'Custom...';
+      liftDpSelect.appendChild(customOption);
+
+      liftDpSelect.value =
+        Array.from(liftDpSelect.options).find((opt) => opt.value === current)
+          ?.value || liftDpSelect.options[0]?.value || 'custom';
+      liftDpSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    const tubingBtn = document.querySelector('.tubing-count-btn.active');
+    if (tubingBtn) tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
+
+    const dpBtn = document.querySelector('.drillpipe-count-btn.active');
+    if (dpBtn) dpBtn.dispatchEvent(new Event('click', { bubbles: true }));
+  };
+
+  const populateItems = () => {
+    const type = getSelectedType();
+    const section = sectionSelect.value;
+    itemSelect.innerHTML = '';
+
+    if (type === 'drillpipe') {
+      getDrillpipeCatalog().forEach((entry, idx) => {
+        const option = document.createElement('option');
+        option.value = String(idx);
+        option.textContent = entry.name;
+        itemSelect.appendChild(option);
+      });
+      return;
+    }
+
+    if (section === 'completion_tubing') {
+      getTubingCatalog().forEach((entry, idx) => {
+        const option = document.createElement('option');
+        option.value = String(idx);
+        option.textContent = entry.name;
+        itemSelect.appendChild(option);
+      });
+      return;
+    }
+
+    getCasingDefinitions(section).forEach((entry) => {
+      const option = document.createElement('option');
+      option.value = String(entry.id);
+      option.textContent = entry.label || String(entry.id);
+      itemSelect.appendChild(option);
+    });
+  };
+
+  const setFieldVisibility = () => {
+    const type = getSelectedType();
+    const section = sectionSelect.value;
+    const isDrillPipe = type === 'drillpipe';
+    const isTubing = type === 'casing' && section === 'completion_tubing';
+    const isCasing = type === 'casing' && !isTubing;
+
+    const driftField = el('defs_drift_field');
+    const tjField = el('defs_tj_field');
+    const lPerMField = el('defs_lperm_field');
+    const eodField = el('defs_eod_field');
+    const cedField = el('defs_ced_field');
+
+    if (sectionContainer) sectionContainer.classList.toggle('hidden', isDrillPipe);
+    if (driftField) driftField.classList.toggle('hidden', !isCasing || section === 'open_hole');
+    if (tjField) tjField.classList.toggle('hidden', !isCasing);
+    if (lPerMField) lPerMField.classList.toggle('hidden', !(isDrillPipe || isTubing));
+    if (eodField) eodField.classList.toggle('hidden', !(isDrillPipe || isTubing));
+    if (cedField) cedField.classList.toggle('hidden', !isDrillPipe);
+  };
+
+  const loadSelected = () => {
+    setFieldVisibility();
+    const type = getSelectedType();
+    const section = sectionSelect.value;
+
+    let isManual = false;
+
+    if (type === 'drillpipe') {
+      const idx = Number(itemSelect.value);
+      const item = getDrillpipeCatalog()[idx];
+      if (!item) return;
+      nameInput.value = item.name || '';
+      idInput.value = item.id ?? '';
+      odInput.value = item.od ?? '';
+      driftInput.value = '';
+      tjInput.value = '';
+      lPerMInput.value = item.lPerM ?? '';
+      eodInput.value = item.eod ?? '';
+      cedInput.value = item.ced ?? '';
+      isManual = isDrillpipeManual(idx);
+    } else if (section === 'completion_tubing') {
+      const idx = Number(itemSelect.value);
+      const item = getTubingCatalog()[idx];
+      if (!item) return;
+      nameInput.value = item.name || '';
+      idInput.value = item.id ?? '';
+      odInput.value = item.od ?? '';
+      driftInput.value = '';
+      tjInput.value = '';
+      lPerMInput.value = item.lPerM ?? '';
+      eodInput.value = item.eod ?? '';
+      cedInput.value = '';
+      isManual = isTubingManual(idx);
+    } else {
+      const item = getCasingDefinition(section, itemSelect.value);
+      if (!item) return;
+      nameInput.value = item.label || '';
+      idInput.value = item.id ?? '';
+      odInput.value = item.od ?? '';
+      driftInput.value = item.drift ?? '';
+      tjInput.value = item.tj ?? '';
+      lPerMInput.value = '';
+      eodInput.value = '';
+      cedInput.value = '';
+      isManual = isCasingManual(section, itemSelect.value);
+    }
+
+    deleteBtn.classList.toggle('hidden', !isManual);
+  };
+
+  const refreshEditor = () => {
+    populateItems();
+    loadSelected();
+  };
+
+  saveBtn.addEventListener('click', () => {
+    const type = getSelectedType();
+    const section = sectionSelect.value;
+
+    let ok = false;
+    if (type === 'drillpipe') {
+      ok = setDrillpipeEntry(Number(itemSelect.value), {
+        name: nameInput.value.trim(),
+        id: parseNumber(idInput),
+        od: parseNumber(odInput),
+        lPerM: parseNumber(lPerMInput),
+        eod: parseNumber(eodInput),
+        ced: parseNumber(cedInput)
+      });
+    } else if (section === 'completion_tubing') {
+      ok = setTubingEntry(Number(itemSelect.value), {
+        name: nameInput.value.trim(),
+        id: parseNumber(idInput),
+        od: parseNumber(odInput),
+        lPerM: parseNumber(lPerMInput),
+        eod: parseNumber(eodInput)
+      });
+    } else {
+      const idValue = parseNumber(idInput);
+      ok = setCasingDefinition(section, idValue, {
+        label: nameInput.value.trim(),
+        id: idValue,
+        od: parseNumber(odInput),
+        drift: parseNumber(driftInput),
+        tj: parseNumber(tjInput)
+      });
+    }
+
+    if (!ok) {
+      setMessage('Failed to save definition. Check numeric values.');
+      return;
+    }
+
+    setMessage('Definition saved.');
+    populateGeneralSelects();
+    refreshEditor();
+    calculateVolume();
+    scheduleSave();
+  });
+
+  addBtn.addEventListener('click', () => {
+    const section = sectionSelect.value;
+    const idValue = parseNumber(idInput);
+    const odValue = parseNumber(odInput);
+    const nameValue = nameInput.value.trim();
+
+    let ok = false;
+    if (getSelectedType() === 'drillpipe') {
+      setMessage('Manual add is available for casing/tubing sections.');
+      return;
+    }
+
+    if (section === 'completion_tubing') {
+      ok = addManualTubingDefinition({
+        name: nameValue,
+        id: idValue,
+        od: odValue,
+        lPerM: parseNumber(lPerMInput),
+        eod: parseNumber(eodInput)
+      });
+    } else {
+      ok = addManualCasingDefinition(section, {
+        label: nameValue || (idValue ? String(idValue) : ''),
+        id: idValue,
+        od: odValue,
+        drift: parseNumber(driftInput),
+        tj: parseNumber(tjInput)
+      });
+    }
+
+    if (!ok) {
+      setMessage('Failed to add manual entry. Check required fields.');
+      return;
+    }
+
+    setMessage('Manual definition added.');
+    populateGeneralSelects();
+    refreshEditor();
+    calculateVolume();
+    scheduleSave();
+  });
+
+  deleteBtn.addEventListener('click', () => {
+    const type = getSelectedType();
+    const section = sectionSelect.value;
+    
+    if (!confirm('Delete this manual entry? This cannot be undone.')) return;
+
+    let ok = false;
+    if (type === 'drillpipe') {
+      ok = deleteDrillpipeEntry(Number(itemSelect.value));
+    } else if (section === 'completion_tubing') {
+      ok = deleteTubingEntry(Number(itemSelect.value));
+    } else {
+      ok = deleteCasingDefinition(section, itemSelect.value);
+    }
+
+    if (!ok) {
+      setMessage('Failed to delete entry. Only manual entries can be deleted.');
+      return;
+    }
+
+    setMessage('Entry deleted successfully.');
+    populateGeneralSelects();
+    refreshEditor();
+    calculateVolume();
+    scheduleSave();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (!confirm('Reset all edited/manual definitions back to defaults?')) return;
+    resetDefinitionsToDefaults();
+    setMessage('Definitions reset to defaults.');
+    populateGeneralSelects();
+    refreshEditor();
+    calculateVolume();
+    scheduleSave();
+  });
+
+  typeCasingRadio.addEventListener('change', refreshEditor);
+  typeDrillpipeRadio.addEventListener('change', refreshEditor);
+  sectionSelect.addEventListener('change', refreshEditor);
+  itemSelect.addEventListener('change', loadSelected);
+
+  document.addEventListener('keino:definitions-changed', () => {
+    populateGeneralSelects();
+    refreshEditor();
+  });
+
+  registerCurrentLabels();
+  populateGeneralSelects();
+  refreshEditor();
+}
+
 export function initUI(deps) {
   // deps: { calculateVolume, scheduleSave, captureStateObject, applyStateObject, initDraw }
   setupEventDelegation(deps);
@@ -1730,6 +2138,7 @@ export function initUI(deps) {
   setupButtons(deps);
   setupTooltips(deps);
   setupFlowVelocityUI(deps);
+  setupDefinitionsSettings(deps);
   setupSizeIdInputs(deps);
   initUpperCompletionChecks(deps);
   setupWellheadSync(deps);

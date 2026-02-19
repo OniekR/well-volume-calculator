@@ -1,10 +1,13 @@
 import { TJ } from './constants.js';
+import { getCasingField } from './definitions.js';
 
 /**
  * Returns the TJ value for upper completion given a size id
  */
 export function getUpperCompletionTJ(sizeId) {
   if (!sizeId) return undefined;
+  const custom = getCasingField('upper_completion', sizeId, 'tj', undefined);
+  if (typeof custom !== 'undefined') return custom;
   const m = TJ.upper_completion || {};
   return m[sizeId] !== undefined ? m[sizeId] : undefined;
 }

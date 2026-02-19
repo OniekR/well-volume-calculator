@@ -186,6 +186,28 @@
               <li class="sidebar-nav-item" role="listitem">
                 <button
                   class="sidebar-nav-button"
+                  data-section="definitions"
+                  aria-label="Navigate to Custom Casings section"
+                  role="button"
+                >
+                  <svg
+                    class="sidebar-icon"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"
+                    />
+                  </svg>
+                  <span class="sidebar-nav-text">Custom Casings</span>
+                </button>
+              </li>
+              <li class="sidebar-nav-item" role="listitem">
+                <button
+                  class="sidebar-nav-button"
                   data-section="settings"
                   aria-label="Navigate to Settings section"
                   role="button"
@@ -2045,6 +2067,135 @@
                 Outputs in metric tons. Diameters should be entered in inches;
                 pressure supports bar and psi.
               </p>
+            </div>
+          </section>
+
+          <section
+            id="view-definitions"
+            class="app-view"
+            data-view="definitions"
+            aria-label="Custom Casings"
+            hidden
+          >
+            <h2 style="margin: 0 0 20px 0">Custom Casings</h2>
+            <p class="view-description" style="margin: -10px 0 24px 0; color: var(--text-muted);">
+              Edit existing casing specifications or add custom entries. Changes are saved to presets.
+            </p>
+
+            <div class="definitions-editor">
+              <!-- Type Selection -->
+              <div class="definitions-type-selector">
+                <label class="radio-card">
+                  <input type="radio" name="defs_type" value="casing" id="defs_type_casing" checked />
+                  <span class="radio-card-content">
+                    <svg class="radio-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="9" y="2" width="6" height="20" rx="1" />
+                    </svg>
+                    <span class="radio-card-label">Casing</span>
+                  </span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="defs_type" value="drillpipe" id="defs_type_drillpipe" />
+                  <span class="radio-card-content">
+                    <svg class="radio-card-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="12" cy="12" r="8" />
+                    </svg>
+                    <span class="radio-card-label">Drill Pipe</span>
+                  </span>
+                </label>
+              </div>
+
+              <!-- Section Selection (visible for casing only) -->
+              <div class="definitions-section-selector" id="defs_section_container">
+                <label for="defs_section_select" class="definitions-label">Section</label>
+                <select id="defs_section_select" class="definitions-select">
+                  <option value="conductor">Conductor</option>
+                  <option value="surface">Surface</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="production">Production</option>
+                  <option value="tieback">Tieback</option>
+                  <option value="reservoir">Reservoir</option>
+                  <option value="small_liner">Small Liner</option>
+                  <option value="open_hole">Open Hole</option>
+                  <option value="upper_completion">Completion Casing</option>
+                  <option value="completion_tubing">Tubing</option>
+                </select>
+              </div>
+
+              <!-- Item Selection -->
+              <div class="definitions-item-selector">
+                <label for="defs_item_select" class="definitions-label">Select Item</label>
+                <select id="defs_item_select" class="definitions-select"></select>
+              </div>
+
+              <!-- Edit Form -->
+              <div class="definitions-form">
+                <div class="definitions-form-grid">
+                  <div class="definitions-field">
+                    <label for="defs_name_input">Label</label>
+                    <input id="defs_name_input" type="text" />
+                  </div>
+                  <div class="definitions-field">
+                    <label for="defs_id_input">ID (in)</label>
+                    <input id="defs_id_input" type="number" step="0.001" min="0" />
+                  </div>
+                  <div class="definitions-field">
+                    <label for="defs_od_input">OD (in)</label>
+                    <input id="defs_od_input" type="number" step="0.001" min="0" />
+                  </div>
+                  <div class="definitions-field" id="defs_drift_field">
+                    <label for="defs_drift_input">Drift (in)</label>
+                    <input id="defs_drift_input" type="number" step="0.001" min="0" />
+                  </div>
+                  <div class="definitions-field" id="defs_tj_field">
+                    <label for="defs_tj_input">TJ (in)</label>
+                    <input id="defs_tj_input" type="number" step="0.001" min="0" />
+                  </div>
+                  <div class="definitions-field hidden" id="defs_lperm_field">
+                    <label for="defs_lperm_input">L/m</label>
+                    <input id="defs_lperm_input" type="number" step="0.001" min="0" />
+                  </div>
+                  <div class="definitions-field hidden" id="defs_eod_field">
+                    <label for="defs_eod_input">EOD (L/m)</label>
+                    <input id="defs_eod_input" type="number" step="0.001" min="0" />
+                  </div>
+                  <div class="definitions-field hidden" id="defs_ced_field">
+                    <label for="defs_ced_input">CED (L/m)</label>
+                    <input id="defs_ced_input" type="number" step="0.001" min="0" />
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="definitions-actions">
+                  <button id="defs_save_btn" class="definitions-btn definitions-btn-primary" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                    Save Edits
+                  </button>
+                  <button id="defs_add_btn" class="definitions-btn definitions-btn-secondary" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                    Add Manual
+                  </button>
+                  <button id="defs_delete_btn" class="definitions-btn definitions-btn-warning hidden" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                    </svg>
+                    Delete Entry
+                  </button>
+                  <button id="defs_reset_btn" class="definitions-btn definitions-btn-danger" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                    </svg>
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <!-- Status Message -->
+                <p id="defs_msg" class="definitions-status" aria-live="polite"></p>
+              </div>
             </div>
           </section>
 

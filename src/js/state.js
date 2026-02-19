@@ -1,4 +1,8 @@
 import { el, qs } from './dom.js';
+import {
+  applyDefinitionSnapshot,
+  getDefinitionSnapshot
+} from './definitions.js';
 
 /**
  * Capture current DOM inputs into a serializable state object.
@@ -40,6 +44,15 @@ export function captureStateObject(getInputsFn) {
   } catch (e) {
     /* ignore */
   }
+
+  try {
+    state.__definitions = {
+      type: 'object',
+      value: getDefinitionSnapshot()
+    };
+  } catch (e) {
+    /* ignore */
+  }
   return state;
 }
 
@@ -52,8 +65,17 @@ export function applyStateObject(state, callbacks = {}) {
   if (!state) return;
   const { calculateVolume = () => {}, scheduleSave = () => {} } = callbacks;
 
+  try {
+    if (state.__definitions && state.__definitions.value) {
+      applyDefinitionSnapshot(state.__definitions.value);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+
   // Populate fields
   Object.entries(state).forEach(([id, item]) => {
+    if (id === '__definitions') return;
     // never populate reserved UI controls when loading a preset
     if (new Set(['preset_name', 'preset_list', 'import_presets_input']).has(id))
       return;

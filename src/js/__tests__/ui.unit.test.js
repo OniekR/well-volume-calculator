@@ -451,6 +451,50 @@ describe('ui.js', () => {
       expect(tieBottom.readOnly).toBe(true);
       expect(tieBottom.classList.contains('readonly-input')).toBe(true);
     });
+
+    it('does not overwrite non-empty production top during liner tie-back init', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+
+      const prodTop = document.getElementById('depth_7_top');
+      const linerBtn = document.querySelector('.liner-default-btn');
+      const prodLiner = document.getElementById('production_is_liner');
+      const tieBottom = document.getElementById('depth_tb');
+
+      prodTop.value = '2532.7';
+      linerBtn.addEventListener('click', () => {
+        prodTop.value = '1858.4';
+      });
+      prodLiner.checked = true;
+
+      setupTiebackBehavior(deps);
+
+      expect(prodTop.value).toBe('2532.7');
+      expect(tieBottom.value).toBe('2532.7');
+    });
+
+    it('applies liner default during tie-back init only when production top is empty', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+
+      const prodTop = document.getElementById('depth_7_top');
+      const linerBtn = document.querySelector('.liner-default-btn');
+      const prodLiner = document.getElementById('production_is_liner');
+
+      prodTop.value = '';
+      linerBtn.addEventListener('click', () => {
+        prodTop.value = '1858.4';
+      });
+      prodLiner.checked = true;
+
+      setupTiebackBehavior(deps);
+
+      expect(prodTop.value).toBe('1858.4');
+    });
   });
 
   describe('setupRiserPositionToggle()', () => {

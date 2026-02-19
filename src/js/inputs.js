@@ -1,5 +1,6 @@
 import { el } from './dom.js';
 import { OD, DRIFT } from './constants.js';
+import { getCasingField } from './definitions.js';
 import { gatherTubingInput } from './tubing.js';
 
 /**
@@ -30,7 +31,10 @@ export function gatherInputs() {
   // Read common values
   const riserTypeVal = el('riser_type')?.value;
   const riserID = sizeIdValue('riser_type', clampNumber(riserTypeVal));
-  const riserOD = riserTypeVal === 'none' ? 0 : OD.riser[riserTypeVal] || 20;
+  const riserOD =
+    riserTypeVal === 'none'
+      ? 0
+      : getCasingField('riser', riserID, 'od', OD.riser[riserTypeVal] || 20);
 
   const riserDepthVal = readInputNumber('depth_riser');
   const wellheadDepthVal = readInputNumber('wellhead_depth');
@@ -46,57 +50,101 @@ export function gatherInputs() {
     'conductor_size',
     readInputNumber('conductor_size')
   );
-  const conductorOD = OD.conductor[conductorID] || 30;
+  const conductorOD = getCasingField(
+    'conductor',
+    conductorID,
+    'od',
+    OD.conductor[conductorID] || 30
+  );
   const conductorTopInputVal = readInputNumber('depth_18_top');
 
   const surfaceID = sizeIdValue(
     'surface_size',
     readInputNumber('surface_size')
   );
-  const surfaceOD = OD.surface[surfaceID] || 20;
+  const surfaceOD = getCasingField(
+    'surface',
+    surfaceID,
+    'od',
+    OD.surface[surfaceID] || 20
+  );
 
   const intermediateID = sizeIdValue(
     'intermediate_size',
     readInputNumber('intermediate_size')
   );
-  const intermediateOD = OD.intermediate[intermediateID] || 13.375;
+  const intermediateOD = getCasingField(
+    'intermediate',
+    intermediateID,
+    'od',
+    OD.intermediate[intermediateID] || 13.375
+  );
 
   const productionID = sizeIdValue(
     'production_size',
     readInputNumber('production_size')
   );
-  const productionOD = OD.production[productionID] || 9.625;
+  const productionOD = getCasingField(
+    'production',
+    productionID,
+    'od',
+    OD.production[productionID] || 9.625
+  );
 
   const reservoirID = sizeIdValue(
     'reservoir_size',
     readInputNumber('reservoir_size')
   );
-  const reservoirOD = OD.reservoir[reservoirID] || 5.5;
+  const reservoirOD = getCasingField(
+    'reservoir',
+    reservoirID,
+    'od',
+    OD.reservoir[reservoirID] || 5.5
+  );
 
   const smallLinerID = sizeIdValue(
     'small_liner_size',
     readInputNumber('small_liner_size')
   );
-  const smallLinerOD = OD.small_liner[smallLinerID] || 5;
+  const smallLinerOD = getCasingField(
+    'small_liner',
+    smallLinerID,
+    'od',
+    OD.small_liner[smallLinerID] || 5
+  );
 
   const upperCompletionID = sizeIdValue(
     'upper_completion_size',
     readInputNumber('upper_completion_size')
   );
-  const upperCompletionOD = OD.upper_completion[upperCompletionID] || 5.5;
+  const upperCompletionOD = getCasingField(
+    'upper_completion',
+    upperCompletionID,
+    'od',
+    OD.upper_completion[upperCompletionID] || 5.5
+  );
 
   const openHoleID = sizeIdValue(
     'open_hole_size',
     readInputNumber('open_hole_size')
   );
-  const openHoleOD =
-    typeof openHoleID !== 'undefined' && !isNaN(openHoleID) ? openHoleID : 0;
+  const openHoleOD = getCasingField(
+    'open_hole',
+    openHoleID,
+    'od',
+    typeof openHoleID !== 'undefined' && !isNaN(openHoleID) ? openHoleID : 0
+  );
 
   const tiebackID = sizeIdValue(
     'tieback_size',
     readInputNumber('tieback_size')
   );
-  const tiebackOD = OD.tieback[tiebackID] || productionOD;
+  const tiebackOD = getCasingField(
+    'tieback',
+    tiebackID,
+    'od',
+    OD.tieback[tiebackID] || productionOD
+  );
 
   const plugDepthVal = readInputNumber('plug_depth');
   const plugEnabled = !!el('use_plug')?.checked;
@@ -302,6 +350,11 @@ export function gatherInputs() {
   // default drift from constants if not provided explicitly
   casingsInput.forEach((c) => {
     if (typeof c.drift === 'undefined') {
+      const fromDefinitions = getCasingField(c.role, c.id, 'drift', undefined);
+      if (typeof fromDefinitions !== 'undefined') {
+        c.drift = fromDefinitions;
+        return;
+      }
       const roleMap = DRIFT && DRIFT[c.role];
       if (roleMap && typeof roleMap[c.id] !== 'undefined')
         c.drift = roleMap[c.id];

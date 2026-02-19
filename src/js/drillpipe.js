@@ -3,55 +3,20 @@
  * Handles drill pipe selection, calculation, and UI management
  */
 
+import {
+  DEFAULT_DRILLPIPE_CATALOG,
+  getDrillpipeCatalog
+} from './definitions.js';
+
 // Drill pipe catalog: 3.5", 4", 5", 5.875" with ID and OD in inches
-export const DRILLPIPE_CATALOG = [
-  {
-    name: '2 7/8"',
-    id: 2.151,
-    od: 2.875,
-    // liters per meter for ID volume (user-specified)
-    lPerM: 2.238,
-    // open-ended displacement (L/m)
-    eod: 2.059,
-    // closed-ended displacement (L/m)
-    ced: 4.296
-  },
-  {
-    name: '4"',
-    id: 3.34,
-    od: 4.0,
-    // liters per meter for ID volume (user-specified)
-    lPerM: 5.396,
-    // open-ended displacement (L/m)
-    eod: 2.985,
-    // closed-ended displacement (L/m)
-    ced: 8.381
-  },
-  {
-    name: '5"',
-    id: 4.276,
-    od: 5.0,
-    lPerM: 9.021,
-    eod: 4.144,
-    // closed-ended displacement (L/m)
-    ced: 13.167
-  },
-  {
-    name: '5 7/8"',
-    id: 5.153,
-    od: 5.875,
-    lPerM: 13.128,
-    eod: 4.739,
-    // closed-ended displacement (L/m)
-    ced: 17.857
-  }
-];
+export const DRILLPIPE_CATALOG = DEFAULT_DRILLPIPE_CATALOG;
 
 /**
  * Get drill pipe state from DOM
  * @returns {Object} - { mode: 'tubing'|'drillpipe', count: number, pipes: [{size, length}, ...] }
  */
 export function gatherDrillPipeInput() {
+  const catalog = getDrillpipeCatalog();
   const ucCheckbox = document.getElementById('use_upper_completion');
   const modeToggle = document.getElementById('uc_mode_toggle');
   const mode = modeToggle && modeToggle.checked ? 'drillpipe' : 'tubing';
@@ -77,11 +42,11 @@ export function gatherDrillPipeInput() {
     if (!sizeSelect || !lengthInput) continue;
 
     const selectedIndex = parseInt(sizeSelect.value, 10);
-    const sizeName = DRILLPIPE_CATALOG[selectedIndex]?.name || '';
+    const sizeName = catalog[selectedIndex]?.name || '';
     const length = parseFloat(lengthInput.value) || 0;
-    const lPerM = DRILLPIPE_CATALOG[selectedIndex]?.lPerM;
-    const eod = DRILLPIPE_CATALOG[selectedIndex]?.eod;
-    const od = DRILLPIPE_CATALOG[selectedIndex]?.od;
+    const lPerM = catalog[selectedIndex]?.lPerM;
+    const eod = catalog[selectedIndex]?.eod;
+    const od = catalog[selectedIndex]?.od;
 
     pipes.push({
       size: selectedIndex,
@@ -121,6 +86,7 @@ export function calculateDrillPipeDepths(pipes) {
  * @returns {Object} - { sections: [...], dpIdVolume, annulusVolume, dpIdLength, used: boolean }
  */
 export function computeDrillPipeBreakdown(pipes, casingsInput, _dpInput = {}) {
+  const catalog = getDrillpipeCatalog();
   if (!pipes || pipes.length === 0) {
     return {
       used: false,
@@ -134,7 +100,7 @@ export function computeDrillPipeBreakdown(pipes, casingsInput, _dpInput = {}) {
   // Build array of DP segments with cumulative depths
   let cumulativeDepth = 0;
   const dpSegments = pipes.map((pipe) => {
-    const sizeData = DRILLPIPE_CATALOG[pipe.size];
+    const sizeData = catalog[pipe.size];
     const start = cumulativeDepth;
     const end = cumulativeDepth + pipe.length;
     cumulativeDepth = end;
@@ -262,6 +228,7 @@ export function computeDrillPipeBreakdown(pipes, casingsInput, _dpInput = {}) {
  * @param {number} count - Number of drill pipe sizes (1-3)
  */
 export function renderDrillPipeInputs(count) {
+  const catalog = getDrillpipeCatalog();
   const container = document.getElementById('drillpipe_inputs_container');
   if (!container) return;
 
@@ -296,8 +263,8 @@ export function renderDrillPipeInputs(count) {
     sizeSelect.setAttribute('aria-label', `Drill pipe size ${i + 1}`);
 
     // Append options in reverse order so dropdown shows opposite order
-    for (let idx = DRILLPIPE_CATALOG.length - 1; idx >= 0; idx--) {
-      const pipe = DRILLPIPE_CATALOG[idx];
+    for (let idx = catalog.length - 1; idx >= 0; idx--) {
+      const pipe = catalog[idx];
       const option = document.createElement('option');
       option.value = idx;
       option.textContent = pipe.name;
@@ -306,7 +273,7 @@ export function renderDrillPipeInputs(count) {
 
     // Default sizing: DP1 -> largest, DP2 -> next, DP3 -> smallest
     // BUT preserve the previous size if user has already set it
-    let defaultIndex = Math.max(0, DRILLPIPE_CATALOG.length - 1 - i);
+    let defaultIndex = Math.max(0, catalog.length - 1 - i);
     if (preservedValues[i] && preservedValues[i].size) {
       defaultIndex = preservedValues[i].size;
     }

@@ -12,7 +12,7 @@
  */
 
 import { el } from './dom.js';
-import { DRILLPIPE_CATALOG } from './drillpipe.js';
+import { getCasingDefinitions, getDrillpipeCatalog } from './definitions.js';
 
 // Conversion constants
 const INCHES_TO_METERS = 0.0254;
@@ -49,10 +49,37 @@ export const CASING_OPTIONS = [
  * @returns {Array<{label: string, od: number}>}
  */
 export function getDrillpipeOptions() {
-  return DRILLPIPE_CATALOG.map((dp) => ({
+  return getDrillpipeCatalog().map((dp) => ({
     label: dp.name,
     od: dp.od
   }));
+}
+
+function getEditableCasingOptions() {
+  const sections = [
+    'conductor',
+    'surface',
+    'intermediate',
+    'production',
+    'tieback',
+    'reservoir',
+    'small_liner',
+    'upper_completion'
+  ];
+  const seen = new Set();
+  const options = [];
+  sections.forEach((section) => {
+    getCasingDefinitions(section).forEach((entry) => {
+      const key = String(entry.id);
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      options.push({
+        label: entry.label || String(entry.id),
+        id: entry.id
+      });
+    });
+  });
+  return options.length ? options : CASING_OPTIONS;
 }
 
 /**
@@ -427,6 +454,53 @@ export function setupStringLiftUI(deps = {}) {
   const pressureInput = el('lift_pressure');
   const pressureUnitSelect = el('lift_pressure_unit');
 
+  const populateDropdowns = () => {
+    if (casingSelect) {
+      const current = casingSelect.value;
+      const options = getEditableCasingOptions().sort((a, b) => b.id - a.id);
+      casingSelect.innerHTML = '';
+      options.forEach((entry) => {
+        const option = document.createElement('option');
+        option.value = String(entry.id);
+        option.textContent = entry.label;
+        casingSelect.appendChild(option);
+      });
+      const customOption = document.createElement('option');
+      customOption.value = 'custom';
+      customOption.textContent = 'Custom...';
+      casingSelect.appendChild(customOption);
+
+      const keep = Array.from(casingSelect.options).find(
+        (opt) => opt.value === current
+      );
+      casingSelect.value = keep ? keep.value : casingSelect.options[0]?.value;
+      onCasingSelectChange();
+    }
+
+    if (drillpipeSelect) {
+      const current = drillpipeSelect.value;
+      const options = getDrillpipeOptions().sort((a, b) => b.od - a.od);
+      drillpipeSelect.innerHTML = '';
+      options.forEach((entry) => {
+        const option = document.createElement('option');
+        option.value = String(entry.od);
+        option.textContent = entry.label;
+        drillpipeSelect.appendChild(option);
+      });
+      const customOption = document.createElement('option');
+      customOption.value = 'custom';
+      customOption.textContent = 'Custom...';
+      drillpipeSelect.appendChild(customOption);
+
+      const keep = Array.from(drillpipeSelect.options).find(
+        (opt) => opt.value === current
+      );
+      drillpipeSelect.value =
+        keep ? keep.value : drillpipeSelect.options[0]?.value;
+      onDrillpipeSelectChange();
+    }
+  };
+
   // Dropdown change handlers
   if (casingSelect) {
     casingSelect.addEventListener('change', () => {
@@ -481,6 +555,13 @@ export function setupStringLiftUI(deps = {}) {
       recalculate();
     }
   });
+
+  document.addEventListener('keino:definitions-changed', () => {
+    populateDropdowns();
+    recalculate();
+  });
+
+  populateDropdowns();
 
   // Initial calculation
   recalculate();

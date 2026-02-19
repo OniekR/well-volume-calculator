@@ -3354,3 +3354,269 @@ select:focus {
     margin-left: 16px;
   }
 }
+
+/* ========================================
+   Custom Casings Tab (Definitions Editor)
+   ======================================== */
+
+.definitions-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+}
+
+/* Type Selector - Radio Cards */
+.definitions-type-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.radio-card {
+  position: relative;
+  cursor: pointer;
+  margin: 0;
+}
+
+.radio-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--surface-bg);
+  transition: all 0.2s ease;
+}
+
+.radio-card-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.radio-card-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.radio-card:hover .radio-card-content {
+  border-color: var(--accent-color);
+  background: var(--hover-bg);
+}
+
+.radio-card input[type="radio"]:checked + .radio-card-content {
+  border-color: var(--accent-color);
+  background: var(--accent-bg);
+}
+
+.radio-card input[type="radio"]:checked + .radio-card-content .radio-card-icon {
+  color: var(--accent-color);
+}
+
+.radio-card input[type="radio"]:focus-visible + .radio-card-content {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Section & Item Selectors */
+.definitions-section-selector,
+.definitions-item-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.definitions-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.definitions-select {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--surface-bg);
+  color: var(--text-color);
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.definitions-select:hover {
+  border-color: var(--accent-color);
+}
+
+.definitions-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+/* Form Fields */
+.definitions-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--surface-bg);
+}
+
+.definitions-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.definitions-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.definitions-field.hidden {
+  display: none;
+}
+
+.definitions-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.definitions-field input {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  transition: border-color 0.2s ease;
+}
+
+.definitions-field input:hover {
+  border-color: var(--accent-color);
+}
+
+.definitions-field input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+/* Action Buttons */
+.definitions-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.definitions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.definitions-btn svg {
+  flex-shrink: 0;
+}
+
+.definitions-btn-primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.definitions-btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.definitions-btn-primary:active {
+  transform: translateY(0);
+}
+
+.definitions-btn-secondary {
+  background: var(--surface-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+}
+
+.definitions-btn-secondary:hover {
+  background: var(--hover-bg);
+  border-color: var(--accent-color);
+}
+
+.definitions-btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.definitions-btn-warning:hover {
+  background: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.definitions-btn-danger {
+  background: var(--danger-color);
+  color: white;
+}
+
+.definitions-btn-danger:hover {
+  background: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+}
+
+/* Status Message */
+.definitions-status {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  background: var(--info-bg);
+  color: var(--info-text);
+  min-height: 20px;
+}
+
+.definitions-status:empty {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .definitions-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .definitions-actions {
+    flex-direction: column;
+  }
+
+  .definitions-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
