@@ -2107,15 +2107,13 @@
               <div class="definitions-section-selector" id="defs_section_container">
                 <label for="defs_section_select" class="definitions-label">Section</label>
                 <select id="defs_section_select" class="definitions-select">
-                  <option value="conductor">Conductor</option>
-                  <option value="surface">Surface</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="production">Production</option>
+                  <option value="conductor" selected>Conductor</option>
+                  <option value="surface">Surface Casing</option>
+                  <option value="intermediate">Intermediate Casing</option>
+                  <option value="production">Production Casing</option>
                   <option value="tieback">Tieback</option>
                   <option value="reservoir">Reservoir</option>
                   <option value="small_liner">Small Liner</option>
-                  <option value="open_hole">Open Hole</option>
-                  <option value="upper_completion">Completion Casing</option>
                   <option value="completion_tubing">Tubing</option>
                 </select>
               </div>
@@ -2182,6 +2180,12 @@
                       <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
                     </svg>
                     Delete Entry
+                  </button>
+                  <button id="defs_reset_single_btn" class="definitions-btn definitions-btn-secondary hidden" type="button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                    </svg>
+                    Reset to Default
                   </button>
                   <button id="defs_reset_btn" class="definitions-btn definitions-btn-danger" type="button">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

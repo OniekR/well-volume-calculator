@@ -75,19 +75,6 @@ function normalizeId(value) {
   return String(value ?? '').trim();
 }
 
-const DISALLOWED_CASING_IDS_BY_SECTION = {
-  conductor: new Set(['17.8']),
-  production: new Set(['8.921', '6.276']),
-  tieback: new Set(['8.921']),
-  reservoir: new Set(['6.276'])
-};
-
-function isDisallowedCasingId(section, id) {
-  const denied = DISALLOWED_CASING_IDS_BY_SECTION[section];
-  if (!denied) return false;
-  return denied.has(normalizeId(id));
-}
-
 function buildDefaultCasingBySection() {
   const map = {};
   SECTION_KEYS.forEach((section) => {
@@ -183,13 +170,19 @@ function sanitizeCasingEntry(input) {
       ? input.label.trim()
       : String(id);
 
-  return {
+  const result = {
     id,
     label,
     od,
     drift,
     tj
   };
+  
+  if (input?.manual === true) {
+    result.manual = true;
+  }
+  
+  return result;
 }
 
 function sanitizePipeEntry(input, includeCed = false) {
@@ -228,16 +221,50 @@ export function applyDefinitionSnapshot(snapshot) {
       if (!Array.isArray(entries)) return;
       if (!next.casingBySection[section]) next.casingBySection[section] = [];
       const sectionLabels = SIZE_LABELS[section] || {};
-      next.casingBySection[section] = entries
+      const defaultEntries = next.casingBySection[section];
+      const defaultMap = {};
+      defaultEntries.forEach((entry) => {
+        defaultMap[normalizeId(entry.id)] = entry;
+      });
+      
+      // Process stored entries from snapshot
+      const processedEntries = entries
         .map((entry) => sanitizeCasingEntry(entry))
-        .filter((entry) => entry && !isDisallowedCasingId(section, entry.id))
+        .filter((entry) => entry)
         .map((entry) => {
           const labelFromMap = sectionLabels[String(entry.id)] || sectionLabels[entry.id];
           if (labelFromMap && (!entry.label || entry.label === String(entry.id))) {
             entry.label = labelFromMap;
           }
+          
+          if (!entry.manual) {
+            const defaultEntry = defaultMap[normalizeId(entry.id)];
+            if (!defaultEntry || 
+                defaultEntry.label !== entry.label || 
+                defaultEntry.od !== entry.od || 
+                defaultEntry.drift !== entry.drift || 
+                defaultEntry.tj !== entry.tj) {
+              entry.manual = true;
+            }
+          }
+          
           return entry;
         });
+      
+      // Merge: keep all defaults, but override/add with custom entries from snapshot
+      const resultMap = new Map();
+      
+      // Add all defaults
+      defaultEntries.forEach((entry) => {
+        resultMap.set(normalizeId(entry.id), clone(entry));
+      });
+      
+      // Override/add entries from snapshot (these are custom or edited)
+      processedEntries.forEach((entry) => {
+        resultMap.set(normalizeId(entry.id), entry);
+      });
+      
+      next.casingBySection[section] = Array.from(resultMap.values());
     });
   }
 
@@ -269,7 +296,6 @@ export function registerCasingOptionLabels(section, options) {
   options.forEach((opt) => {
     const id = Number(opt?.id);
     if (!Number.isFinite(id) || id <= 0) return;
-    if (isDisallowedCasingId(section, id)) return;
     const existing = state.casingBySection[section].find(
       (item) => normalizeId(item.id) === normalizeId(id)
     );
@@ -302,7 +328,6 @@ export function registerCasingOptionLabels(section, options) {
 export function getCasingDefinitions(section) {
   const sectionLabels = SIZE_LABELS[section] || {};
   return clone((state.casingBySection[section] || [])
-    .filter((entry) => !isDisallowedCasingId(section, entry.id))
     .map((entry) => {
       const labelFromMap = sectionLabels[String(entry.id)] || sectionLabels[entry.id];
       if (labelFromMap && (!entry.label || entry.label === String(entry.id))) {
@@ -313,7 +338,6 @@ export function getCasingDefinitions(section) {
 }
 
 export function getCasingDefinition(section, id) {
-  if (isDisallowedCasingId(section, id)) return null;
   const list = state.casingBySection[section] || [];
   return clone(
     list.find((entry) => normalizeId(entry.id) === normalizeId(id)) || null
@@ -322,11 +346,15 @@ export function getCasingDefinition(section, id) {
 
 export function setCasingDefinition(section, id, patch = {}) {
   if (!section || !state.casingBySection[section]) return false;
-  if (isDisallowedCasingId(section, id)) return false;
   const current = getCasingDefinition(section, id);
   const base = current || { id: Number(id), label: String(id) };
   const next = sanitizeCasingEntry({ ...base, ...patch, id });
   if (!next) return false;
+  
+  if (current) {
+    next.manual = true;
+  }
+  
   upsertById(state.casingBySection[section], next);
   notifyDefinitionsChanged();
   return true;
@@ -336,10 +364,10 @@ export function addManualCasingDefinition(section, payload) {
   if (!section || !state.casingBySection[section]) return false;
   const parsed = sanitizeCasingEntry(payload);
   if (!parsed) return false;
-  if (isDisallowedCasingId(section, parsed.id)) return false;
   if (!Number.isFinite(parsed.od) || parsed.od <= 0) {
     parsed.od = Number(parsed.id) + 1;
   }
+  parsed.manual = true;
   upsertById(state.casingBySection[section], parsed);
   notifyDefinitionsChanged();
   return true;
@@ -404,11 +432,58 @@ export function addManualTubingDefinition(payload) {
 
 export function isCasingManual(section, id) {
   if (!section) return false;
+  const entry = getCasingDefinition(section, id);
+  if (entry && entry.manual === true) return true;
+  
   const normalizedId = normalizeId(id);
   const builtInIds = OD[section]
     ? Object.keys(OD[section]).map((key) => normalizeId(key))
     : [];
   return !builtInIds.includes(normalizedId);
+}
+
+export function isCasingAdded(section, id) {
+  if (!section) return false;
+  const normalizedId = normalizeId(id);
+  const builtInIds = OD[section]
+    ? Object.keys(OD[section]).map((key) => normalizeId(key))
+    : [];
+  return !builtInIds.includes(normalizedId);
+}
+
+export function isCasingEdited(section, id) {
+  if (!section) return false;
+  if (isCasingAdded(section, id)) return false;
+  const entry = getCasingDefinition(section, id);
+  if (!entry) return false;
+  
+  const sectionDefaults = defaults.casingBySection[section] || [];
+  const defaultEntry = sectionDefaults.find(
+    (e) => normalizeId(e.id) === normalizeId(id)
+  );
+  if (!defaultEntry) return false;
+  
+  return entry.label !== defaultEntry.label || 
+         entry.od !== defaultEntry.od || 
+         entry.drift !== defaultEntry.drift || 
+         entry.tj !== defaultEntry.tj;
+}
+
+export function resetCasingToDefault(section, id) {
+  if (!section || !state.casingBySection[section]) return false;
+  if (!isCasingEdited(section, id)) return false;
+  
+  const sectionDefaults = defaults.casingBySection[section] || [];
+  const defaultEntry = sectionDefaults.find(
+    (e) => normalizeId(e.id) === normalizeId(id)
+  );
+  if (!defaultEntry) return false;
+  
+  const cleaned = clone(defaultEntry);
+  delete cleaned.manual;
+  upsertById(state.casingBySection[section], cleaned);
+  notifyDefinitionsChanged();
+  return true;
 }
 
 export function isTubingManual(index) {

@@ -13,10 +13,13 @@ import {
   getCasingDefinitions,
   getCasingField,
   getDrillpipeCatalog,
+  isCasingAdded,
+  isCasingEdited,
   isCasingManual,
   isDrillpipeManual,
   isTubingManual,
   registerCasingOptionLabels,
+  resetCasingToDefault,
   resetDefinitionsToDefaults,
   setCasingDefinition,
   setDrillpipeEntry,
@@ -1769,6 +1772,7 @@ function setupDefinitionsSettings(deps) {
   const saveBtn = el('defs_save_btn');
   const addBtn = el('defs_add_btn');
   const deleteBtn = el('defs_delete_btn');
+  const resetSingleBtn = el('defs_reset_single_btn');
   const resetBtn = el('defs_reset_btn');
   const msg = el('defs_msg');
 
@@ -1783,6 +1787,7 @@ function setupDefinitionsSettings(deps) {
     !saveBtn ||
     !addBtn ||
     !deleteBtn ||
+    !resetSingleBtn ||
     !resetBtn
   )
     return;
@@ -1799,8 +1804,7 @@ function setupDefinitionsSettings(deps) {
     { section: 'tieback', selectId: 'tieback_size' },
     { section: 'reservoir', selectId: 'reservoir_size' },
     { section: 'small_liner', selectId: 'small_liner_size' },
-    { section: 'open_hole', selectId: 'open_hole_size' },
-    { section: 'upper_completion', selectId: 'upper_completion_size' }
+    { section: 'open_hole', selectId: 'open_hole_size' }
   ];
 
   const setMessage = (text) => {
@@ -1841,7 +1845,14 @@ function setupDefinitionsSettings(deps) {
       sorted.forEach((entry) => {
         const option = document.createElement('option');
         option.value = String(entry.id);
-        option.textContent = entry.label || String(entry.id);
+        const label = entry.label || String(entry.id);
+        let displayText = label;
+        if (isCasingEdited(section, entry.id)) {
+          displayText = `${label} (edited)`;
+        } else if (isCasingAdded(section, entry.id)) {
+          displayText = `${label} (added)`;
+        }
+        option.textContent = displayText;
         select.appendChild(option);
       });
 
@@ -1911,7 +1922,14 @@ function setupDefinitionsSettings(deps) {
     getCasingDefinitions(section).forEach((entry) => {
       const option = document.createElement('option');
       option.value = String(entry.id);
-      option.textContent = entry.label || String(entry.id);
+      const label = entry.label || String(entry.id);
+      let displayText = label;
+      if (isCasingEdited(section, entry.id)) {
+        displayText = `${label} (edited)`;
+      } else if (isCasingAdded(section, entry.id)) {
+        displayText = `${label} (added)`;
+      }
+      option.textContent = displayText;
       itemSelect.appendChild(option);
     });
   };
@@ -1984,7 +2002,20 @@ function setupDefinitionsSettings(deps) {
       isManual = isCasingManual(section, itemSelect.value);
     }
 
-    deleteBtn.classList.toggle('hidden', !isManual);
+    deleteBtn.classList.toggle('hidden', !isCasingManual(section, itemSelect.value));
+    resetSingleBtn.classList.toggle('hidden', !isCasingEdited(section, itemSelect.value));
+    
+    if (getSelectedType() === 'casing') {
+      if (isCasingEdited(section, itemSelect.value)) {
+        setMessage('⚠ This casing has been edited. You can reset it to defaults.');
+      } else if (isCasingAdded(section, itemSelect.value)) {
+        setMessage('ℹ This is a custom casing.');
+      } else {
+        setMessage('');
+      }
+    } else {
+      setMessage('');
+    }
   };
 
   const refreshEditor = () => {
@@ -2106,6 +2137,25 @@ function setupDefinitionsSettings(deps) {
     scheduleSave();
   });
 
+  resetSingleBtn.addEventListener('click', () => {
+    const section = sectionSelect.value;
+    const id = itemSelect.value;
+    
+    if (!confirm('Reset this casing back to its default values?')) return;
+    
+    const ok = resetCasingToDefault(section, id);
+    if (!ok) {
+      setMessage('Failed to reset. Only edited casings can be reset.');
+      return;
+    }
+    
+    setMessage('Casing reset to default values.');
+    populateGeneralSelects();
+    refreshEditor();
+    calculateVolume();
+    scheduleSave();
+  });
+
   resetBtn.addEventListener('click', () => {
     if (!confirm('Reset all edited/manual definitions back to defaults?')) return;
     resetDefinitionsToDefaults();
@@ -2118,13 +2168,21 @@ function setupDefinitionsSettings(deps) {
 
   typeCasingRadio.addEventListener('change', refreshEditor);
   typeDrillpipeRadio.addEventListener('change', refreshEditor);
-  sectionSelect.addEventListener('change', refreshEditor);
+  sectionSelect.addEventListener('change', () => {
+    localStorage.setItem('keino_defs_section', sectionSelect.value);
+    refreshEditor();
+  });
   itemSelect.addEventListener('change', loadSelected);
 
   document.addEventListener('keino:definitions-changed', () => {
     populateGeneralSelects();
     refreshEditor();
   });
+
+  const savedSection = localStorage.getItem('keino_defs_section');
+  if (savedSection && sectionSelect.querySelector(`option[value="${savedSection}"]`)) {
+    sectionSelect.value = savedSection;
+  }
 
   registerCurrentLabels();
   populateGeneralSelects();
