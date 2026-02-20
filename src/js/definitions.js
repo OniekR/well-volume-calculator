@@ -104,11 +104,13 @@ function buildDefaultCasingBySection() {
     });
   });
 
-  map.open_hole = [17.5, 12.25, 8.5].map((id) => ({
-    id,
-    label: String(id),
-    od: id
-  }));
+  map.open_hole = Object.entries(OD.open_hole || {})
+    .map(([idRaw, od]) => ({
+      id: Number(idRaw),
+      label: String(idRaw),
+      od
+    }))
+    .sort((a, b) => Number(b.id) - Number(a.id));
 
   map.riser = [17.5, 8.8].map((id) => ({
     id,

@@ -7,7 +7,8 @@ export const OD = {
   tieback: { 8.535: 9.625, 8.681: 9.625, 9.66: 11.5 },
   reservoir: { 6.184: 7, 4.778: 5.5 },
   small_liner: { 4.276: 5, 3.958: 4.5 },
-  upper_completion: { 4.892: 5.5, 3.958: 4.5 }
+  upper_completion: { 4.892: 5.5, 3.958: 4.5 },
+  open_hole: { 17.5: 17.5, 16: 16, 12.25: 12.25, 8.5: 8.5, 6: 6 }
 };
 
 export const TJ = {
