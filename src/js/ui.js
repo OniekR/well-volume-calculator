@@ -2131,6 +2131,164 @@ function setupDefinitionsSettings(deps) {
   refreshEditor();
 }
 
+function setupSettingsResetActions(deps) {
+  const { calculateVolume, scheduleSave } = deps;
+
+  const resetCasingDepthsBtn = el('reset_casing_depths_btn');
+  const resetTubingInputsBtn = el('reset_tubing_inputs_btn');
+  const clearDrillpipeInputsBtn = el('clear_drillpipe_inputs_btn');
+  const clearManualCasingsBtn = el('clear_manual_casings_btn');
+  const clearManualDrillpipeBtn = el('clear_manual_drillpipe_btn');
+
+  const applyAndSave = () => {
+    calculateVolume();
+    scheduleSave();
+  };
+
+  if (resetCasingDepthsBtn) {
+    resetCasingDepthsBtn.addEventListener('click', () => {
+      if (!confirm('Clear all casing depth inputs?')) return;
+      const depthIds = [
+        'depth_18_top',
+        'depth_18_bottom',
+        'depth_13_top',
+        'depth_13',
+        'depth_9_top',
+        'depth_9',
+        'depth_7_top',
+        'depth_7',
+        'depth_tb_top',
+        'depth_tb',
+        'depth_5_top',
+        'depth_5',
+        'depth_small_top',
+        'depth_small',
+        'depth_open_top',
+        'depth_open'
+      ];
+
+      depthIds.forEach((id) => {
+        const field = el(id);
+        if (!field) return;
+        field.value = '';
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+
+      applyAndSave();
+    });
+  }
+
+  if (resetTubingInputsBtn) {
+    resetTubingInputsBtn.addEventListener('click', () => {
+      if (!confirm('Reset tubing inputs to a single empty row?')) return;
+
+      const modeToggle = el('uc_mode_toggle');
+      if (modeToggle && modeToggle.checked) {
+        modeToggle.checked = false;
+        modeToggle.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      el('tubing_count_1')?.dispatchEvent(new Event('click', { bubbles: true }));
+
+      const rows = qs('#tubing_inputs_container .tubing-input-row');
+      rows.forEach((row) => {
+        const sizeSelect = row.querySelector('select[id^="tubing_size_"]');
+        const lengthInput = row.querySelector('input[id^="tubing_length_"]');
+
+        if (sizeSelect && sizeSelect.options.length) {
+          sizeSelect.selectedIndex = 0;
+          sizeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (lengthInput) {
+          lengthInput.value = '';
+          lengthInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+
+      applyAndSave();
+    });
+  }
+
+  if (clearDrillpipeInputsBtn) {
+    clearDrillpipeInputsBtn.addEventListener('click', () => {
+      if (!confirm('Clear drill pipe input rows?')) return;
+
+      const modeToggle = el('uc_mode_toggle');
+      const wasDrillpipeMode = !!modeToggle?.checked;
+
+      if (modeToggle && !modeToggle.checked) {
+        modeToggle.checked = true;
+        modeToggle.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      const rows = qs('#drillpipe_inputs_container .drillpipe-input-row');
+      rows.forEach((row) => {
+        const sizeSelect = row.querySelector('select[id^="drillpipe_size_"]');
+        const lengthInput = row.querySelector('input[id^="drillpipe_length_"]');
+
+        if (sizeSelect && sizeSelect.options.length) {
+          sizeSelect.selectedIndex = 0;
+          sizeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        if (lengthInput) {
+          lengthInput.value = '';
+          lengthInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+
+      if (modeToggle && !wasDrillpipeMode) {
+        modeToggle.checked = false;
+        modeToggle.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      applyAndSave();
+    });
+  }
+
+  if (clearManualCasingsBtn) {
+    clearManualCasingsBtn.addEventListener('click', () => {
+      if (!confirm('Clear all manual casing definitions?')) return;
+
+      const sections = [
+        'conductor',
+        'surface',
+        'intermediate',
+        'production',
+        'tieback',
+        'reservoir',
+        'small_liner',
+        'open_hole',
+        'upper_completion'
+      ];
+
+      sections.forEach((section) => {
+        getCasingDefinitions(section).forEach((entry) => {
+          if (isCasingManual(section, entry.id)) {
+            deleteCasingDefinition(section, entry.id);
+          }
+        });
+      });
+
+      applyAndSave();
+    });
+  }
+
+  if (clearManualDrillpipeBtn) {
+    clearManualDrillpipeBtn.addEventListener('click', () => {
+      if (!confirm('Clear all manual drill pipe definitions?')) return;
+
+      const catalog = getDrillpipeCatalog();
+      for (let index = catalog.length - 1; index >= 0; index -= 1) {
+        if (isDrillpipeManual(index)) {
+          deleteDrillpipeEntry(index);
+        }
+      }
+
+      applyAndSave();
+    });
+  }
+}
+
 export function initUI(deps) {
   // deps: { calculateVolume, scheduleSave, captureStateObject, applyStateObject, initDraw }
   setupEventDelegation(deps);
@@ -2152,4 +2310,5 @@ export function initUI(deps) {
   setupTubingMode(deps);
   setupNavActive();
   setupThemeToggle();
+  setupSettingsResetActions(deps);
 }

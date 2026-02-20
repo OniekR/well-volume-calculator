@@ -1,4 +1,4 @@
-import { OD, DRIFT, TJ } from './constants.js';
+import { OD, DRIFT, TJ, SIZE_LABELS } from './constants.js';
 
 const SECTION_KEYS = [
   'conductor',
@@ -75,6 +75,19 @@ function normalizeId(value) {
   return String(value ?? '').trim();
 }
 
+const DISALLOWED_CASING_IDS_BY_SECTION = {
+  conductor: new Set(['17.8']),
+  production: new Set(['8.921', '6.276']),
+  tieback: new Set(['8.921']),
+  reservoir: new Set(['6.276'])
+};
+
+function isDisallowedCasingId(section, id) {
+  const denied = DISALLOWED_CASING_IDS_BY_SECTION[section];
+  if (!denied) return false;
+  return denied.has(normalizeId(id));
+}
+
 function buildDefaultCasingBySection() {
   const map = {};
   SECTION_KEYS.forEach((section) => {
@@ -85,9 +98,12 @@ function buildDefaultCasingBySection() {
     if (!map[section]) map[section] = [];
     Object.entries(values).forEach(([idRaw, od]) => {
       const id = Number(idRaw);
+      const sectionLabels = SIZE_LABELS[section] || {};
+      const label = sectionLabels[idRaw] || sectionLabels[id] || String(idRaw);
+      
       map[section].push({
         id,
-        label: String(idRaw),
+        label,
         od,
         drift:
           DRIFT && DRIFT[section] && typeof DRIFT[section][idRaw] !== 'undefined'
@@ -211,9 +227,17 @@ export function applyDefinitionSnapshot(snapshot) {
     Object.entries(snapshot.casingBySection).forEach(([section, entries]) => {
       if (!Array.isArray(entries)) return;
       if (!next.casingBySection[section]) next.casingBySection[section] = [];
+      const sectionLabels = SIZE_LABELS[section] || {};
       next.casingBySection[section] = entries
         .map((entry) => sanitizeCasingEntry(entry))
-        .filter(Boolean);
+        .filter((entry) => entry && !isDisallowedCasingId(section, entry.id))
+        .map((entry) => {
+          const labelFromMap = sectionLabels[String(entry.id)] || sectionLabels[entry.id];
+          if (labelFromMap && (!entry.label || entry.label === String(entry.id))) {
+            entry.label = labelFromMap;
+          }
+          return entry;
+        });
     });
   }
 
@@ -245,6 +269,7 @@ export function registerCasingOptionLabels(section, options) {
   options.forEach((opt) => {
     const id = Number(opt?.id);
     if (!Number.isFinite(id) || id <= 0) return;
+    if (isDisallowedCasingId(section, id)) return;
     const existing = state.casingBySection[section].find(
       (item) => normalizeId(item.id) === normalizeId(id)
     );
@@ -275,10 +300,20 @@ export function registerCasingOptionLabels(section, options) {
 }
 
 export function getCasingDefinitions(section) {
-  return clone(state.casingBySection[section] || []);
+  const sectionLabels = SIZE_LABELS[section] || {};
+  return clone((state.casingBySection[section] || [])
+    .filter((entry) => !isDisallowedCasingId(section, entry.id))
+    .map((entry) => {
+      const labelFromMap = sectionLabels[String(entry.id)] || sectionLabels[entry.id];
+      if (labelFromMap && (!entry.label || entry.label === String(entry.id))) {
+        return { ...entry, label: labelFromMap };
+      }
+      return entry;
+    }));
 }
 
 export function getCasingDefinition(section, id) {
+  if (isDisallowedCasingId(section, id)) return null;
   const list = state.casingBySection[section] || [];
   return clone(
     list.find((entry) => normalizeId(entry.id) === normalizeId(id)) || null
@@ -287,6 +322,7 @@ export function getCasingDefinition(section, id) {
 
 export function setCasingDefinition(section, id, patch = {}) {
   if (!section || !state.casingBySection[section]) return false;
+  if (isDisallowedCasingId(section, id)) return false;
   const current = getCasingDefinition(section, id);
   const base = current || { id: Number(id), label: String(id) };
   const next = sanitizeCasingEntry({ ...base, ...patch, id });
@@ -300,6 +336,7 @@ export function addManualCasingDefinition(section, payload) {
   if (!section || !state.casingBySection[section]) return false;
   const parsed = sanitizeCasingEntry(payload);
   if (!parsed) return false;
+  if (isDisallowedCasingId(section, parsed.id)) return false;
   if (!Number.isFinite(parsed.od) || parsed.od <= 0) {
     parsed.od = Number(parsed.id) + 1;
   }
