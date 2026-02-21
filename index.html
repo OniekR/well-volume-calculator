@@ -2240,19 +2240,19 @@
                 >
                   <button
                     id="import_presets_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--secondary"
                     type="button"
-                    aria-label="Import presets from JSON"
+                    aria-label="Import presets from a JSON file"
                   >
-                    Import JSON
+                    Import presets (JSON)
                   </button>
                   <button
                     id="export_presets_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--secondary"
                     type="button"
-                    aria-label="Export presets to JSON"
+                    aria-label="Export presets to a JSON file"
                   >
-                    Export JSON
+                    Export presets (JSON)
                   </button>
                   <input
                     id="import_presets_input"
@@ -2265,31 +2265,48 @@
               </div>
 
               <div class="settings-control-group">
+                <label class="settings-control-label">Feedback</label>
+                <div class="settings-buttons-group">
+                  <a
+                    id="send_feedback_link"
+                    class="btn-primary settings-button settings-button--secondary"
+                    href="mailto:gjerde_innbydelse.58@icloud.com?subject=Well%20Volume%20Calculator%20Feedback&body=Feedback%20type%20(Bug%20%2F%20Idea%20%2F%20Feature%20request)%3A%0D%0A%0D%0ADetails%3A%0D%0A%0D%0AOptional%20contact%20email%3A%0D%0A%0D%0AIf%20relevant%2C%20please%20attach%20screenshots%20in%20your%20email%20app."
+                    aria-label="Send feedback by email"
+                  >
+                    Send feedback by email
+                  </a>
+                  <p class="settings-feedback-hint">
+                    Share bugs, ideas, or feature requests. Attach screenshots in your email app when relevant.
+                  </p>
+                </div>
+              </div>
+
+              <div class="settings-control-group">
                 <label class="settings-control-label">Reset inputs</label>
                 <div class="settings-buttons-group">
                   <button
                     id="reset_casing_depths_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--danger"
                     type="button"
-                    aria-label="Clear casing depths"
+                    aria-label="Clear all casing depth inputs"
                   >
-                    Clear casing depths
+                    Clear all casing depths
                   </button>
                   <button
                     id="reset_tubing_inputs_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--danger"
                     type="button"
-                    aria-label="Reset tubing input"
+                    aria-label="Reset all tubing inputs"
                   >
-                    Reset tubing input
+                    Reset all tubing inputs
                   </button>
                   <button
                     id="clear_drillpipe_inputs_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--danger"
                     type="button"
-                    aria-label="Clear drill pipe inputs"
+                    aria-label="Clear all drill pipe inputs"
                   >
-                    Clear drill pipe inputs
+                    Clear all drill pipe inputs
                   </button>
                 </div>
               </div>
@@ -2299,19 +2316,19 @@
                 <div class="settings-buttons-group">
                   <button
                     id="clear_manual_casings_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--danger"
                     type="button"
-                    aria-label="Clear manual input casings"
+                    aria-label="Remove custom casing definitions"
                   >
-                    Clear manual input casings
+                    Remove custom casing definitions
                   </button>
                   <button
                     id="clear_manual_drillpipe_btn"
-                    class="btn-primary settings-button"
+                    class="btn-primary settings-button settings-button--danger"
                     type="button"
-                    aria-label="Clear manual input drill pipe"
+                    aria-label="Remove custom drill pipe definitions"
                   >
-                    Clear manual input drill pipe
+                    Remove custom drill pipe definitions
                   </button>
                 </div>
               </div>

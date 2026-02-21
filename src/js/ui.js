@@ -2205,7 +2205,7 @@ function setupSettingsResetActions(deps) {
 
   if (resetCasingDepthsBtn) {
     resetCasingDepthsBtn.addEventListener('click', () => {
-      if (!confirm('Clear all casing depth inputs?')) return;
+      if (!confirm('Clear all casing depth inputs? This cannot be undone.')) return;
       const depthIds = [
         'depth_18_top',
         'depth_18_bottom',
@@ -2238,7 +2238,7 @@ function setupSettingsResetActions(deps) {
 
   if (resetTubingInputsBtn) {
     resetTubingInputsBtn.addEventListener('click', () => {
-      if (!confirm('Reset tubing inputs to a single empty row?')) return;
+      if (!confirm('Reset all tubing inputs to a single empty row?')) return;
 
       const modeToggle = el('uc_mode_toggle');
       if (modeToggle && modeToggle.checked) {
@@ -2269,7 +2269,7 @@ function setupSettingsResetActions(deps) {
 
   if (clearDrillpipeInputsBtn) {
     clearDrillpipeInputsBtn.addEventListener('click', () => {
-      if (!confirm('Clear drill pipe input rows?')) return;
+      if (!confirm('Clear all drill pipe input rows?')) return;
 
       const modeToggle = el('uc_mode_toggle');
       const wasDrillpipeMode = !!modeToggle?.checked;
@@ -2305,7 +2305,7 @@ function setupSettingsResetActions(deps) {
 
   if (clearManualCasingsBtn) {
     clearManualCasingsBtn.addEventListener('click', () => {
-      if (!confirm('Clear all manual casing definitions?')) return;
+      if (!confirm('Remove all custom casing definitions? This cannot be undone.')) return;
 
       const sections = [
         'conductor',
@@ -2333,7 +2333,7 @@ function setupSettingsResetActions(deps) {
 
   if (clearManualDrillpipeBtn) {
     clearManualDrillpipeBtn.addEventListener('click', () => {
-      if (!confirm('Clear all manual drill pipe definitions?')) return;
+      if (!confirm('Remove all custom drill pipe definitions? This cannot be undone.')) return;
 
       const catalog = getDrillpipeCatalog();
       for (let index = catalog.length - 1; index >= 0; index -= 1) {

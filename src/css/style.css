@@ -2768,16 +2768,66 @@ select:focus {
 .settings-buttons-group {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 10px;
 }
 
 .settings-button {
-  padding: var(--spacing-sm) var(--spacing-md) !important;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: 100%;
+  padding: 10px var(--spacing-md) !important;
+  font-weight: 600;
   font-size: 0.9rem;
+  line-height: 1.2;
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
+  background: var(--surface-bg);
+  text-decoration: none;
   border-radius: var(--border-radius);
   transition: all 0.2s ease;
   cursor: pointer;
+}
+
+.settings-feedback-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.settings-button:focus-visible {
+  outline: 2px solid var(--equinor-red);
+  outline-offset: 2px;
+}
+
+.settings-button--secondary {
+  border-color: var(--input-border);
+  color: var(--text-color);
+  background: var(--surface-bg);
+}
+
+.settings-button--secondary:hover {
+  border-color: var(--equinor-red);
+  background: var(--card-bg);
+}
+
+.settings-button--danger {
+  border-color: var(--equinor-red);
+  color: var(--equinor-red);
+  background: var(--surface-bg);
+}
+
+[data-theme='dark'] .settings-button--danger {
+  color: var(--equinor-accent);
+  border-color: var(--equinor-accent);
+}
+
+.settings-button--danger:hover {
+  color: #fff;
+  border-color: var(--equinor-red);
+  background: linear-gradient(90deg, var(--equinor-red), var(--equinor-accent));
 }
 
 .settings-button:hover {

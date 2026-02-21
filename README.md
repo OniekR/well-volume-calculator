@@ -15,6 +15,12 @@ Project structure
 - Flow Velocity: calculates pipe and annulus velocities across casing transitions.
   Supports L/min, GPM, m³/h, and BPM inputs.
 
+### Feedback
+
+- Open **Settings** and use **Send feedback by email** to report bugs, ideas, or feature requests.
+- The email draft includes prompts for feedback type, details, and optional contact email.
+- Attach screenshots directly in your email client when relevant.
+
 ### Pressure Test Calculator
 
 Calculate the volume of fluid required to pressurize selected well sections:
