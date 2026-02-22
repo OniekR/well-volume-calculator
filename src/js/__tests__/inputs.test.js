@@ -58,6 +58,19 @@ describe('gatherInputs', () => {
     expect(tie.od).toBe(9.625);
   });
 
+  it('maps production 8.535 ID to 9.625 OD', () => {
+    document.body.innerHTML = `
+      <select id="production_size"><option value="8.535">8.535</option></select>
+      <input id="production_size_id" value="8.535" />
+    `;
+
+    const out = gatherInputs();
+    const prod = out.casingsInput.find((c) => c.role === 'production');
+
+    expect(prod.id).toBe(8.535);
+    expect(prod.od).toBe(9.625);
+  });
+
   it('uses production riser profile OD while allowing manual ID override', () => {
     document.body.innerHTML = `
       <select id="riser_type">
