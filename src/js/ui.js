@@ -686,12 +686,7 @@ export function checkUpperCompletionFit() {
         cumulativeDepth = ucShoe;
 
         const ucKey = tubing.id;
-        const ucOd = getCasingField(
-          'upper_completion',
-          ucKey,
-          'od',
-          tubing.od
-        );
+        const ucOd = getCasingField('upper_completion', ucKey, 'od', tubing.od);
         const ucTj =
           (TJ && TJ.upper_completion && TJ.upper_completion[ucKey]) ||
           undefined;
@@ -1877,7 +1872,9 @@ function setupDefinitionsSettings(deps) {
       const definitions = getCasingDefinitions(section);
       if (!definitions.length) return;
 
-      const sorted = [...definitions].sort((a, b) => Number(b.id) - Number(a.id));
+      const sorted = [...definitions].sort(
+        (a, b) => Number(b.id) - Number(a.id)
+      );
       select.innerHTML = '';
       sorted.forEach((entry) => {
         const option = document.createElement('option');
@@ -1893,7 +1890,9 @@ function setupDefinitionsSettings(deps) {
         select.appendChild(option);
       });
 
-      const hasCurrent = sorted.some((entry) => String(entry.id) === String(current));
+      const hasCurrent = sorted.some(
+        (entry) => String(entry.id) === String(current)
+      );
       if (hasCurrent) select.value = current;
       else select.value = String(sorted[0]?.id ?? '');
 
@@ -1920,12 +1919,15 @@ function setupDefinitionsSettings(deps) {
 
       liftDpSelect.value =
         Array.from(liftDpSelect.options).find((opt) => opt.value === current)
-          ?.value || liftDpSelect.options[0]?.value || 'custom';
+          ?.value ||
+        liftDpSelect.options[0]?.value ||
+        'custom';
       liftDpSelect.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     const tubingBtn = document.querySelector('.tubing-count-btn.active');
-    if (tubingBtn) tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
+    if (tubingBtn)
+      tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
 
     const dpBtn = document.querySelector('.drillpipe-count-btn.active');
     if (dpBtn) dpBtn.dispatchEvent(new Event('click', { bubbles: true }));
@@ -1984,11 +1986,18 @@ function setupDefinitionsSettings(deps) {
     const eodField = el('defs_eod_field');
     const cedField = el('defs_ced_field');
 
-    if (sectionContainer) sectionContainer.classList.toggle('hidden', isDrillPipe);
-    if (driftField) driftField.classList.toggle('hidden', !isCasing || section === 'open_hole');
+    if (sectionContainer)
+      sectionContainer.classList.toggle('hidden', isDrillPipe);
+    if (driftField)
+      driftField.classList.toggle(
+        'hidden',
+        !isCasing || section === 'open_hole'
+      );
     if (tjField) tjField.classList.toggle('hidden', !isCasing);
-    if (lPerMField) lPerMField.classList.toggle('hidden', !(isDrillPipe || isTubing));
-    if (eodField) eodField.classList.toggle('hidden', !(isDrillPipe || isTubing));
+    if (lPerMField)
+      lPerMField.classList.toggle('hidden', !(isDrillPipe || isTubing));
+    if (eodField)
+      eodField.classList.toggle('hidden', !(isDrillPipe || isTubing));
     if (cedField) cedField.classList.toggle('hidden', !isDrillPipe);
   };
 
@@ -2039,12 +2048,20 @@ function setupDefinitionsSettings(deps) {
       isManual = isCasingManual(section, itemSelect.value);
     }
 
-    deleteBtn.classList.toggle('hidden', !isCasingManual(section, itemSelect.value));
-    resetSingleBtn.classList.toggle('hidden', !isCasingEdited(section, itemSelect.value));
-    
+    deleteBtn.classList.toggle(
+      'hidden',
+      !isCasingManual(section, itemSelect.value)
+    );
+    resetSingleBtn.classList.toggle(
+      'hidden',
+      !isCasingEdited(section, itemSelect.value)
+    );
+
     if (getSelectedType() === 'casing') {
       if (isCasingEdited(section, itemSelect.value)) {
-        setMessage('⚠ This casing has been edited. You can reset it to defaults.');
+        setMessage(
+          '⚠ This casing has been edited. You can reset it to defaults.'
+        );
       } else if (isCasingAdded(section, itemSelect.value)) {
         setMessage('ℹ This is a custom casing.');
       } else {
@@ -2150,7 +2167,7 @@ function setupDefinitionsSettings(deps) {
   deleteBtn.addEventListener('click', () => {
     const type = getSelectedType();
     const section = sectionSelect.value;
-    
+
     if (!confirm('Delete this manual entry? This cannot be undone.')) return;
 
     let ok = false;
@@ -2177,15 +2194,15 @@ function setupDefinitionsSettings(deps) {
   resetSingleBtn.addEventListener('click', () => {
     const section = sectionSelect.value;
     const id = itemSelect.value;
-    
+
     if (!confirm('Reset this casing back to its default values?')) return;
-    
+
     const ok = resetCasingToDefault(section, id);
     if (!ok) {
       setMessage('Failed to reset. Only edited casings can be reset.');
       return;
     }
-    
+
     setMessage('Casing reset to default values.');
     populateGeneralSelects();
     refreshEditor();
@@ -2194,7 +2211,8 @@ function setupDefinitionsSettings(deps) {
   });
 
   resetBtn.addEventListener('click', () => {
-    if (!confirm('Reset all edited/manual definitions back to defaults?')) return;
+    if (!confirm('Reset all edited/manual definitions back to defaults?'))
+      return;
     resetDefinitionsToDefaults();
     setMessage('Definitions reset to defaults.');
     populateGeneralSelects();
@@ -2217,7 +2235,10 @@ function setupDefinitionsSettings(deps) {
   });
 
   const savedSection = localStorage.getItem('keino_defs_section');
-  if (savedSection && sectionSelect.querySelector(`option[value="${savedSection}"]`)) {
+  if (
+    savedSection &&
+    sectionSelect.querySelector(`option[value="${savedSection}"]`)
+  ) {
     sectionSelect.value = savedSection;
   }
 
@@ -2242,7 +2263,8 @@ function setupSettingsResetActions(deps) {
 
   if (resetCasingDepthsBtn) {
     resetCasingDepthsBtn.addEventListener('click', () => {
-      if (!confirm('Clear all casing depth inputs? This cannot be undone.')) return;
+      if (!confirm('Clear all casing depth inputs? This cannot be undone.'))
+        return;
       const depthIds = [
         'depth_18_top',
         'depth_18_bottom',
@@ -2283,7 +2305,9 @@ function setupSettingsResetActions(deps) {
         modeToggle.dispatchEvent(new Event('change', { bubbles: true }));
       }
 
-      el('tubing_count_1')?.dispatchEvent(new Event('click', { bubbles: true }));
+      el('tubing_count_1')?.dispatchEvent(
+        new Event('click', { bubbles: true })
+      );
 
       const rows = qs('#tubing_inputs_container .tubing-input-row');
       rows.forEach((row) => {
@@ -2342,7 +2366,10 @@ function setupSettingsResetActions(deps) {
 
   if (clearManualCasingsBtn) {
     clearManualCasingsBtn.addEventListener('click', () => {
-      if (!confirm('Remove all custom casing definitions? This cannot be undone.')) return;
+      if (
+        !confirm('Remove all custom casing definitions? This cannot be undone.')
+      )
+        return;
 
       const sections = [
         'conductor',
@@ -2370,7 +2397,12 @@ function setupSettingsResetActions(deps) {
 
   if (clearManualDrillpipeBtn) {
     clearManualDrillpipeBtn.addEventListener('click', () => {
-      if (!confirm('Remove all custom drill pipe definitions? This cannot be undone.')) return;
+      if (
+        !confirm(
+          'Remove all custom drill pipe definitions? This cannot be undone.'
+        )
+      )
+        return;
 
       const catalog = getDrillpipeCatalog();
       for (let index = catalog.length - 1; index >= 0; index -= 1) {

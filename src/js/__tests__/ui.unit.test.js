@@ -561,7 +561,9 @@ describe('ui.js', () => {
       setupRiserTypeHandler(deps);
 
       const select = document.getElementById('riser_type');
-      const profileContainer = document.getElementById('riser_profile_container');
+      const profileContainer = document.getElementById(
+        'riser_profile_container'
+      );
       const profile = document.getElementById('riser_profile');
       const riserId = document.getElementById('riser_type_id');
       const useRiser = document.getElementById('use_riser');
