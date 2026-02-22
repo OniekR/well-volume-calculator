@@ -493,8 +493,9 @@ export function setupStringLiftUI(deps = {}) {
       const keep = Array.from(drillpipeSelect.options).find(
         (opt) => opt.value === current
       );
-      drillpipeSelect.value =
-        keep ? keep.value : drillpipeSelect.options[0]?.value;
+      drillpipeSelect.value = keep
+        ? keep.value
+        : drillpipeSelect.options[0]?.value;
       onDrillpipeSelectChange();
     }
   };
