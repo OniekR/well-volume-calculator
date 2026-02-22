@@ -1618,6 +1618,42 @@ select:focus {
   display: block;
   margin-bottom: 6px;
 }
+
+#riser_type {
+  min-width: 168px;
+}
+
+#depth_riser_container {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#depth_riser_row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#depth_riser_row label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+#riser_profile_container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+#riser_profile {
+  width: 108px !important;
+  min-width: 0 !important;
+  max-width: 108px !important;
+  padding: 6px 24px 6px 8px;
+  font-size: 0.85rem;
+}
+
 @media (max-width: 720px) {
   .input-row.three-cols {
     grid-template-columns: 1fr;

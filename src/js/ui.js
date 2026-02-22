@@ -1,6 +1,6 @@
 import { el, qs } from './dom.js';
 import { getUpperCompletionTJ } from './validation.js';
-import { DRIFT, OD, TJ } from './constants.js';
+import { DRIFT, OD, TJ, RISER_PROFILES } from './constants.js';
 import { getTubingCatalog } from './definitions.js';
 import { setupFlowVelocityUI } from './flow-velocity.js';
 import {
@@ -1333,11 +1333,28 @@ export function setupRiserPositionToggle() {
 export function setupRiserTypeHandler(deps) {
   const { calculateVolume, scheduleSave } = deps;
   const select = el('riser_type');
+  const useRiser = el('use_riser');
   const riserDepthEl = el('depth_riser');
+  const riserIdEl = el('riser_type_id');
+  const profileSelect = el('riser_profile');
+  const profileContainer = el('riser_profile_container');
   const wellEl = el('wellhead_depth');
   const riserContainer = el('depth_riser_container');
   if (!select || !riserDepthEl) return;
+
+  const applyProfileId = ({ force = false } = {}) => {
+    if (!profileSelect || !riserIdEl) return;
+    const profile = RISER_PROFILES[profileSelect.value];
+    if (!profile) return;
+    if (force || String(riserIdEl.value || '').trim() === '') {
+      riserIdEl.value = String(profile.id);
+    }
+  };
+
   const update = () => {
+    const isProduction = select.value === '8.8';
+    const isRiserEnabled = !useRiser || useRiser.checked;
+
     if (select.value === 'none') {
       riserDepthEl.value = '0';
       if (riserContainer) riserContainer.classList.add('hidden');
@@ -1345,9 +1362,29 @@ export function setupRiserTypeHandler(deps) {
       if (riserContainer) riserContainer.classList.remove('hidden');
       if (wellEl && wellEl.value !== '') riserDepthEl.value = wellEl.value;
     }
+
+    if (profileContainer) {
+      if (isProduction && isRiserEnabled) {
+        profileContainer.classList.remove('hidden');
+        applyProfileId();
+      } else {
+        profileContainer.classList.add('hidden');
+      }
+    }
+
     scheduleSave();
     calculateVolume();
   };
+
+  if (profileSelect) {
+    profileSelect.addEventListener('change', () => {
+      applyProfileId({ force: true });
+      scheduleSave();
+      calculateVolume();
+    });
+  }
+
+  if (useRiser) useRiser.addEventListener('change', update);
   select.addEventListener('change', update);
   update();
 }

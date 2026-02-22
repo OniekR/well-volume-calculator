@@ -349,21 +349,33 @@
                     class="input-inline input-inline--narrow"
                     id="depth_riser_container"
                   >
-                    <label>Depth (m):</label>
-                    <input
-                      type="number"
-                      id="depth_riser"
-                      step="1.0"
-                      value="0"
-                    />
-                    <div style="margin-top: 8px">
-                      <button
-                        type="button"
-                        class="wellhead-btn"
-                        data-target="depth_riser"
+                    <div id="riser_profile_container" class="hidden">
+                      <select
+                        id="riser_profile"
+                        name="riser_profile"
+                        aria-label="Riser profile"
                       >
-                        Wellhead
-                      </button>
+                        <option value="gen1_cameron">Gen 1, Cameron</option>
+                        <option value="gen23_fmc">Gen 2/3, FMC</option>
+                      </select>
+                    </div>
+                    <div id="depth_riser_row" class="input-inline">
+                      <label>Depth (m):</label>
+                      <input
+                        type="number"
+                        id="depth_riser"
+                        step="1.0"
+                        value="0"
+                      />
+                      <div style="margin-top: 8px">
+                        <button
+                          type="button"
+                          class="wellhead-btn"
+                          data-target="depth_riser"
+                        >
+                          Wellhead
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

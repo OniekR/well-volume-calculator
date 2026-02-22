@@ -57,4 +57,22 @@ describe('gatherInputs', () => {
     expect(tie.id).toBe(8.681);
     expect(tie.od).toBe(9.625);
   });
+
+  it('uses production riser profile OD while allowing manual ID override', () => {
+    document.body.innerHTML = `
+      <select id="riser_type">
+        <option value="8.8" selected>Production</option>
+      </select>
+      <select id="riser_profile">
+        <option value="gen1_cameron">Gen 1, Cameron</option>
+        <option value="gen23_fmc" selected>Gen 2/3, FMC</option>
+      </select>
+      <input id="riser_type_id" value="8.69" />
+    `;
+
+    const out = gatherInputs();
+    const riser = out.casingsInput.find((c) => c.role === 'riser');
+    expect(riser.id).toBe(8.69);
+    expect(riser.od).toBe(9.875);
+  });
 });

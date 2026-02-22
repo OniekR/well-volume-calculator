@@ -11,6 +11,11 @@ export const OD = {
   open_hole: { 17.5: 17.5, 16: 16, 12.25: 12.25, 8.5: 8.5, 6: 6 }
 };
 
+export const RISER_PROFILES = {
+  gen1_cameron: { id: 8.68, od: 9.69 },
+  gen23_fmc: { id: 8.675, od: 9.875 }
+};
+
 export const TJ = {
   upper_completion: { 4.892: 6.098, 3.958: 4.967 },
   // TJ entry for 4 1/2" 12.6# L-80 tubing (Nom ID 3.958)

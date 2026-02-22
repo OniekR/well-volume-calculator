@@ -519,10 +519,19 @@ describe('ui.js', () => {
   describe('setupRiserTypeHandler()', () => {
     beforeEach(() => {
       document.body.innerHTML = `
+        <input type="checkbox" id="use_riser" checked />
         <select id="riser_type">
           <option value="none" selected>None</option>
-          <option value="standard">Standard</option>
+          <option value="8.8">Production</option>
+          <option value="17.5">Drilling</option>
         </select>
+        <input id="riser_type_id" value="" />
+        <div id="riser_profile_container" class="hidden">
+          <select id="riser_profile">
+            <option value="gen1_cameron">Gen 1, Cameron</option>
+            <option value="gen23_fmc">Gen 2/3, FMC</option>
+          </select>
+        </div>
         <input id="depth_riser" value="" />
         <input id="wellhead_depth" value="250" />
         <div id="depth_riser_container"></div>
@@ -538,10 +547,39 @@ describe('ui.js', () => {
       const container = document.getElementById('depth_riser_container');
       expect(container.classList.contains('hidden')).toBe(true);
       const select = document.getElementById('riser_type');
-      select.value = 'standard';
+      select.value = '17.5';
       select.dispatchEvent(new Event('change'));
       expect(container.classList.contains('hidden')).toBe(false);
       expect(document.getElementById('depth_riser').value).toBe('250');
+    });
+
+    it('shows profile only for production and autofills riser ID', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+      setupRiserTypeHandler(deps);
+
+      const select = document.getElementById('riser_type');
+      const profileContainer = document.getElementById('riser_profile_container');
+      const profile = document.getElementById('riser_profile');
+      const riserId = document.getElementById('riser_type_id');
+      const useRiser = document.getElementById('use_riser');
+
+      expect(profileContainer.classList.contains('hidden')).toBe(true);
+
+      select.value = '8.8';
+      select.dispatchEvent(new Event('change'));
+      expect(profileContainer.classList.contains('hidden')).toBe(false);
+      expect(riserId.value).toBe('8.68');
+
+      profile.value = 'gen23_fmc';
+      profile.dispatchEvent(new Event('change'));
+      expect(riserId.value).toBe('8.675');
+
+      useRiser.checked = false;
+      useRiser.dispatchEvent(new Event('change'));
+      expect(profileContainer.classList.contains('hidden')).toBe(true);
     });
   });
 

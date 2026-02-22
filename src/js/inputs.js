@@ -1,5 +1,5 @@
 import { el } from './dom.js';
-import { OD, DRIFT } from './constants.js';
+import { OD, DRIFT, RISER_PROFILES } from './constants.js';
 import { getCasingField } from './definitions.js';
 import { gatherTubingInput } from './tubing.js';
 
@@ -30,11 +30,20 @@ function sizeIdValue(selectId, fallbackValue) {
 export function gatherInputs() {
   // Read common values
   const riserTypeVal = el('riser_type')?.value;
-  const riserID = sizeIdValue('riser_type', clampNumber(riserTypeVal));
+  const riserProfileVal = el('riser_profile')?.value;
+  const riserProfile =
+    riserTypeVal === '8.8' ? RISER_PROFILES[riserProfileVal] : undefined;
+  const riserFallbackId = riserProfile
+    ? riserProfile.id
+    : clampNumber(riserTypeVal);
+  const riserID = sizeIdValue('riser_type', riserFallbackId);
+  const riserFallbackOD = riserProfile
+    ? riserProfile.od
+    : OD.riser[riserTypeVal] || 20;
   const riserOD =
     riserTypeVal === 'none'
       ? 0
-      : getCasingField('riser', riserID, 'od', OD.riser[riserTypeVal] || 20);
+      : getCasingField('riser', riserID, 'od', riserFallbackOD);
 
   const riserDepthVal = readInputNumber('depth_riser');
   const wellheadDepthVal = readInputNumber('wellhead_depth');
