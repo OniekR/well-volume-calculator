@@ -163,6 +163,10 @@ body {
   min-height: 100vh;
 }
 
+#main-title {
+  display: none;
+}
+
 header {
   background: var(--card-bg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);

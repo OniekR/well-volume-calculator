@@ -161,6 +161,28 @@ function setActiveButton(activeButton) {
   const allButtons = document.querySelectorAll('.sidebar-nav-button');
   allButtons.forEach((btn) => btn.classList.remove('active'));
   activeButton.classList.add('active');
+  updateMainTitle(activeButton);
+}
+
+function getButtonLabel(button) {
+  const label = button.querySelector('.sidebar-nav-text');
+  if (!label) return button.textContent.trim();
+
+  const textNodes = Array.from(label.childNodes)
+    .filter((node) => node.nodeType === Node.TEXT_NODE)
+    .map((node) => node.textContent.trim())
+    .filter(Boolean);
+
+  return textNodes.join(' ').trim();
+}
+
+function updateMainTitle(activeButton) {
+  const mainTitle = document.getElementById('main-title');
+  if (!mainTitle) return;
+  const label = getButtonLabel(activeButton);
+  if (label) {
+    mainTitle.textContent = label;
+  }
 }
 
 function saveActiveSection(sectionName) {
