@@ -3013,6 +3013,10 @@ select:focus {
   align-items: flex-start;
 }
 
+.pressure-input-row .pressure-surface-volume-inline {
+  grid-column: 3;
+}
+
 .input-with-unit {
   display: flex;
   align-items: center;
@@ -3165,6 +3169,10 @@ select:focus {
 
   .input-row.three-cols.pressure-input-row {
     grid-template-columns: 1fr;
+  }
+
+  .pressure-input-row .pressure-surface-volume-inline {
+    grid-column: auto;
   }
 }
 

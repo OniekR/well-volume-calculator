@@ -173,6 +173,149 @@ describe('buildSelectableSections', () => {
     const annulus = sections.find((s) => s.id === 'annulus_innermost');
     expect(annulus.label).toBe('DP/9 5/8" Annulus');
   });
+
+  it('includes entire well volume when no string is present', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 0, pipes: [] },
+      tubingInput: { count: 0, tubings: [] },
+      volumes: { fullWellVolume: 120 }
+    });
+
+    expect(sections).toHaveLength(1);
+    expect(sections[0]).toMatchObject({
+      id: 'full_well_volume',
+      label: 'Entire Well Volume',
+      volumeM3: 120,
+      type: 'well'
+    });
+  });
+
+  it('applies To depth filter using exact section intervals', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 0, pipes: [] },
+      tubingInput: { count: 0, tubings: [] },
+      casingsInput: [
+        { role: 'riser', use: true, top: 0, depth: 300 },
+        { role: 'production', use: true, top: 300, depth: 1000 }
+      ],
+      volumes: {
+        fullWellVolume: 80,
+        wellTotalDepth: 1000,
+        perCasingVolumes: [
+          { role: 'riser', perMeter_m3: 0.05 },
+          { role: 'production', perMeter_m3: 0.02 }
+        ]
+      },
+      toDepth: 400
+    });
+
+    expect(sections).toHaveLength(1);
+    expect(sections[0].volumeM3).toBeCloseTo(17, 5);
+  });
+
+  it('includes below string volume when string is present and volume is at least 1 m3', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 1, pipes: [{}] },
+      tubingInput: { count: 0, tubings: [] },
+      casingsInput: [
+        { role: 'production', id: 7, depth: 3000, use: true, od: 9.625 }
+      ],
+      volumes: {
+        drillPipeCapacity: 10,
+        annulusInnermost: 20,
+        belowStringVolume: 5
+      }
+    });
+
+    expect(sections.find((s) => s.id === 'below_string_volume')).toMatchObject({
+      label: 'Below string',
+      volumeM3: 5
+    });
+  });
+
+  it('derives below string volume from remaining full well volume when explicit value is missing', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 1, pipes: [{}] },
+      tubingInput: { count: 0, tubings: [] },
+      casingsInput: [
+        { role: 'production', id: 9.625, depth: 2800, use: true, od: 10.75 }
+      ],
+      volumes: {
+        fullWellVolume: 80,
+        drillPipeCapacity: 20,
+        annulusInnermost: 35
+      }
+    });
+
+    expect(sections.find((s) => s.id === 'below_string_volume')).toMatchObject({
+      label: 'Below string',
+      volumeM3: 25
+    });
+  });
+
+  it('applies To depth to drill pipe and annulus volumes when string is present', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 1, pipes: [{}] },
+      tubingInput: { count: 0, tubings: [] },
+      casingsInput: [
+        { role: 'production', id: 9.625, depth: 2800, use: true, od: 10.75 }
+      ],
+      volumes: {
+        drillPipeCapacity: 40,
+        annulusInnermost: 80,
+        drillPipeLength: 2000,
+        drillPipeAnnulusLength: 2000
+      },
+      toDepth: 500
+    });
+
+    const pipe = sections.find((s) => s.id === 'drillpipe_capacity');
+    const annulus = sections.find((s) => s.id === 'annulus_innermost');
+    expect(pipe.volumeM3).toBeCloseTo(10, 5);
+    expect(annulus.volumeM3).toBeCloseTo(20, 5);
+  });
+
+  it('applies To depth to below string volume when string is present', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 1, pipes: [{}] },
+      tubingInput: { count: 0, tubings: [] },
+      casingsInput: [
+        { role: 'production', id: 9.625, top: 0, depth: 3000, use: true, od: 10.75 }
+      ],
+      volumes: {
+        fullWellVolume: 120,
+        drillPipeCapacity: 20,
+        annulusInnermost: 30,
+        drillPipeLength: 1500,
+        drillPipeAnnulusLength: 1500,
+        drillPipeTotalDepth: 1500,
+        belowStringVolume: 70,
+        perCasingVolumes: [{ role: 'production', perMeter_m3: 0.01 }],
+        wellTotalDepth: 3000
+      },
+      toDepth: 2000
+    });
+
+    const below = sections.find((s) => s.id === 'below_string_volume');
+    expect(below.volumeM3).toBeCloseTo(5, 5);
+  });
+
+  it('hides below string volume when computed volume is less than 1 m3', () => {
+    const sections = buildSelectableSections({
+      drillpipeInput: { mode: 'drillpipe', count: 1, pipes: [{}] },
+      tubingInput: { count: 0, tubings: [] },
+      casingsInput: [
+        { role: 'production', id: 7, depth: 3000, use: true, od: 9.625 }
+      ],
+      volumes: {
+        drillPipeCapacity: 10,
+        annulusInnermost: 20,
+        belowStringVolume: 0.5
+      }
+    });
+
+    expect(sections.find((s) => s.id === 'below_string_volume')).toBeUndefined();
+  });
 });
 
 describe('computePressureTest', () => {
@@ -251,6 +394,28 @@ describe('computePressureTest', () => {
     expect(result.totalVolumeM3).toBe(150);
     expect(result.lowTestLiters).toBeCloseTo(166.67, 1);
     expect(result.highTestLiters).toBeCloseTo(2708.33, 1);
+  });
+
+  it('adds surface volume to selected sections total', () => {
+    const result = computePressureTest(
+      { ...baseInput, surfaceVolumeM3: 10 },
+      baseWellConfig
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.totalVolumeM3).toBe(160);
+  });
+
+  it('allows calculation with only surface volume and no selected sections', () => {
+    const result = computePressureTest(
+      { ...baseInput, selectedSectionIds: [], surfaceVolumeM3: 3 },
+      baseWellConfig
+    );
+
+    expect(result.valid).toBe(true);
+    expect(result.totalVolumeM3).toBe(3);
+    expect(result.lowTestLiters).toBeCloseTo(3.33, 1);
+    expect(result.highTestLiters).toBeCloseTo(54.17, 1);
   });
 
   it('sums multiple selected sections', () => {

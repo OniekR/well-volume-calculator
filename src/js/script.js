@@ -298,12 +298,44 @@ const VolumeCalc = (() => {
       ucBreakdown = computeUpperCompletionBreakdown(casingsInput);
     }
 
+    const hasDrillpipeString = dpInput.mode === 'drillpipe' && dpInput.count > 0;
+    const hasTubingString = dpInput.mode === 'tubing' && tubingInput.count > 0;
+    let belowStringVolume;
+
+    if (hasTubingString) {
+      belowStringVolume = result.casingVolumeBelowTubingShoe;
+    } else if (hasDrillpipeString) {
+      const selectedStringVolume =
+        (dpBreakdown?.dpIdVolume || 0) + (dpBreakdown?.annulusVolume || 0);
+      const remainingVolume = (result.totalVolume || 0) - selectedStringVolume;
+      belowStringVolume = remainingVolume > 0 ? remainingVolume : undefined;
+    }
+
+    const tubingTotalDepth = tubingInput?.tubings
+      ? tubingInput.tubings.reduce((sum, tubing) => sum + (tubing.length || 0), 0)
+      : 0;
+
     const pressureInput = gatherPressureInput();
+    const wellTotalDepth = casingsInput.reduce((maxDepth, casing) => {
+      if (!casing?.use) return maxDepth;
+      return Math.max(maxDepth, Number(casing.depth) || 0);
+    }, 0);
+
     lastPressureResults = computePressureTest(pressureInput, {
       casingsInput,
       drillpipeInput: dpInput,
       tubingInput,
       volumes: {
+        fullWellVolume: result.totalVolume,
+        belowStringVolume,
+        wellTotalDepth,
+        perCasingVolumes: result.perCasingVolumes,
+        drillPipeLength: dpBreakdown?.dpIdLength,
+        drillPipeAnnulusLength: dpBreakdown?.dpIdLength,
+        drillPipeTotalDepth: result.dpTotalDepth,
+        tubingLength: ucBreakdown?.ucIdLength,
+        tubingAnnulusLength: ucBreakdown?.annulusLength,
+        tubingTotalDepth,
         drillPipeCapacity: dpBreakdown?.dpIdVolume,
         tubingCapacity: ucBreakdown?.ucIdVolume,
         annulusInnermost:
@@ -357,6 +389,10 @@ const VolumeCalc = (() => {
       activeSection === 'flow' && lastFlowResults?.valid
         ? lastFlowResults.overlay
         : undefined;
+    const pressureToDepth =
+      activeSection === 'pressure' && Number.isFinite(pressureInput?.toDepth)
+        ? pressureInput.toDepth
+        : undefined;
 
     const __testDrawOpts = {
       showWater,
@@ -372,7 +408,8 @@ const VolumeCalc = (() => {
           ? dpInput.pipes
           : undefined,
       tubingSegments,
-      flowOverlay
+      flowOverlay,
+      pressureToDepth
     };
 
     // Expose the draw args for test helpers so we can force a deterministic redraw in CI

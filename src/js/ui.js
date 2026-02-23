@@ -1706,6 +1706,7 @@ function setupTubingMode(deps) {
     const count = parseInt(activeBtn?.dataset.count, 10) || 1;
     renderTubingInputs(count);
     attachTubingListeners();
+    document.dispatchEvent(new CustomEvent('keino:tubing-ui-ready'));
 
     // Update tubing count via buttons
     tubingCountBtns.forEach((btn) => {
@@ -1723,6 +1724,7 @@ function setupTubingMode(deps) {
         // Re-render tubing inputs
         renderTubingInputs(count);
         attachTubingListeners();
+        document.dispatchEvent(new CustomEvent('keino:tubing-ui-ready'));
         calculateVolume();
         if (scheduleSave) scheduleSave();
         checkUpperCompletionFit();

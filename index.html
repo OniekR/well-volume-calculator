@@ -150,7 +150,7 @@
                   <span class="sidebar-nav-text">
                     Pressure
                     <span class="badge badge--construction"
-                      >🚧 Under Construction</span
+                      >🧪 In testing</span
                     >
                   </span>
                 </button>
@@ -1781,6 +1781,34 @@
                     value="18"
                     placeholder="18"
                   />
+                </div>
+                <div class="input-inline">
+                  <label for="pressure_to_depth">To depth</label>
+                  <div class="input-with-unit">
+                    <input
+                      type="number"
+                      id="pressure_to_depth"
+                      name="pressure_to_depth"
+                      step="1"
+                      min="0"
+                      placeholder="Optional"
+                    />
+                    <span class="input-unit">m MD</span>
+                  </div>
+                </div>
+                <div class="input-inline pressure-surface-volume-inline">
+                  <label for="pressure_surface_volume">Surface volume</label>
+                  <div class="input-with-unit">
+                    <input
+                      type="number"
+                      id="pressure_surface_volume"
+                      name="pressure_surface_volume"
+                      step="0.01"
+                      min="0"
+                      placeholder="0"
+                    />
+                    <span class="input-unit">m³</span>
+                  </div>
                 </div>
               </div>
 

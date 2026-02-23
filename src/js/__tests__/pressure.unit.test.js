@@ -149,7 +149,9 @@ describe('pressure.js', () => {
       active = true,
       lowPressure = '20',
       highPressure = '345',
-      kValue = '21'
+      kValue = '21',
+      toDepth = '',
+      surfaceVolume = ''
     } = {}) {
       document.body.innerHTML = `
         <input type="checkbox" id="pressure_active" ${
@@ -157,6 +159,8 @@ describe('pressure.js', () => {
         } />
         <input type="number" id="pressure_low" value="${lowPressure}" />
         <input type="number" id="pressure_high" value="${highPressure}" />
+        <input type="number" id="pressure_to_depth" value="${toDepth}" />
+        <input type="number" id="pressure_surface_volume" value="${surfaceVolume}" />
         <select id="pressure_k_value">
           <option value="21" ${
             kValue === '21' ? 'selected' : ''
@@ -178,6 +182,8 @@ describe('pressure.js', () => {
       expect(result.lowPressure).toBe(20);
       expect(result.highPressure).toBe(345);
       expect(result.kValue).toBe(21);
+      expect(result.toDepth).toBeUndefined();
+      expect(result.surfaceVolumeM3).toBe(0);
     });
 
     it('returns inactive when checkbox unchecked', () => {
@@ -196,6 +202,18 @@ describe('pressure.js', () => {
       expect(result.lowPressure).toBe(50);
       expect(result.highPressure).toBe(500);
       expect(result.kValue).toBe(18);
+    });
+
+    it('parses To depth when provided', () => {
+      setupPressureDOM({ toDepth: '1250' });
+      const result = gatherPressureInput();
+      expect(result.toDepth).toBe(1250);
+    });
+
+    it('parses surface volume when provided', () => {
+      setupPressureDOM({ surfaceVolume: '2.75' });
+      const result = gatherPressureInput();
+      expect(result.surfaceVolumeM3).toBeCloseTo(2.75, 5);
     });
   });
 
@@ -248,6 +266,9 @@ describe('pressure.js', () => {
     beforeEach(() => {
       document.body.innerHTML = `
         <div id="pressure-results" class="hidden">
+          <span id="pressure-low-target">20</span>
+          <span id="pressure-high-from">20</span>
+          <span id="pressure-high-target">345</span>
           <span id="pressure-low-result">0</span>
           <span id="pressure-high-result">0</span>
           <span id="pressure-total-volume">0</span>
@@ -275,6 +296,8 @@ describe('pressure.js', () => {
       renderPressureResults({
         active: true,
         valid: true,
+        lowPressure: 35,
+        highPressure: 410,
         totalVolumeM3: 90.75,
         lowTestLiters: 15.5,
         highTestLiters: 75.25
@@ -285,6 +308,15 @@ describe('pressure.js', () => {
       expect(
         document.getElementById('pressure-high-result').textContent
       ).toContain('75');
+      expect(document.getElementById('pressure-low-target').textContent).toBe(
+        '35'
+      );
+      expect(document.getElementById('pressure-high-from').textContent).toBe(
+        '35'
+      );
+      expect(document.getElementById('pressure-high-target').textContent).toBe(
+        '410'
+      );
     });
 
     it('hides results when result is null', () => {
@@ -302,6 +334,8 @@ describe('pressure.js', () => {
         <input type="checkbox" id="pressure_active" />
         <input type="number" id="pressure_low" value="20" />
         <input type="number" id="pressure_high" value="345" />
+        <input type="number" id="pressure_to_depth" value="" />
+        <input type="number" id="pressure_surface_volume" value="" />
         <select id="pressure_k_value">
           <option value="21" selected>WBM/Brine</option>
           <option value="18">OBM</option>
@@ -333,6 +367,18 @@ describe('pressure.js', () => {
       vi.runAllTimers();
       expect(deps.calculateVolume).toHaveBeenCalled();
       expect(deps.scheduleSave).toHaveBeenCalled();
+    });
+
+    it('clears To depth when user enters 0', () => {
+      const deps = {
+        calculateVolume: vi.fn(),
+        scheduleSave: vi.fn()
+      };
+      setupPressureUI(deps);
+      const input = document.getElementById('pressure_to_depth');
+      input.value = '0';
+      input.dispatchEvent(new Event('input'));
+      expect(input.value).toBe('');
     });
 
     it('applies k value button and triggers deps', () => {

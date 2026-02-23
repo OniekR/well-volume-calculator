@@ -257,6 +257,15 @@ describe('draw.js', () => {
       expect(ctxMock.stroke).toHaveBeenCalled();
     });
 
+    it('draws To depth marker when pressureToDepth is provided', () => {
+      initDraw(fakeCanvas);
+      drawSchematic(mockCasings, { pressureToDepth: 250 });
+      const textCalls = ctxMock.fillText.mock.calls.map((call) => String(call[0]));
+      expect(textCalls.some((text) => text.includes('To depth @ 250 m'))).toBe(
+        true
+      );
+    });
+
     it('draws water level when showWater is true', () => {
       initDraw(fakeCanvas);
       drawSchematic(mockCasings, { showWater: true, waterDepth: 300 });

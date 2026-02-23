@@ -149,6 +149,33 @@ export function drawSchematic(casings, opts = {}) {
     }
   }
 
+  if (
+    opts &&
+    typeof opts.pressureToDepth !== 'undefined' &&
+    !isNaN(opts.pressureToDepth)
+  ) {
+    const markerDepth = Math.min(Math.max(Number(opts.pressureToDepth), 0), maxDepth);
+    const y = markerDepth * scale + startY;
+    ctx.save();
+    ctx.strokeStyle = '#cc005f';
+    ctx.fillStyle = '#cc005f';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(centerX - rect.width * 0.45, y);
+    ctx.lineTo(centerX + rect.width * 0.45, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = `${Math.max(10, Math.round(rect.width * 0.012))}px Arial`;
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(
+      `To depth @ ${formatDepthLabel(markerDepth)} m`,
+      centerX + rect.width * 0.46,
+      y
+    );
+    ctx.restore();
+  }
+
   // draw current preset name (if any) near top-left of canvas
   if (
     typeof opts.currentPresetName === 'string' &&
@@ -497,4 +524,9 @@ export function drawSchematic(casings, opts = {}) {
       );
     });
   }
+}
+
+function formatDepthLabel(value) {
+  if (!Number.isFinite(value)) return '0';
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }

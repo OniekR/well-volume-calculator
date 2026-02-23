@@ -165,9 +165,16 @@ export function applyStateObject(state, callbacks = {}) {
     }
   ];
 
-  // Restore tapered tubing inputs if present in state
-  try {
+  // Restore tapered tubing inputs if present in state.
+  // This may run before dynamic tubing rows are rendered, so retry when tubing UI is ready.
+  const restoreTubing = () => {
+    const tubingKeys = Object.keys(state || {}).filter((k) =>
+      /^tubing_(size|length)_\d+$/.test(k)
+    );
     const tubingCountValue = state?.tubing_count?.value;
+
+    if (!tubingKeys.length && tubingCountValue == null) return true;
+
     if (tubingCountValue != null) {
       const tubingBtn = el(`tubing_count_${tubingCountValue}`);
       if (tubingBtn) {
@@ -179,31 +186,26 @@ export function applyStateObject(state, callbacks = {}) {
         tubingBtn.setAttribute('aria-pressed', 'true');
         tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
       }
-    } else {
-      const tubingKeys = Object.keys(state || {}).filter((k) =>
-        /^tubing_(size|length)_\d+$/.test(k)
+    } else if (tubingKeys.length > 0) {
+      const maxIdx = Math.max(
+        ...tubingKeys.map((k) => parseInt(k.match(/\d+$/)?.[0] || '0', 10))
       );
-      if (tubingKeys.length > 0) {
-        const maxIdx = Math.max(
-          ...tubingKeys.map((k) => parseInt(k.match(/\d+$/)?.[0] || '0', 10))
-        );
-        const count = Math.min(3, Math.max(1, maxIdx + 1));
-        const tubingBtn = el(`tubing_count_${count}`);
-        if (tubingBtn) {
-          document.querySelectorAll('.tubing-count-btn').forEach((btn) => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
-          });
-          tubingBtn.classList.add('active');
-          tubingBtn.setAttribute('aria-pressed', 'true');
-          tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
-        }
+      const count = Math.min(3, Math.max(1, maxIdx + 1));
+      const tubingBtn = el(`tubing_count_${count}`);
+      if (tubingBtn) {
+        document.querySelectorAll('.tubing-count-btn').forEach((btn) => {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-pressed', 'false');
+        });
+        tubingBtn.classList.add('active');
+        tubingBtn.setAttribute('aria-pressed', 'true');
+        tubingBtn.dispatchEvent(new Event('click', { bubbles: true }));
       }
     }
 
-    const tubingKeys = Object.keys(state || {}).filter((k) =>
-      /^tubing_(size|length)_\d+$/.test(k)
-    );
+    const tubingRows = document.querySelectorAll('.tubing-input-row');
+    if (tubingKeys.length > 0 && tubingRows.length === 0) return false;
+
     if (tubingKeys.length > 0) {
       setTimeout(() => {
         tubingKeys.forEach((id) => {
@@ -223,6 +225,16 @@ export function applyStateObject(state, callbacks = {}) {
           }
         });
       }, 0);
+    }
+
+    return true;
+  };
+
+  try {
+    if (!restoreTubing()) {
+      document.addEventListener('keino:tubing-ui-ready', restoreTubing, {
+        once: true
+      });
     }
   } catch (e) {
     /* ignore */
