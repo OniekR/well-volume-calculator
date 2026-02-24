@@ -344,6 +344,30 @@ describe('draw.js', () => {
       );
     });
 
+    it('draws new tubing entries using segment-provided metadata', () => {
+      initDraw(fakeCanvas);
+      const opts = {
+        tubingSegments: [
+          {
+            size: 2,
+            top: 0,
+            shoe: 1000,
+            length: 1000,
+            od: 5.5,
+            id: 4.778,
+            sizeName: '5 1/2" 20# SM25CRW-125'
+          }
+        ]
+      };
+
+      drawSchematic(mockCasings, opts);
+
+      const textCalls = ctxMock.fillText.mock.calls.map((call) => call[0]);
+      expect(
+        textCalls.some((text) => String(text).includes('SM25CRW-125'))
+      ).toBe(true);
+    });
+
     it('renders open hole casing', () => {
       initDraw(fakeCanvas);
       const openHoleCasings = [

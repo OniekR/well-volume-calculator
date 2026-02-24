@@ -461,21 +461,31 @@ export function drawSchematic(casings, opts = {}) {
 
   // Draw tapered tubing segments if provided
   if (opts.tubingSegments && opts.tubingSegments.length > 0) {
-    const tubingCatalog = [
+    const fallbackTubingCatalog = [
       { name: '4 1/2" 12.6#', id: 3.958, od: 4.5 },
-      { name: '5 1/2" 17#', id: 4.892, od: 5.5 }
+      { name: '5 1/2" 17#', id: 4.892, od: 5.5 },
+      { name: '5 1/2" 20# SM25CRW-125', id: 4.778, od: 5.5 }
     ];
     const tubingColors = ['#4169E1', '#6495ED']; // blues for tubing
 
     opts.tubingSegments.forEach((tubing, idx) => {
-      const sizeData = tubingCatalog[tubing.size];
-      if (!sizeData) return;
+      const fallbackSizeData = fallbackTubingCatalog[Number(tubing.size)];
+      const tubingOD = Number(tubing.od ?? fallbackSizeData?.od);
+      const tubingID = Number(tubing.id ?? fallbackSizeData?.id);
+      const tubingLabel =
+        tubing.sizeName || fallbackSizeData?.name || `Tubing ${idx + 1}`;
+      if (
+        !Number.isFinite(tubingOD) ||
+        tubingOD <= 0 ||
+        !Number.isFinite(tubingID) ||
+        tubingID <= 0
+      )
+        return;
 
-      const startDepth = (tubing.top || 0) * scale + startY;
-      const endDepth = tubing.shoe * scale + startY;
-
-      const tubingOD = sizeData.od;
-      const tubingID = sizeData.id;
+      const topDepth = Number(tubing.top) || 0;
+      const shoeDepth = Number(tubing.shoe) || topDepth + (Number(tubing.length) || 0);
+      const startDepth = topDepth * scale + startY;
+      const endDepth = shoeDepth * scale + startY;
 
       const width = (tubingOD / maxOD) * 80;
       const innerWidth = (tubingID / maxOD) * 80;
@@ -513,7 +523,7 @@ export function drawSchematic(casings, opts = {}) {
       ctx.font = '11px Arial';
       ctx.textBaseline = 'middle';
       ctx.fillText(
-        sizeData.name,
+        tubingLabel,
         centerX - width / 2 - 40,
         (startDepth + endDepth) / 2
       );

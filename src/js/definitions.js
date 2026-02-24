@@ -62,6 +62,13 @@ const DEFAULT_TUBING_CATALOG = [
     od: 5.5,
     lPerM: 11.803,
     eod: 0
+  },
+  {
+    name: '5 1/2" 20# SM25CRW-125',
+    id: 4.778,
+    od: 5.5,
+    lPerM: 11.562,
+    eod: 3.763
   }
 ];
 
@@ -221,6 +228,28 @@ export function applyDefinitionSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== 'object') return;
   const next = clone(defaults);
 
+  const mergePipeCatalogWithDefaults = (
+    defaultCatalog,
+    snapshotCatalog,
+    includeCed
+  ) => {
+    const parsed = snapshotCatalog
+      .map((entry) => sanitizePipeEntry(entry, includeCed))
+      .filter(Boolean);
+
+    if (!parsed.length) return clone(defaultCatalog);
+
+    const resultMap = new Map();
+    defaultCatalog.forEach((entry) => {
+      resultMap.set(normalizeId(entry.id), clone(entry));
+    });
+    parsed.forEach((entry) => {
+      resultMap.set(normalizeId(entry.id), entry);
+    });
+
+    return Array.from(resultMap.values());
+  };
+
   if (
     snapshot.casingBySection &&
     typeof snapshot.casingBySection === 'object'
@@ -283,17 +312,19 @@ export function applyDefinitionSnapshot(snapshot) {
   }
 
   if (Array.isArray(snapshot.drillpipeCatalog)) {
-    const parsed = snapshot.drillpipeCatalog
-      .map((entry) => sanitizePipeEntry(entry, true))
-      .filter(Boolean);
-    if (parsed.length) next.drillpipeCatalog = parsed;
+    next.drillpipeCatalog = mergePipeCatalogWithDefaults(
+      defaults.drillpipeCatalog,
+      snapshot.drillpipeCatalog,
+      true
+    );
   }
 
   if (Array.isArray(snapshot.tubingCatalog)) {
-    const parsed = snapshot.tubingCatalog
-      .map((entry) => sanitizePipeEntry(entry, false))
-      .filter(Boolean);
-    if (parsed.length) next.tubingCatalog = parsed;
+    next.tubingCatalog = mergePipeCatalogWithDefaults(
+      defaults.tubingCatalog,
+      snapshot.tubingCatalog,
+      false
+    );
   }
 
   state = next;
