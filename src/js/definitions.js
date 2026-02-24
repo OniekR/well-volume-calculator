@@ -477,6 +477,14 @@ export function addManualTubingDefinition(payload) {
   return true;
 }
 
+export function addManualDrillpipeDefinition(payload) {
+  const parsed = sanitizePipeEntry(payload, true);
+  if (!parsed) return false;
+  state.drillpipeCatalog.push(parsed);
+  notifyDefinitionsChanged();
+  return true;
+}
+
 export function isCasingManual(section, id) {
   if (!section) return false;
   const entry = getCasingDefinition(section, id);
@@ -537,16 +545,30 @@ export function resetCasingToDefault(section, id) {
 
 export function isTubingManual(index) {
   const idx = Number(index);
-  return (
-    Number.isInteger(idx) && idx >= 0 && idx >= DEFAULT_TUBING_CATALOG.length
+  if (!Number.isInteger(idx) || idx < 0 || idx >= state.tubingCatalog.length)
+    return false;
+  const entry = state.tubingCatalog[idx];
+  if (!entry) return false;
+  const builtInIds = new Set(
+    DEFAULT_TUBING_CATALOG.map((item) => normalizeId(item.id))
   );
+  return !builtInIds.has(normalizeId(entry.id));
 }
 
 export function isDrillpipeManual(index) {
   const idx = Number(index);
-  return (
-    Number.isInteger(idx) && idx >= 0 && idx >= DEFAULT_DRILLPIPE_CATALOG.length
+  if (
+    !Number.isInteger(idx) ||
+    idx < 0 ||
+    idx >= state.drillpipeCatalog.length
+  )
+    return false;
+  const entry = state.drillpipeCatalog[idx];
+  if (!entry) return false;
+  const builtInIds = new Set(
+    DEFAULT_DRILLPIPE_CATALOG.map((item) => normalizeId(item.id))
   );
+  return !builtInIds.has(normalizeId(entry.id));
 }
 
 export function deleteCasingDefinition(section, id) {

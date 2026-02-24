@@ -5,6 +5,7 @@ import { getTubingCatalog } from './definitions.js';
 import { setupFlowVelocityUI } from './flow-velocity.js';
 import {
   addManualCasingDefinition,
+  addManualDrillpipeDefinition,
   addManualTubingDefinition,
   deleteCasingDefinition,
   deleteDrillpipeEntry,
@@ -2050,13 +2051,12 @@ function setupDefinitionsSettings(deps) {
       isManual = isCasingManual(section, itemSelect.value);
     }
 
-    deleteBtn.classList.toggle(
-      'hidden',
-      !isCasingManual(section, itemSelect.value)
-    );
+    deleteBtn.classList.toggle('hidden', !isManual);
     resetSingleBtn.classList.toggle(
       'hidden',
-      !isCasingEdited(section, itemSelect.value)
+      type !== 'casing' || section === 'completion_tubing'
+        ? true
+        : !isCasingEdited(section, itemSelect.value)
     );
 
     if (getSelectedType() === 'casing') {
@@ -2132,11 +2132,15 @@ function setupDefinitionsSettings(deps) {
 
     let ok = false;
     if (getSelectedType() === 'drillpipe') {
-      setMessage('Manual add is available for casing/tubing sections.');
-      return;
-    }
-
-    if (section === 'completion_tubing') {
+      ok = addManualDrillpipeDefinition({
+        name: nameValue,
+        id: idValue,
+        od: odValue,
+        lPerM: parseNumber(lPerMInput),
+        eod: parseNumber(eodInput),
+        ced: parseNumber(cedInput)
+      });
+    } else if (section === 'completion_tubing') {
       ok = addManualTubingDefinition({
         name: nameValue,
         id: idValue,
